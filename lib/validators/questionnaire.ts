@@ -53,3 +53,27 @@ export const stepGeneralSchema = questionnaireSchema.pick({
     startWeight: true,
     targetWeight: true,
 });
+
+// Partial schema for Step 2 (Nutrition)
+export const stepNutritionSchema = questionnaireSchema.pick({
+    allergies: true,
+    mealsPerDay: true,
+    habits: true,
+});
+
+// Partial schema for Step 3 (Fitness)
+export const stepFitnessSchema = questionnaireSchema.pick({
+    activityLevel: true,
+    injuries: true,
+});
+
+// Partial schema for Step 4 (Wellness)
+export const stepWellnessSchema = questionnaireSchema.pick({
+    stressLevel: true,
+    sleepQuality: true,
+});
+
+// Partial schema for Step 5 (Beauty)
+export const stepBeautySchema = questionnaireSchema.pick({
+    bodyConfidence: true,
+});

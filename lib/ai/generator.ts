@@ -9,20 +9,29 @@ const openai = new OpenAI({
 
 export interface AnalysisResult {
     introduction: string;
-    nutrition: { analysis: string; objectives: string[] };
-    fitness: { analysis: string; objectives: string[] };
-    wellness: { analysis: string; objectives: string[] };
-    beauty: { analysis: string; objectives: string[] };
+    nutrition: { analysis: string; tips: string[] };
+    fitness: { analysis: string; tips: string[] };
+    wellness: { analysis: string; tips: string[] };
+    // beauty: { analysis: string; tips: string[] }; // Optional if user strictly wanted 3 pillars, but let's keep it if possible or remove if strict.
+    // User request example didn't have it. I'll omit it to be safe and strictly follow the USER prompt structure request.
     conclusion: string;
 }
 
 const FALLBACK_ANALYSIS: AnalysisResult = {
-    introduction: "Bienvenue chez IKONGA. Ton profil a bien été pris en compte et nous allons construire ensemble ton succès.",
-    nutrition: { analysis: "Nous allons rééquilibrer ton assiette.", objectives: ["Manger régulierement", "Hydratation"] },
-    fitness: { analysis: "Bouger est essentiel.", objectives: ["Marche quotidienne"] },
-    wellness: { analysis: "Prenons soin de ton esprit.", objectives: ["Sommeil réparateur"] },
-    beauty: { analysis: "Tu es unique.", objectives: ["Bienveillance"] },
-    conclusion: "C'est parti pour la Detox !"
+    introduction: "Coucou ! C'est Rosy. Ravie de te compter parmi nous ! Ton profil est très intéressant et j'ai hâte de t'aider.",
+    nutrition: {
+        analysis: "Je vois que tu as de bonnes bases, mais quelques ajustements feront la différence.",
+        tips: ["Mise sur l'hydratation", "Structure tes repas"]
+    },
+    fitness: {
+        analysis: "L'important est de bouger avec plaisir, sans te faire mal.",
+        tips: ["Marche 30min par jour", "Écoute ton corps"]
+    },
+    wellness: {
+        analysis: "Le stress peut bloquer la perte de poids, on va travailler là-dessus.",
+        tips: ["Respiration consciente le soir"]
+    },
+    conclusion: "Fais-moi confiance, on commence la DÉTOX ensemble dès maintenant ! 💪✨"
 };
 
 export async function generateUserAnalysis(userProfile: any, answers: QuestionnaireData): Promise<AnalysisResult> {
@@ -60,6 +69,10 @@ export async function generateUserAnalysis(userProfile: any, answers: Questionna
         if (!content) throw new Error("Empty content from OpenAI");
 
         const analysis = JSON.parse(content) as AnalysisResult;
+
+        // Basic validation to ensure keys exist (fallback if partial)
+        if (!analysis.nutrition || !analysis.fitness) return { ...FALLBACK_ANALYSIS, ...analysis };
+
         return analysis;
 
     } catch (error) {

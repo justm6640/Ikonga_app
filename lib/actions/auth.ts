@@ -24,8 +24,11 @@ export async function login(formData: FormData) {
     redirect("/dashboard")
 }
 
+import { headers } from "next/headers"
+
 export async function signup(formData: FormData) {
     const supabase = await createClient()
+    const origin = (await headers()).get("origin")
 
     const email = formData.get("email") as string
     const password = formData.get("password") as string
@@ -39,7 +42,8 @@ export async function signup(formData: FormData) {
             data: {
                 first_name: firstName,
                 last_name: lastName
-            }
+            },
+            emailRedirectTo: `${origin}/auth/callback?next=/onboarding`
         }
     })
 
@@ -66,7 +70,7 @@ export async function signup(formData: FormData) {
     }
 
     revalidatePath("/", "layout")
-    redirect("/onboarding") // Redirect to onboarding after signup
+    redirect("/verify-email")
 }
 
 export async function signout() {

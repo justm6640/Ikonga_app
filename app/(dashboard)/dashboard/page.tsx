@@ -1,43 +1,46 @@
-"use client";
-
 import { motion } from "framer-motion";
 import { PhaseCard } from "@/components/dashboard/PhaseCard";
 import { WeightMiniChart } from "@/components/dashboard/WeightMiniChart";
 import { PillarsGrid } from "@/components/dashboard/PillarsGrid";
 import { DailyJournalCard } from "@/components/dashboard/DailyJournalCard";
+import { AnalysisWidget } from "@/components/dashboard/AnalysisWidget";
+import { createClient } from "@/lib/supabase/server";
+import prisma from "@/lib/prisma";
+import { AnalysisResult } from "@/lib/ai/generator";
 
-const container = {
-    hidden: { opacity: 0 },
-    show: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1
+export default async function DashboardPage() {
+    // 1. Fetch User
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    let analysisData: AnalysisResult | null = null;
+
+    if (user && user.email) {
+        // 2. Fetch UserAnalysis
+        const prismaUser = await prisma.user.findUnique({
+            where: { email: user.email },
+            include: { analysis: true }
+        });
+
+        if (prismaUser?.analysis?.content) {
+            analysisData = prismaUser.analysis.content as unknown as AnalysisResult;
         }
     }
-};
 
-const item = {
-    hidden: { y: 20, opacity: 0 },
-    show: { y: 0, opacity: 1 }
-};
-
-export default function DashboardPage() {
     return (
-        <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="flex flex-col gap-6 max-w-xl mx-auto md:max-w-4xl"
-        >
+        <div className="flex flex-col gap-6 max-w-xl mx-auto md:max-w-4xl">
+            {/* Analysis Widget (AI) */}
+            <AnalysisWidget analysis={analysisData} />
+
             {/* Motivational Quote (Mobile Header Placeholder) */}
-            <motion.div variants={item} className="mb-2">
+            <div className="mb-2">
                 <p className="text-lg font-hand text-muted-foreground italic">
                     "Petit pas + Petit pas = Grande Victoire"
                 </p>
-            </motion.div>
+            </div>
 
             {/* Hero Section: Phase & Weight */}
-            <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Phase Card (Main) */}
                 <PhaseCard />
 
@@ -45,19 +48,18 @@ export default function DashboardPage() {
                 <div className="h-40 md:h-auto">
                     <WeightMiniChart />
                 </div>
-            </motion.div>
+            </div>
 
             {/* Action: Daily Journal */}
-            <motion.div variants={item}>
+            <div>
                 <DailyJournalCard />
-            </motion.div>
+            </div>
 
             {/* Pillars Grid */}
-            <motion.div variants={item} className="mt-2">
+            <div className="mt-2">
                 <h3 className="text-lg font-serif font-medium mb-4 ml-1">Mes Piliers</h3>
                 <PillarsGrid />
-            </motion.div>
-
-        </motion.div>
+            </div>
+        </div>
     );
 }
