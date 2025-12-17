@@ -1,0 +1,206 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// --- MODULE 1: SOCLE (USERS & ABO) ---
+
+enum Role { USER; COACH; ADMIN }
+enum Gender { FEMALE; MALE }
+enum SubscriptionTier { STANDARD; VIP; VIP_PLUS }
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  role          Role      @default(USER)
+  
+  // Profil
+  firstName     String?
+  lastName      String?
+  gender        Gender    @default(FEMALE)
+  birthDate     DateTime?
+  heightCm      Int?
+  startWeight   Float?
+  targetWeight  Float?
+  pisi          Float?    // Poids Idéal Santé IKONGA
+
+  // Abonnement
+  subscriptionTier SubscriptionTier @default(STANDARD)
+  subStartDate     DateTime?
+  subEndDate       DateTime?
+  isActive         Boolean          @default(true)
+
+  // Relations
+  phases        UserPhase[]
+  sessions      IkongaSession[]
+  dailyLogs     DailyLog[]
+  messages      Message[]
+  channels      ChannelMember[]
+  notifications Notification[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([email])
+}
+
+// --- MODULE 2: ENGINE (PHASES & MATHS) ---
+
+enum PhaseType { DETOX; EQUILIBRE; CONSOLIDATION; ENTRETIEN }
+
+model UserPhase {
+  id             String    @id @default(uuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  
+  type           PhaseType
+  startDate      DateTime  @default(now())
+  plannedEndDate DateTime?
+  actualEndDate  DateTime?
+  
+  isManualOverride Boolean @default(false)
+  adminNote        String?
+  isActive       Boolean   @default(true)
+
+  @@index([userId, isActive])
+}
+
+model IkongaSession {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  
+  sessionNumber  Int
+  startDate      DateTime
+  endDate        DateTime
+  
+  projectedWeightEnd Float
+  targetLoss         Float
+  realWeightEnd      Float?
+  
+  @@unique([userId, sessionNumber])
+}
+
+// --- MODULE 3: PILIERS (LOGS & WELLNESS) ---
+
+model DailyLog {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  date        DateTime @default(now())
+
+  // Pesées
+  weight      Float?
+  photoUrl    String?
+  
+  // Nutrition & Fitness
+  menuId      String?
+  caloriesConsumed Int?
+  workoutDone Boolean  @default(false)
+  
+  // Wellness Journal
+  hydration   Int?
+  sleepScore  Int?
+  stressScore Int?
+  energyScore Int?
+  mood        String?
+  journalNote String?
+
+  // Intelligence
+  dayStatus   String? // "FRAGILE", "STABLE"
+  
+  @@unique([userId, date])
+}
+
+model WellnessAnalysis {
+  id          String   @id @default(uuid())
+  userId      String
+  date        DateTime @default(now())
+  
+  trendSlope  Float?
+  avgStress   Float?
+  actionTaken String? // "FORCED_GENTLE_MODE"
+}
+
+// --- MODULE 4: CMS (CONTENUS) ---
+
+model Menu {
+  id          String   @id @default(uuid())
+  title       String
+  phaseCompat PhaseType[]
+  content     Json
+  isPremium   Boolean  @default(false)
+}
+
+model ContentLibrary {
+  id            String   @id @default(uuid())
+  category      String   // "FITNESS", "BEAUTY"
+  title         String
+  mediaUrl      String?
+  
+  targetGender  String[]
+  targetPhases  PhaseType[]
+  emotionalTags String[]
+  metadata      Json
+}
+
+// --- MODULE 5: SOCIAL (CHAT & GROUPES) ---
+
+enum ChannelType { PRIVATE_COACH; GROUP_DETOX; GROUP_ECE }
+enum MemberStatus { ACTIVE; LOCKED; READ_ONLY }
+
+model Channel {
+  id          String          @id @default(uuid())
+  type        ChannelType
+  name        String?
+  members     ChannelMember[]
+  messages    Message[]
+}
+
+model ChannelMember {
+  id        String       @id @default(uuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
+  channelId String
+  channel   Channel      @relation(fields: [channelId], references: [id])
+  
+  status    MemberStatus @default(ACTIVE)
+  joinedAt  DateTime     @default(now())
+  
+  @@unique([userId, channelId])
+}
+
+model Message {
+  id           String   @id @default(uuid())
+  content      String?
+  mediaUrl     String?
+  
+  senderId     String
+  sender       User     @relation(fields: [senderId], references: [id])
+  channelId    String
+  channel      Channel  @relation(fields: [channelId], references: [id])
+  
+  isSystem     Boolean  @default(false)
+  emotionalTag String?
+  priority     String   @default("NORMAL")
+  
+  createdAt    DateTime @default(now())
+}
+
+enum NotifCategory { PROGRAM; WEIGHT; COACH; SOCIAL; WELLNESS }
+
+model Notification {
+  id          String        @id @default(uuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  title       String
+  body        String
+  category    NotifCategory
+  isRead      Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+}
