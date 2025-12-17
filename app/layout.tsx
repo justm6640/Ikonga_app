@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Serif_Display, Poppins, Dancing_Script } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const dmSerif = DM_Serif_Display({
@@ -35,6 +36,7 @@ export default function RootLayout({
         className={`${dmSerif.variable} ${poppins.variable} ${dancingScript.variable} font-sans antialiased`}
       >
         {children}
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );

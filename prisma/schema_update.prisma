@@ -1,0 +1,7 @@
+model UserAnalysis {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  content   Json     // Stores the AI JSON output
+  createdAt DateTime @default(now())
+}
