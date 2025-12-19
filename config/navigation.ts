@@ -1,10 +1,20 @@
-import { LayoutGrid, Map, Scale, MessageCircle, User } from "lucide-react";
+import { LayoutGrid, Map, Scale, MessageCircle, User, Dumbbell, ShoppingBasket } from "lucide-react";
 
 export const NAV_ITEMS = [
     {
         label: "Accueil",
         href: "/dashboard",
         icon: LayoutGrid,
+    },
+    {
+        label: "Fitness",
+        href: "/fitness",
+        icon: Dumbbell,
+    },
+    {
+        label: "Courses",
+        href: "/shopping-list",
+        icon: ShoppingBasket,
     },
     {
         label: "Phases",

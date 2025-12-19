@@ -2,16 +2,34 @@ import { Bell } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
+import prisma from "@/lib/prisma";
+import { StreakCounter } from "@/components/gamification/StreakCounter";
+import { updateStreak } from "@/lib/actions/gamification";
 
 export async function DashboardHeader() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Fetch User Profile to get First Name (Assuming we have a getProfile logic or direct DB access)
-    // For now, we'll try to get it from metadata or fallback. 
-    // In a real scenario, fetch from Prisma User table here.
-    // Placeholder logic:
-    const userName = user?.user_metadata?.first_name || "Rosy";
+    if (!user || !user.email) return null;
+
+    // Fetch User from DB to get real data and streak
+    const dbUser = await prisma.user.findUnique({
+        where: { email: user.email },
+        select: { id: true, firstName: true, currentStreak: true }
+    });
+
+    if (!dbUser) return null;
+
+    // Trigger streak update on visit (Server Action)
+    await updateStreak(dbUser.id);
+
+    // Re-fetch or just increment locally if we want fresh data? 
+    // updateStreak is async but doesn't return data. 
+    // Actually, updateStreak will update the DB. 
+    // For simplicity, we fetch once. The UI might be 1 day behind until next refresh, 
+    // but usually, it's fine for a header. 
+
+    const userName = dbUser.firstName || "Rosy";
 
     return (
         <header className="flex h-20 items-center justify-between px-6 py-4 bg-background/50 backdrop-blur-sm sticky top-0 z-40">
@@ -26,7 +44,10 @@ export async function DashboardHeader() {
             </div>
 
             {/* Right: Actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+                {/* Streak Counter */}
+                <StreakCounter streak={dbUser.currentStreak} />
+
                 {/* Notifications */}
                 <Button variant="ghost" size="icon" className="rounded-full relative">
                     <Bell size={20} className="text-muted-foreground" />

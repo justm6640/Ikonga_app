@@ -1,53 +1,46 @@
-/**
- * Moteur de calculs métaboliques et indicateurs santé.
- */
+import { DailyLog, Gender } from "@prisma/client"
+import { differenceInYears } from "date-fns"
 
-export const calculateIMC = (weight: number, heightCm: number): number => {
-    if (heightCm === 0) return 0;
-    const heightM = heightCm / 100;
-    const imc = weight / (heightM * heightM);
-    return parseFloat(imc.toFixed(1));
-};
+export interface BMIResult {
+    value: number
+    status: string
+    color: string
+}
 
-/**
- * Formule de Lorentz pour le Poids Idéal Santé
- * Femme : (Height - 100) - ((Height - 150) / 2.5)
- * Homme : (Height - 100) - ((Height - 150) / 4)
- */
-export const calculatePISI = (heightCm: number, gender: 'FEMALE' | 'MALE' | 'OTHER'): number => {
-    // Fallback 'OTHER' to 'FEMALE' formula or average? Usually Lorentz is specific. 
-    // We will default to FEMALE for OTHER as safer lower bound, or average. 
-    // Given the context of "detox", conservative is safer. Let's strict to binary gender for formula or use FEMALE default.
-    const isMale = gender === 'MALE';
+export function calculateBMI(weightKg: number, heightCm: number): BMIResult {
+    if (!weightKg || !heightCm) return { value: 0, status: "N/A", color: "text-slate-400" }
 
-    const factor = isMale ? 4 : 2.5;
-    const pisi = (heightCm - 100) - ((heightCm - 150) / factor);
+    const heightM = heightCm / 100
+    const bmi = weightKg / (heightM * heightM)
+    const value = Number(bmi.toFixed(1))
 
-    return parseFloat(pisi.toFixed(1));
-};
+    if (value < 18.5) return { value, status: "Insuffisance", color: "text-blue-500" }
+    if (value < 25) return { value, status: "Poids normal", color: "text-emerald-500" }
+    if (value < 30) return { value, status: "Surpoids", color: "text-orange-500" }
+    return { value, status: "Obésité", color: "text-red-500" }
+}
 
-/**
- * Formule de Mifflin-St Jeor pour le BMR (Basal Metabolic Rate)
- * Femme : 10*W + 6.25*H - 5*A - 161
- * Homme : 10*W + 6.25*H - 5*A + 5
- */
-export const calculateBMR = (
-    weight: number,
-    heightCm: number,
-    age: number,
-    gender: 'FEMALE' | 'MALE' | 'OTHER'
-): number => {
-    const s = gender === 'MALE' ? 5 : -161;
-    const bmr = (10 * weight) + (6.25 * heightCm) - (5 * age) + s;
-    return Math.round(bmr);
-};
+export function calculateBodyFat(bmi: number, age: number, gender: Gender): number {
+    if (!bmi || !age) return 0
 
-export const calculateAge = (birthDate: Date): number => {
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
+    // Deurenberg formula: (1.20 * BMI) + (0.23 * Age) - (10.8 * genderFactor) - 5.4
+    // MALE = 1, FEMALE = 0
+    const genderFactor = gender === Gender.MALE ? 1 : 0
+    const bodyFat = (1.20 * bmi) + (0.23 * age) - (10.8 * genderFactor) - 5.4
+
+    return Number(Math.max(0, bodyFat).toFixed(1))
+}
+
+export function calculateBodyBattery(lastLog: DailyLog | null): number {
+    if (!lastLog || (lastLog as any).wellnessScore === null) {
+        return 50 // Default/Fallback
     }
-    return age;
+
+    // Transform wellnessScore (0-10) to 0-100 scale
+    return Math.round((lastLog as any).wellnessScore * 10)
+}
+
+export function getAge(birthDate: Date | null): number {
+    if (!birthDate) return 30 // Default if unknown
+    return differenceInYears(new Date(), new Date(birthDate))
 }

@@ -18,9 +18,11 @@ export function Sidebar() {
             </div>
 
             {/* Navigation Links */}
-            <nav className="flex-1 flex flex-col gap-1 p-4 overflow-y-auto">
+            <nav className="flex-1 flex flex-col gap-1 p-4 overflow-y-auto mt-4">
                 {NAV_ITEMS.map((item) => {
-                    const isActive = pathname === item.href;
+                    const isActive = item.href === "/dashboard"
+                        ? pathname === "/dashboard"
+                        : pathname.startsWith(item.href);
                     const Icon = item.icon;
 
                     return (
@@ -28,22 +30,19 @@ export function Sidebar() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-secondary/50",
+                                "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group",
                                 isActive
-                                    ? "bg-secondary text-foreground font-medium shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground"
+                                    ? "bg-ikonga-pink text-white shadow-lg shadow-pink-500/20 font-bold"
+                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
-                            <Icon
-                                size={20}
-                                className={cn(
-                                    "transition-colors",
-                                    isActive ? "text-ikonga-pink" : "text-muted-foreground group-hover:text-foreground"
-                                )}
-                            />
-                            <span className={cn(
-                                isActive ? "text-foreground" : ""
+                            <div className={cn(
+                                "p-2 rounded-xl transition-colors",
+                                isActive ? "bg-white/20 text-white" : "text-slate-400 group-hover:text-slate-900"
                             )}>
+                                <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                            </div>
+                            <span className="text-sm">
                                 {item.label}
                             </span>
                         </Link>

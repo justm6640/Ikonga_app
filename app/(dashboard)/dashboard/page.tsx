@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { redirect } from "next/navigation";
 import { PhaseCard } from "@/components/dashboard/PhaseCard";
 import { WeightMiniChart } from "@/components/dashboard/WeightMiniChart";
 import { PillarsGrid } from "@/components/dashboard/PillarsGrid";
@@ -7,25 +8,62 @@ import { AnalysisWidget } from "@/components/dashboard/AnalysisWidget";
 import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 import { AnalysisResult } from "@/lib/ai/generator";
+import { BadgeGrid } from "@/components/gamification/BadgeGrid";
+import { getUserBadges } from "@/lib/actions/gamification";
+import { AnalyticsWidget } from "@/components/dashboard/AnalyticsWidget";
+import { WellnessChart } from "@/components/dashboard/WellnessChart";
+import { getRecentWellnessLogs } from "@/lib/actions/journal";
+import { analyzeTrend } from "@/lib/engines/wellness";
+import { format, startOfDay } from "date-fns";
+import { MetricsGrid } from "@/components/dashboard/MetricsGrid";
+import { getOrCreateUser } from "@/lib/actions/user";
 
 export default async function DashboardPage() {
-    // 1. Fetch User
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // 1. Fetch User (Self-healing)
+    const prismaUser = await getOrCreateUser();
+
+    if (!prismaUser) {
+        redirect("/login");
+    }
 
     let analysisData: AnalysisResult | null = null;
+    let pillarsData = {
+        nutrition: null as any,
+        fitness: null as any,
+        wellness: null as any,
+        beauty: null as any
+    };
 
-    if (user && user.email) {
-        // 2. Fetch UserAnalysis
-        const prismaUser = await prisma.user.findUnique({
-            where: { email: user.email },
-            include: { analysis: true }
-        });
-
-        if (prismaUser?.analysis?.content) {
-            analysisData = prismaUser.analysis.content as unknown as AnalysisResult;
-        }
+    // A. Analysis
+    if (prismaUser.analysis?.content) {
+        analysisData = prismaUser.analysis.content as unknown as AnalysisResult;
     }
+
+    // B. Pillars Data (Contextual to Phase)
+    const activePhaseVal = prismaUser.phases[0]?.type || "DETOX";
+
+    // Parallel Fetch for Pillars
+    const [menu, fitness, wellness, beauty] = await Promise.all([
+        prisma.menu.findFirst({
+            where: { phaseCompat: { has: activePhaseVal } }
+        }),
+        prisma.contentLibrary.findFirst({
+            where: { category: "FITNESS", targetPhases: { has: activePhaseVal } }
+        }),
+        prisma.contentLibrary.findFirst({
+            where: { category: "WELLNESS", targetPhases: { has: activePhaseVal } }
+        }),
+        prisma.contentLibrary.findFirst({
+            where: { category: "BEAUTY", targetPhases: { has: activePhaseVal } }
+        })
+    ]);
+
+    pillarsData = {
+        nutrition: menu ? { title: menu.title, content: menu.content } : null,
+        fitness: fitness ? { title: fitness.title } : null,
+        wellness: wellness ? { title: wellness.title } : null,
+        beauty: beauty ? { title: beauty.title } : null
+    };
 
     return (
         <div className="flex flex-col gap-6 max-w-xl mx-auto md:max-w-4xl">
@@ -39,27 +77,79 @@ export default async function DashboardPage() {
                 </p>
             </div>
 
-            {/* Hero Section: Phase & Weight */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Phase Card (Main) */}
-                <PhaseCard />
-
-                {/* Weight Chart (Mini) */}
-                <div className="h-40 md:h-auto">
-                    <WeightMiniChart />
+            {/* Hero Section: Phase & Analytics */}
+            <div className="flex flex-col gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Phase Card (Main) */}
+                    <PhaseCard />
+                    <div className="h-full">
+                        <DailyJournalCard />
+                    </div>
                 </div>
+
+                {/* Health Gauges (IMC, Body Fat, Battery) */}
+                <MetricsWrapper user={prismaUser} />
+
+                {/* Performance Analytics (Full Width) */}
+                <AnalyticsWidget />
+
+                {/* Wellness Analytics (Full Width) */}
+                <WellnessWrapper />
             </div>
 
-            {/* Action: Daily Journal */}
-            <div>
-                <DailyJournalCard />
-            </div>
-
-            {/* Pillars Grid */}
+            {/* Mes Piliers */}
             <div className="mt-2">
                 <h3 className="text-lg font-serif font-medium mb-4 ml-1">Mes Piliers</h3>
-                <PillarsGrid />
+                <PillarsGrid
+                    nutrition={pillarsData.nutrition}
+                    fitness={pillarsData.fitness}
+                    wellness={pillarsData.wellness}
+                    beauty={pillarsData.beauty}
+                />
+            </div>
+
+            {/* Badges Section */}
+            <div className="mt-4 pb-12">
+                <h3 className="text-lg font-serif font-medium mb-4 ml-1">Mes Badges</h3>
+                <BadgeGridWrapper userId={prismaUser?.id || ""} />
             </div>
         </div>
     );
+}
+
+// Small server component wrapper to fetch badges
+async function BadgeGridWrapper({ userId }: { userId: string }) {
+    if (!userId) return null;
+    const badges = await getUserBadges(userId);
+    return <BadgeGrid badges={badges as any} />;
+}
+
+async function WellnessWrapper() {
+    const logs = await getRecentWellnessLogs(7);
+    const analysis = analyzeTrend(logs as any);
+    const chartData = logs.map(l => ({
+        date: format(l.date, "dd/MM"),
+        score: (l as any).wellnessScore || 0
+    }));
+
+    return <WellnessChart data={chartData} analysis={analysis} />;
+}
+
+async function MetricsWrapper({ user }: { user: any }) {
+    if (!user) return null;
+
+    // Fetch current weight (most recent log with weight)
+    const lastWeightLog = await prisma.dailyLog.findFirst({
+        where: { userId: user.id, weight: { not: null } },
+        orderBy: { date: 'desc' }
+    });
+
+    // Fetch today's log for body battery
+    const todayLog = await prisma.dailyLog.findUnique({
+        where: { userId_date: { userId: user.id, date: startOfDay(new Date()) } }
+    });
+
+    const currentWeight = lastWeightLog?.weight || user.startWeight || 0;
+
+    return <MetricsGrid user={user} currentWeight={currentWeight} lastLog={todayLog as any} />;
 }

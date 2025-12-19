@@ -33,10 +33,12 @@ model User {
   lastName         String?
   gender           Gender           @default(FEMALE)
   birthDate        DateTime?
-  heightCm         Int?
+  heightCm         Float?
   startWeight      Float?
   targetWeight     Float?
   pisi             Float?
+  startDate        DateTime         @default(now())
+  goalDate         DateTime?
   subscriptionTier SubscriptionTier @default(STANDARD)
   subStartDate     DateTime?
   subEndDate       DateTime?
@@ -47,6 +49,11 @@ model User {
   messages         Message[]
   channels         ChannelMember[]
   notifications    Notification[]
+  contentLogs      ContentLog[]
+  currentStreak    Int              @default(0)
+  longestStreak    Int              @default(0)
+  lastActivityDate DateTime?
+  badges           UserBadge[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
@@ -109,15 +116,32 @@ model DailyLog {
   menuId           String?
   caloriesConsumed Int?
   workoutDone      Boolean  @default(false)
-  hydration        Int?
-  sleepScore       Int?
-  stressScore      Int?
-  energyScore      Int?
-  mood             String?
-  journalNote      String?
+  hydration        Int      @default(0)
+  sleepHours       Int?
+  mood             Mood?
+  digestion        Digestion?
+  stressLevel      Int?     // 1-10
+  energyLevel      Int?     // 1-10
+  wellnessScore    Float?   // Calculated
+  notes            String?
   dayStatus        String?
 
   @@unique([userId, date])
+}
+
+enum Mood {
+  GREAT
+  GOOD
+  NEUTRAL
+  BAD
+  STRESSED
+}
+
+enum Digestion {
+  GREAT
+  NORMAL
+  BLOATED
+  CONSTIPATED
 }
 
 model WellnessAnalysis {
@@ -138,7 +162,7 @@ model Menu {
 }
 
 model ContentLibrary {
-  id            String      @id @default(uuid())
+  id            String       @id @default(uuid())
   category      String
   title         String
   mediaUrl      String?
@@ -146,6 +170,27 @@ model ContentLibrary {
   targetPhases  PhaseType[]
   emotionalTags String[]
   metadata      Json
+  duration      Int? // in minutes
+  difficulty    Difficulty?
+  description   String?
+  logs          ContentLog[]
+}
+
+model ContentLog {
+  id          String         @id @default(uuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  contentId   String
+  content     ContentLibrary @relation(fields: [contentId], references: [id])
+  completedAt DateTime       @default(now())
+
+  @@unique([userId, contentId, completedAt])
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
 }
 
 enum ChannelType {
@@ -211,4 +256,39 @@ model Notification {
   category  NotifCategory
   isRead    Boolean       @default(false)
   createdAt DateTime      @default(now())
+}
+model Recipe {
+  id           String   @id @default(uuid())
+  title        String   @unique
+  description  String
+  imageUrl     String?
+  calories     Int
+  protein      Int
+  carbs        Int
+  fat          Int
+  ingredients  String[]
+  instructions String[]
+  prepTime     Int // in minutes
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Badge {
+  id          String      @id @default(uuid())
+  code        String      @unique
+  name        String
+  description String
+  icon        String
+  earnedBy    UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(uuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  badgeId  String
+  badge    Badge    @relation(fields: [badgeId], references: [id])
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
 }

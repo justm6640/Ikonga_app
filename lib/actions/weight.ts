@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import { awardBadge } from "./gamification"
 
 export type LogWeightResult = {
     status: "success" | "neutral" | "info" | "error";
@@ -66,6 +67,7 @@ export async function saveWeightLog(
 
         // 3. Algorithme Zero Guilt Feedback
         if (!previousWeight) {
+            await awardBadge(prismaUser.id, "FIRST_WEIGH_IN")
             return { status: "success", message: "Premier pas validé ! Bienvenue dans ton suivi. 🚀" };
         }
 
