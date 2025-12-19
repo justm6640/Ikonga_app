@@ -1,4 +1,4 @@
-import { LayoutGrid, Map, Scale, MessageCircle, User, Dumbbell, ShoppingBasket, Shield } from "lucide-react";
+import { LayoutGrid, Map, Scale, MessageCircle, User, Dumbbell, Utensils, Shield } from "lucide-react";
 import { Feature } from "./subscriptions";
 
 export interface NavItem {
@@ -28,9 +28,9 @@ export const NAV_ITEMS: NavItem[] = [
         requiredFeature: 'FITNESS'
     },
     {
-        label: "Courses",
+        label: "Menus",
         href: "/shopping-list",
-        icon: ShoppingBasket,
+        icon: Utensils,
         requiredFeature: 'SHOPPING_LIST'
     },
     {

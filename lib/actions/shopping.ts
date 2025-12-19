@@ -5,8 +5,7 @@ import prisma from "@/lib/prisma"
 
 /**
  * Aggregates ingredients from all recipes to build a shopping list.
- * In a real-world scenario, this would filter by the recipes actually 
- * linked to the user's current menu for the week.
+ * Also fetches the active menu to provide context to the user.
  */
 export async function getShoppingList() {
     const supabase = await createClient()
@@ -17,7 +16,7 @@ export async function getShoppingList() {
     }
 
     try {
-        // 1. Get user and active phase (to know which recipes to aggregate eventually)
+        // 1. Get user and active phase
         const dbUser = await prisma.user.findUnique({
             where: { email: user.email },
             include: {
@@ -30,24 +29,39 @@ export async function getShoppingList() {
 
         if (!dbUser) throw new Error("Utilisateur non trouvé")
 
-        // 2. Fetch recipes
-        // For now, we fetch all recipes as requested.
-        const recipes = await prisma.recipe.findMany()
+        const currentPhase = dbUser.phases?.[0]?.type || "DETOX"
 
-        // 3. Aggregate and deduplicate ingredients
+        // 2. Fetch the active menu for this phase
+        const activeMenu = await prisma.menu.findFirst({
+            where: {
+                phaseCompat: {
+                    has: currentPhase
+                }
+            }
+        })
+
+        // 3. Fetch recipes and aggregate ingredients
+        const recipes = await prisma.recipe.findMany()
         const allIngredients = recipes.flatMap(recipe => recipe.ingredients)
 
-        // Normalize strings (lowercase, trim) for better deduplication
+        // Normalize and deduplicate
         const uniqueIngredients = Array.from(new Set(
             allIngredients.map(item => item.trim())
         )).sort((a, b) => a.localeCompare(b, "fr"))
 
         return {
             ingredients: uniqueIngredients,
-            phaseName: dbUser.phases?.[0]?.type || "Détox"
+            phaseName: currentPhase,
+            menu: activeMenu,
+            error: null
         }
     } catch (error) {
         console.error("Error generating shopping list:", error)
-        return { ingredients: [], phaseName: "Détox", error: "Erreur lors de la génération" }
+        return {
+            ingredients: [],
+            phaseName: "Détox",
+            menu: null,
+            error: "Erreur lors de la génération"
+        }
     }
 }

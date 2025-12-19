@@ -30,14 +30,18 @@ import { Input } from "@/components/ui/input"
 
 // Schema
 const weighInSchema = z.object({
-    weight: z.number({ invalid_type_error: "Poids requis" }).min(30).max(250),
-    date: z.date({ required_error: "Date requise" }),
+    weight: z.number().min(30, "Minimum 30kg").max(250, "Maximum 250kg"),
+    date: z.date(),
     // photoUrl handled separately or inside hidden input if needed
 })
 
 type WeighInFormValues = z.infer<typeof weighInSchema>
 
-export function WeighInForm() {
+interface WeighInFormProps {
+    onSuccess?: () => void
+}
+
+export function WeighInForm({ onSuccess }: WeighInFormProps) {
     const [isPending, setIsPending] = useState(false)
 
     const form = useForm<WeighInFormValues>({
@@ -64,6 +68,7 @@ export function WeighInForm() {
                 // Reset logic if needed, but keeping value might be better for UX or clear?
                 // Usually clear weight to prevent double sub.
                 form.reset({ date: new Date(), weight: undefined })
+                onSuccess?.()
             }
 
         } catch (e) {
