@@ -5,8 +5,15 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/config/navigation";
 
+import { useSubscription } from "@/components/providers/SubscriptionProvider";
+
 export function Sidebar() {
     const pathname = usePathname();
+    const { hasAccess } = useSubscription();
+
+    const filteredNavItems = NAV_ITEMS.filter(item =>
+        !item.requiredFeature || hasAccess(item.requiredFeature)
+    );
 
     return (
         <div className="hidden md:flex flex-col w-64 h-full bg-card border-r border-border">
@@ -19,7 +26,7 @@ export function Sidebar() {
 
             {/* Navigation Links */}
             <nav className="flex-1 flex flex-col gap-1 p-4 overflow-y-auto mt-4">
-                {NAV_ITEMS.map((item) => {
+                {filteredNavItems.map((item) => {
                     const isActive = item.href === "/dashboard"
                         ? pathname === "/dashboard"
                         : pathname.startsWith(item.href);

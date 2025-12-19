@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import prisma from "@/lib/prisma"
+import { SubscriptionTier } from "@prisma/client"
 
 /**
  * Robustly retrieves the current user's Prisma profile.
@@ -64,7 +65,7 @@ export async function getOrCreateUser() {
                     firstName: user.user_metadata?.first_name || "",
                     lastName: user.user_metadata?.last_name || "",
                     gender: "FEMALE", // Default based on schema
-                    subscriptionTier: "STANDARD"
+                    subscriptionTier: SubscriptionTier.STANDARD_6
                 },
                 include: {
                     analysis: true,

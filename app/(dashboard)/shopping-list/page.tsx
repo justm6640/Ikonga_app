@@ -7,7 +7,10 @@ export const metadata = {
     description: "Consultez et gérez votre liste de courses pour votre phase actuelle.",
 }
 
+import { protectFeature } from "@/lib/security/permissions"
+
 export default async function ShoppingListPage() {
+    await protectFeature("SHOPPING_LIST")
     const data = await getShoppingList()
 
     if (data.error) {
@@ -28,7 +31,7 @@ export default async function ShoppingListPage() {
             </div>
 
             <ShoppingListView
-                initialIngredients={data.ingredients}
+                initialIngredients={data.ingredients as any}
                 phaseName={data.phaseName}
             />
         </div>

@@ -20,9 +20,12 @@ enum Gender {
 }
 
 enum SubscriptionTier {
-  STANDARD
-  VIP
-  VIP_PLUS
+  STANDARD_6
+  STANDARD_12
+  STANDARD_24
+  STANDARD_48
+  VIP_12
+  VIP_PLUS_16
 }
 
 model User {
@@ -39,8 +42,10 @@ model User {
   pisi             Float?
   startDate        DateTime         @default(now())
   goalDate         DateTime?
-  subscriptionTier SubscriptionTier @default(STANDARD)
-  subStartDate     DateTime?
+  subscriptionTier SubscriptionTier @default(STANDARD_6)
+  planStartDate    DateTime?        @default(now())
+  isPhaseManual    Boolean          @default(false)
+  manualPhaseReason String?
   subEndDate       DateTime?
   isActive         Boolean          @default(true)
   phases           UserPhase[]

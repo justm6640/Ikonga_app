@@ -5,12 +5,16 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/config/navigation";
 
+import { useSubscription } from "@/components/providers/SubscriptionProvider";
+
 export function BottomNav() {
     const pathname = usePathname();
+    const { hasAccess } = useSubscription();
 
-    // Select top 5 essential items for mobile view
+    // Select top 5 essential items for mobile view AND check access
     const MOBILE_NAV_ITEMS = NAV_ITEMS.filter(item =>
-        ["Accueil", "Fitness", "Pesée", "Courses", "Profil"].includes(item.label)
+        ["Accueil", "Fitness", "Pesée", "Courses", "Profil"].includes(item.label) &&
+        (!item.requiredFeature || hasAccess(item.requiredFeature))
     );
 
     return (

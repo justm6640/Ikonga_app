@@ -1,39 +1,54 @@
-import { LayoutGrid, Map, Scale, MessageCircle, User, Dumbbell, ShoppingBasket } from "lucide-react";
+import { LayoutGrid, Map, Scale, MessageCircle, User, Dumbbell, ShoppingBasket, Shield } from "lucide-react";
+import { Feature } from "./subscriptions";
 
-export const NAV_ITEMS = [
+export interface NavItem {
+    label: string;
+    href: string;
+    icon: any;
+    requiredFeature?: Feature;
+}
+
+export const NAV_ITEMS: NavItem[] = [
     {
         label: "Accueil",
         href: "/dashboard",
         icon: LayoutGrid,
+        requiredFeature: 'DASHBOARD_VIEW'
+    },
+    {
+        label: "Journal",
+        href: "/journal",
+        icon: Map, // Keeping Map or switching to something else if needed
+        requiredFeature: 'JOURNAL'
     },
     {
         label: "Fitness",
         href: "/fitness",
         icon: Dumbbell,
+        requiredFeature: 'FITNESS'
     },
     {
         label: "Courses",
         href: "/shopping-list",
         icon: ShoppingBasket,
-    },
-    {
-        label: "Phases",
-        href: "/phases",
-        icon: Map,
+        requiredFeature: 'SHOPPING_LIST'
     },
     {
         label: "Pesée",
         href: "/weigh-in",
         icon: Scale,
-    },
-    {
-        label: "Coach",
-        href: "/chat",
-        icon: MessageCircle,
+        requiredFeature: 'DASHBOARD_VIEW'
     },
     {
         label: "Profil",
         href: "/profile",
         icon: User,
+        requiredFeature: 'PROFILE'
+    },
+    {
+        label: "Admin",
+        href: "/admin",
+        icon: Shield,
+        requiredFeature: 'ADMIN_ACCESS'
     },
 ];

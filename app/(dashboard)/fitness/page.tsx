@@ -11,7 +11,10 @@ export const metadata = {
     description: "Votre programmation sportive quotidienne adaptée à votre phase.",
 }
 
+import { protectFeature } from "@/lib/security/permissions"
+
 export default async function FitnessPage() {
+    await protectFeature("FITNESS")
     const data = await getDailyWorkout()
 
     if (!data) {
@@ -47,7 +50,7 @@ export default async function FitnessPage() {
                             Programmation
                         </Badge>
                         <Badge variant="outline" className="text-slate-400 font-bold border-slate-200 uppercase tracking-widest text-[10px] px-3">
-                            {video.difficulty}
+                            {(video as any).difficulty}
                         </Badge>
                     </div>
                     <div>
@@ -55,7 +58,7 @@ export default async function FitnessPage() {
                             {video.title}
                         </h1>
                         <p className="text-slate-500 mt-3 text-lg font-medium italic">
-                            "{video.description}"
+                            "{(video as any).description}"
                         </p>
                     </div>
                 </div>
@@ -67,7 +70,7 @@ export default async function FitnessPage() {
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[10px] uppercase font-bold text-slate-400 leading-none mb-1">Durée</span>
-                            <span className="text-lg font-black text-slate-900">{video.duration} min</span>
+                            <span className="text-lg font-black text-slate-900">{(video as any).duration} min</span>
                         </div>
                     </div>
                 </div>

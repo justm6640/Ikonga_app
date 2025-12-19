@@ -14,8 +14,6 @@ const config: NextConfig = {
     serverActions: {
       allowedOrigins: ["*"],
     },
-    // @ts-ignore - Specific setup for certain dev environments
-    allowedDevOrigins: ["*"],
   },
 };
 

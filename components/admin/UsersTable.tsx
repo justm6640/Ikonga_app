@@ -19,11 +19,12 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, Shield, Trash2, UserPlus, UserMinus } from "lucide-react"
+import { MoreHorizontal, Shield, Trash2, UserPlus, UserMinus, Settings, ArrowUpRight } from "lucide-react"
 import { toggleUserRole, deleteUser } from "@/lib/actions/admin-users"
 import { toast } from "sonner"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import Link from "next/link"
 
 interface UsersTableProps {
     users: any[]
@@ -139,6 +140,13 @@ export function UsersTable({ users }: UsersTableProps) {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-56 rounded-xl">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem asChild className="cursor-pointer">
+                                                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2">
+                                                        <Settings size={16} />
+                                                        Gérer l'utilisateur
+                                                    </Link>
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem
                                                     onClick={() => handleToggleRole(user.id, user.role)}

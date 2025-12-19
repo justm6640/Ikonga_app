@@ -93,7 +93,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                         <span className="text-sm font-bold tracking-widest uppercase">Mon Abonnement</span>
                     </div>
                     <h3 className="text-3xl font-serif font-bold">
-                        Formule {user.subscriptionTier === 'STANDARD' ? 'Essentielle' : user.subscriptionTier}
+                        Formule {user.subscriptionTier?.startsWith('STANDARD') ? 'Essentielle' : (user.subscriptionTier || 'Standard')}
                     </h3>
                     <p className="mt-2 text-white/80 text-sm italic">
                         Membre IKONGA depuis le {new Date(user.createdAt).toLocaleDateString()}

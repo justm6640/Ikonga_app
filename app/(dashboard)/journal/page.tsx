@@ -5,7 +5,10 @@ import { getTodayJournalEntry } from "@/lib/actions/journal"
 import { ChevronLeft } from "lucide-react"
 import Link from "next/link"
 
+import { protectFeature } from "@/lib/security/permissions"
+
 export default async function JournalPage() {
+    await protectFeature("JOURNAL")
     const todayEntry = await getTodayJournalEntry()
     const todayDate = format(new Date(), "EEEE d MMMM", { locale: fr })
 

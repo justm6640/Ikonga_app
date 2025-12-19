@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import {
     ResponsiveContainer,
     AreaChart,
@@ -45,6 +46,22 @@ const TrendBadge = ({ status, message }: { status: WellnessTrend, message: strin
 }
 
 export function WellnessChart({ data, analysis }: WellnessChartProps) {
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+
+    if (!isMounted) {
+        return (
+            <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-[2.5rem] bg-white overflow-hidden">
+                <div className="h-[430px] flex items-center justify-center text-slate-300">
+                    <Activity className="animate-pulse" size={40} />
+                </div>
+            </Card>
+        )
+    }
+
     return (
         <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-[2.5rem] bg-white overflow-hidden">
             <CardHeader className="p-8 pb-0">
