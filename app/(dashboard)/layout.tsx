@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { AdminFAB } from "@/components/layout/AdminFAB";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { getOrCreateUser } from "@/lib/actions/user";
 import { SubscriptionProvider } from "@/components/providers/SubscriptionProvider";
@@ -40,6 +41,9 @@ export default async function DashboardLayout({
 
                     {/* Bottom Nav - Mobile Only */}
                     <BottomNav />
+
+                    {/* Admin FAB - Mobile Only, Role Protected */}
+                    <AdminFAB />
                 </div>
             </div>
         </SubscriptionProvider>
