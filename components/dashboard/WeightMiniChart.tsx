@@ -3,41 +3,37 @@
 import { Area, AreaChart, ResponsiveContainer, YAxis } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 
-const data = [
-    { weight: 85.5 },
-    { weight: 85.2 },
-    { weight: 85.0 },
-    { weight: 84.8 },
-    { weight: 84.6 },
-    { weight: 84.4 },
-    { weight: 84.2 },
-];
+interface WeightMiniChartProps {
+    data: { date: Date | string; weight: number }[];
+    currentWeight: number;
+    startWeight: number;
+}
 
-export function WeightMiniChart() {
-    const currentWeight = 84.2;
-    const startWeight = 85.5;
+export function WeightMiniChart({ data, currentWeight, startWeight }: WeightMiniChartProps) {
     const loss = (currentWeight - startWeight).toFixed(1);
+    const isLoss = (currentWeight - startWeight) < 0;
 
     return (
-        <Card className="rounded-3xl border-none shadow-sm overflow-hidden h-full">
+        <Card className="rounded-3xl border-none shadow-none overflow-hidden h-full bg-transparent">
             <CardContent className="p-6 relative h-full flex flex-col justify-between">
                 <div>
-                    <p className="text-sm text-muted-foreground font-medium">Poids actuel</p>
+                    <p className="text-sm text-slate-500 font-medium">Poids actuel</p>
                     <div className="flex items-baseline gap-2 mt-1">
-                        <span className="text-3xl font-bold text-foreground">{currentWeight}</span>
-                        <span className="text-sm font-medium text-muted-foreground">kg</span>
+                        <span className="text-4xl font-serif font-bold text-slate-900">{currentWeight}</span>
+                        <span className="text-sm font-medium text-slate-400">kg</span>
                     </div>
-                    <div className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-bold">
-                        {loss} kg
+                    <div className={`mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${isLoss ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'
+                        }`}>
+                        {isLoss ? '📉' : '📊'} {loss} kg
                     </div>
                 </div>
 
-                <div className="h-[100px] w-full absolute bottom-0 left-0 right-0 opacity-50">
+                <div className="h-[100px] w-full absolute bottom-0 left-0 right-0 opacity-40">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={data}>
                             <defs>
                                 <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#E5488A" stopOpacity={0.3} />
+                                    <stop offset="5%" stopColor="#E5488A" stopOpacity={0.4} />
                                     <stop offset="95%" stopColor="#E5488A" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
@@ -45,12 +41,13 @@ export function WeightMiniChart() {
                                 type="monotone"
                                 dataKey="weight"
                                 stroke="#E5488A"
-                                strokeWidth={2}
+                                strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorWeight)"
+                                animationDuration={1500}
+                                isAnimationActive={true}
                             />
-                            {/* Hide Axis for minimal look, but keep domain dynamic */}
-                            <YAxis domain={['dataMin - 1', 'dataMax + 1']} hide />
+                            <YAxis domain={['dataMin - 0.5', 'dataMax + 0.5']} hide />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>

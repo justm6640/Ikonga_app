@@ -17,6 +17,7 @@ import { analyzeTrend } from "@/lib/engines/wellness";
 import { format, startOfDay } from "date-fns";
 import { MetricsGrid } from "@/components/dashboard/MetricsGrid";
 import { getOrCreateUser } from "@/lib/actions/user";
+import Link from "next/link";
 
 export default async function DashboardPage() {
     // 1. Fetch User (Self-healing)
@@ -37,6 +38,13 @@ export default async function DashboardPage() {
     });
 
     if (!dbUser) redirect("/login");
+
+    // Fetch 7 most recent weight logs for the mini chart (chronological for graph)
+    const recentWeightLogs = await prisma.dailyLog.findMany({
+        where: { userId: dbUser.id, weight: { not: null } },
+        orderBy: { date: 'asc' },
+        take: 7
+    });
 
     let analysisData: AnalysisResult | null = null;
     let pillarsData = {
@@ -113,22 +121,33 @@ export default async function DashboardPage() {
                     lastLog={dbUser.dailyLogs[0] || null}
                 />
 
+                {/* Interactive Weight Chart - Moved below Gauges */}
+                <Link href="/weigh-in" className="block w-full group">
+                    <div className="h-[180px] w-full rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50 bg-white transition-all duration-300 group-hover:scale-[1.01] group-hover:shadow-2xl group-hover:shadow-slate-200/60 transition-all">
+                        <WeightMiniChart
+                            currentWeight={currentWeight}
+                            startWeight={dbUser.startWeight || 0}
+                            data={recentWeightLogs.map(l => ({ date: l.date, weight: l.weight! }))}
+                        />
+                    </div>
+                </Link>
+
+                {/* Mes Piliers - Moved above Analytics */}
+                <div className="mt-2">
+                    <h3 className="text-lg font-serif font-medium mb-4 ml-1">Mes Piliers</h3>
+                    <PillarsGrid
+                        nutrition={pillarsData.nutrition}
+                        fitness={pillarsData.fitness}
+                        wellness={pillarsData.wellness}
+                        beauty={pillarsData.beauty}
+                    />
+                </div>
+
                 {/* Performance Analytics (Full Width) */}
                 <AnalyticsWidget />
 
                 {/* Wellness Analytics (Full Width) */}
                 <WellnessWrapper />
-            </div>
-
-            {/* Mes Piliers */}
-            <div className="mt-2">
-                <h3 className="text-lg font-serif font-medium mb-4 ml-1">Mes Piliers</h3>
-                <PillarsGrid
-                    nutrition={pillarsData.nutrition}
-                    fitness={pillarsData.fitness}
-                    wellness={pillarsData.wellness}
-                    beauty={pillarsData.beauty}
-                />
             </div>
 
             {/* Badges Section */}
