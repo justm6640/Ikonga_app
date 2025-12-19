@@ -160,10 +160,12 @@ model WellnessAnalysis {
 
 model Menu {
   id          String      @id @default(uuid())
-  title       String
+  title       String      @unique
   phaseCompat PhaseType[]
   content     Json
   isPremium   Boolean     @default(false)
+
+  @@index([title])
 }
 
 model ContentLibrary {

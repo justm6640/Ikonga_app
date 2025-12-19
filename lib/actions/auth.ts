@@ -28,7 +28,7 @@ import { headers } from "next/headers"
 
 export async function signup(formData: FormData) {
     const supabase = await createClient()
-    const origin = (await headers()).get("origin")
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
     const email = formData.get("email") as string
     const password = formData.get("password") as string
@@ -43,7 +43,7 @@ export async function signup(formData: FormData) {
                 first_name: firstName,
                 last_name: lastName
             },
-            emailRedirectTo: `${origin}/auth/callback?next=/onboarding`
+            emailRedirectTo: `${appUrl}/auth/callback?next=/onboarding`
         }
     })
 

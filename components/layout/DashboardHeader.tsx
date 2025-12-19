@@ -6,30 +6,20 @@ import prisma from "@/lib/prisma";
 import { StreakCounter } from "@/components/gamification/StreakCounter";
 import { updateStreak } from "@/lib/actions/gamification";
 
-export async function DashboardHeader() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+import { User } from "@prisma/client";
 
-    if (!user || !user.email) return null;
+interface DashboardHeaderProps {
+    user: User;
+}
 
-    // Fetch User from DB to get real data and streak
-    const dbUser = await prisma.user.findUnique({
-        where: { email: user.email },
-        select: { id: true, firstName: true, currentStreak: true }
-    });
-
-    if (!dbUser) return null;
+export async function DashboardHeader({ user }: DashboardHeaderProps) {
+    if (!user) return null;
 
     // Trigger streak update on visit (Server Action)
-    await updateStreak(dbUser.id);
+    // We keep this to ensure streaks increment correctly on daily visits
+    await updateStreak(user.id);
 
-    // Re-fetch or just increment locally if we want fresh data? 
-    // updateStreak is async but doesn't return data. 
-    // Actually, updateStreak will update the DB. 
-    // For simplicity, we fetch once. The UI might be 1 day behind until next refresh, 
-    // but usually, it's fine for a header. 
-
-    const userName = dbUser.firstName || "Rosy";
+    const userName = user.firstName || "Rosy";
 
     return (
         <header className="flex h-20 items-center justify-between px-6 py-4 bg-background/50 backdrop-blur-sm sticky top-0 z-40">
@@ -46,7 +36,7 @@ export async function DashboardHeader() {
             {/* Right: Actions */}
             <div className="flex items-center gap-2 sm:gap-4">
                 {/* Streak Counter */}
-                <StreakCounter streak={dbUser.currentStreak} />
+                <StreakCounter streak={(user as any).currentStreak || 0} />
 
                 {/* Notifications */}
                 <Button variant="ghost" size="icon" className="rounded-full relative">
@@ -56,7 +46,6 @@ export async function DashboardHeader() {
 
                 {/* User Avatar */}
                 <Avatar className="h-10 w-10 border-2 border-background shadow-sm cursor-pointer hover:opacity-80 transition-opacity">
-                    <AvatarImage src={user?.user_metadata?.avatar_url} />
                     <AvatarFallback className="bg-ikonga-gradient text-white font-bold">
                         {userName.charAt(0).toUpperCase()}
                     </AvatarFallback>

@@ -5,6 +5,7 @@ import { AnimatedGauge } from "./AnimatedGauge"
 import { calculateBMI, calculateBodyFat, calculateBodyBattery, getAge } from "@/lib/engines/calculators"
 import { Card, CardContent } from "@/components/ui/card"
 import { motion } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 interface MetricsGridProps {
     user: User
@@ -13,6 +14,8 @@ interface MetricsGridProps {
 }
 
 export function MetricsGrid({ user, currentWeight, lastLog }: MetricsGridProps) {
+    if (!user) return null;
+
     // 1. Calculate Metrics
     const bmiResult = calculateBMI(currentWeight, user.heightCm || 0)
     const age = getAge(user.birthDate)
@@ -27,7 +30,6 @@ export function MetricsGrid({ user, currentWeight, lastLog }: MetricsGridProps) 
     }
 
     const getBodyFatColor = (val: number, gender: string) => {
-        // Basic rough ranges for coloring
         if (gender === "MALE") {
             if (val < 20) return "text-emerald-500"
             if (val < 25) return "text-orange-500"
@@ -93,8 +95,4 @@ export function MetricsGrid({ user, currentWeight, lastLog }: MetricsGridProps) 
             ))}
         </div>
     )
-}
-
-function cn(...inputs: any[]) {
-    return inputs.filter(Boolean).join(" ");
 }

@@ -3,15 +3,23 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { getOrCreateUser } from "@/lib/actions/user";
 import { SubscriptionProvider } from "@/components/providers/SubscriptionProvider";
+import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    // 🔒 CRITICAL: Redirect if user authentication fails
     const user = await getOrCreateUser();
-    const tier = user?.subscriptionTier ?? null;
-    const role = user?.role ?? null;
+
+    if (!user) {
+        console.error("[DashboardLayout] User not authenticated - redirecting to login");
+        redirect("/login");
+    }
+
+    const tier = user.subscriptionTier ?? null;
+    const role = user.role ?? null;
 
     return (
         <SubscriptionProvider tier={tier} role={role}>
@@ -22,7 +30,7 @@ export default async function DashboardLayout({
                 {/* Main Content Area */}
                 <div className="flex-1 flex flex-col overflow-hidden relative">
                     {/* Header - Global */}
-                    <DashboardHeader />
+                    <DashboardHeader user={user} />
 
                     {/* Page Content - Scrollable */}
                     {/* pb-24 ensures content isn't hidden behind BottomNav on Mobile */}

@@ -26,6 +26,18 @@ export default async function DashboardPage() {
         redirect("/login");
     }
 
+    // Fetch full user data including logs for metrics
+    const dbUser = await prisma.user.findUnique({
+        where: { id: prismaUser.id },
+        include: {
+            dailyLogs: { orderBy: { date: 'desc' } },
+            phases: { orderBy: { startDate: 'desc' }, take: 1 },
+            analysis: true
+        }
+    });
+
+    if (!dbUser) redirect("/login");
+
     let analysisData: AnalysisResult | null = null;
     let pillarsData = {
         nutrition: null as any,
@@ -35,26 +47,27 @@ export default async function DashboardPage() {
     };
 
     // A. Analysis
-    if (prismaUser.analysis?.content) {
-        analysisData = prismaUser.analysis.content as unknown as AnalysisResult;
+    if (dbUser.analysis?.content) {
+        analysisData = dbUser.analysis.content as unknown as AnalysisResult;
     }
 
     // B. Pillars Data (Contextual to Phase)
-    const activePhaseVal = prismaUser.phases[0]?.type || "DETOX";
+    const activePhase = dbUser.phases[0];
+    const activePhaseType = activePhase?.type || "DETOX";
 
     // Parallel Fetch for Pillars
     const [menu, fitness, wellness, beauty] = await Promise.all([
         prisma.menu.findFirst({
-            where: { phaseCompat: { has: activePhaseVal } }
+            where: { phaseCompat: { has: activePhaseType } }
         }),
         prisma.contentLibrary.findFirst({
-            where: { category: "FITNESS", targetPhases: { has: activePhaseVal } }
+            where: { category: "FITNESS", targetPhases: { has: activePhaseType } }
         }),
         prisma.contentLibrary.findFirst({
-            where: { category: "WELLNESS", targetPhases: { has: activePhaseVal } }
+            where: { category: "WELLNESS", targetPhases: { has: activePhaseType } }
         }),
         prisma.contentLibrary.findFirst({
-            where: { category: "BEAUTY", targetPhases: { has: activePhaseVal } }
+            where: { category: "BEAUTY", targetPhases: { has: activePhaseType } }
         })
     ]);
 
@@ -65,12 +78,15 @@ export default async function DashboardPage() {
         beauty: beauty ? { title: beauty.title } : null
     };
 
+    const lastWeightLog = dbUser.dailyLogs.find(l => l.weight !== null);
+    const currentWeight = lastWeightLog?.weight || dbUser.startWeight || 0;
+
     return (
         <div className="flex flex-col gap-6 max-w-xl mx-auto md:max-w-4xl">
             {/* Analysis Widget (AI) */}
             <AnalysisWidget analysis={analysisData} />
 
-            {/* Motivational Quote (Mobile Header Placeholder) */}
+            {/* Motivational Quote */}
             <div className="mb-2">
                 <p className="text-lg font-hand text-muted-foreground italic">
                     "Petit pas + Petit pas = Grande Victoire"
@@ -81,14 +97,21 @@ export default async function DashboardPage() {
             <div className="flex flex-col gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Phase Card (Main) */}
-                    <PhaseCard />
+                    <PhaseCard
+                        phase={activePhaseType}
+                        startDate={activePhase?.startDate || (dbUser as any).startDate || new Date()}
+                    />
                     <div className="h-full">
                         <DailyJournalCard />
                     </div>
                 </div>
 
                 {/* Health Gauges (IMC, Body Fat, Battery) */}
-                <MetricsWrapper user={prismaUser} />
+                <MetricsGrid
+                    user={dbUser as any}
+                    currentWeight={currentWeight}
+                    lastLog={dbUser.dailyLogs[0] || null}
+                />
 
                 {/* Performance Analytics (Full Width) */}
                 <AnalyticsWidget />
@@ -111,7 +134,7 @@ export default async function DashboardPage() {
             {/* Badges Section */}
             <div className="mt-4 pb-12">
                 <h3 className="text-lg font-serif font-medium mb-4 ml-1">Mes Badges</h3>
-                <BadgeGridWrapper userId={prismaUser?.id || ""} />
+                <BadgeGridWrapper userId={dbUser.id} />
             </div>
         </div>
     );
