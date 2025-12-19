@@ -77,7 +77,7 @@ export function ContentForm() {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-lg bg-white p-6 rounded-xl shadow-sm border">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-2xl">
 
                 {/* Title */}
                 <FormField

@@ -8,13 +8,13 @@ export default async function AdminMenusPage() {
     const menus = await getAdminMenus()
 
     return (
-        <div className="p-8 space-y-8 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between">
+        <div className="p-4 md:p-8 space-y-8 animate-in fade-in duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Menus Quotidiens</h1>
-                    <p className="text-slate-500 mt-1">Gérez les plans alimentaires par phase.</p>
+                    <p className="text-slate-500 mt-1 text-sm">Gérez les plans alimentaires par phase.</p>
                 </div>
-                <Button asChild className="bg-ikonga-gradient rounded-2xl font-bold shadow-lg shadow-pink-500/20">
+                <Button asChild className="bg-ikonga-gradient rounded-2xl font-bold shadow-lg shadow-pink-500/20 w-full sm:w-auto">
                     <Link href="/admin/menus/new">
                         <Plus className="mr-2" size={18} /> Nouveau Menu
                     </Link>
@@ -22,7 +22,7 @@ export default async function AdminMenusPage() {
             </div>
 
             {menus.length === 0 ? (
-                <Card className="border-dashed border-2 border-slate-200 p-20 text-center rounded-[2.5rem] bg-slate-50/50">
+                <Card className="border-dashed border-2 border-slate-200 p-10 md:p-20 text-center rounded-[2.5rem] bg-slate-50/50">
                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Utensils className="text-slate-300" size={32} />
                     </div>

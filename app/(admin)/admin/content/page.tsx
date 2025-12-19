@@ -8,21 +8,21 @@ export default async function AdminContentPage() {
     const { videos, recipes } = await getAdminContent()
 
     return (
-        <div className="p-8 space-y-8 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between">
+        <div className="p-4 md:p-8 space-y-8 animate-in fade-in duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Contenus & Recettes</h1>
-                    <p className="text-slate-500 mt-1">Gérez la bibliothèque de ressources et la base culinaire.</p>
+                    <p className="text-slate-500 mt-1 text-sm">Gérez la bibliothèque de ressources et la base culinaire.</p>
                 </div>
-                <div className="flex gap-4">
-                    <Button asChild variant="outline" className="rounded-2xl font-bold border-slate-200">
+                <div className="flex flex-col xs:flex-row gap-4">
+                    <Button asChild variant="outline" className="rounded-2xl font-bold border-slate-200 w-full sm:w-auto">
                         <Link href="/admin/content/new">
-                            <Plus className="mr-2" size={18} /> Vidéo/Article
+                            <Plus className="mr-2" size={18} /> Article
                         </Link>
                     </Button>
-                    <Button asChild className="bg-ikonga-gradient rounded-2xl font-bold shadow-lg shadow-pink-500/20">
-                        <Link href="/admin/content/new"> {/* For now reuse content creation or assume recipe creation elsewhere */}
-                            <Plus className="mr-2" size={18} /> Nouvelle Recette
+                    <Button asChild className="bg-ikonga-gradient rounded-2xl font-bold shadow-lg shadow-pink-500/20 w-full sm:w-auto">
+                        <Link href="/admin/content/new">
+                            <Plus className="mr-2" size={18} /> Recette
                         </Link>
                     </Button>
                 </div>

@@ -18,10 +18,10 @@ export default async function AdminDashboardPage() {
     ]
 
     return (
-        <div className="p-8 space-y-8 animate-in fade-in duration-700">
+        <div className="p-4 md:p-8 space-y-8 animate-in fade-in duration-700">
             <div>
-                <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase">Admin Dashboard</h1>
-                <p className="text-slate-500 font-medium">Gestion globale de la plateforme IKONGA.</p>
+                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight uppercase">Admin Dashboard</h1>
+                <p className="text-slate-500 font-medium text-sm md:text-base">Gestion globale de la plateforme IKONGA.</p>
             </div>
 
             {/* Stats Grid */}
@@ -56,16 +56,16 @@ export default async function AdminDashboardPage() {
                     <p className="text-slate-400 text-sm mb-6">
                         L'interface d'administration vous permet de gérer les utilisateurs, de créer des plans de repas et de mettre à jour le catalogue de vidéos fitness.
                     </p>
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
                         <Link
                             href="/admin/content/new"
-                            className="bg-ikonga-gradient px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-pink-500/20"
+                            className="bg-ikonga-gradient px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-pink-500/20 text-center"
                         >
                             Ajouter du contenu
                         </Link>
                         <Link
                             href="/admin/menus/new"
-                            className="bg-slate-800 px-6 py-3 rounded-2xl font-bold text-sm border border-white/5"
+                            className="bg-slate-800 px-6 py-3 rounded-2xl font-bold text-sm border border-white/5 text-center"
                         >
                             Créer un menu
                         </Link>
