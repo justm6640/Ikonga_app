@@ -20,6 +20,19 @@ export function calculateBMI(weightKg: number, heightCm: number): BMIResult {
     return { value, status: "Obésité", color: "text-red-500" }
 }
 
+// ALIAS for IMC (Indice de Masse Corporelle)
+export const calculateIMC = calculateBMI
+
+export function calculatePISI(heightCm: number, gender: Gender): number {
+    if (!heightCm) return 0
+    // Lorentz Formula for Ideal Weight (Poids Idéal Santé Ikonga)
+    // MALE: (H - 100) - ((H - 150) / 4)
+    // FEMALE: (H - 100) - ((H - 150) / 2)
+    const factor = gender === Gender.MALE ? 4 : 2
+    const pisi = (heightCm - 100) - ((heightCm - 150) / factor)
+    return Math.round(pisi)
+}
+
 export function calculateBodyFat(bmi: number, age: number, gender: Gender): number {
     if (!bmi || !age) return 0
 
@@ -44,3 +57,6 @@ export function getAge(birthDate: Date | null): number {
     if (!birthDate) return 30 // Default if unknown
     return differenceInYears(new Date(), new Date(birthDate))
 }
+
+// ALIAS for calculateAge
+export const calculateAge = getAge

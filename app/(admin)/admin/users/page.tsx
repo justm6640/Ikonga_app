@@ -4,13 +4,14 @@ import { Input } from "@/components/ui/input"
 import { Search, UserPlus } from "lucide-react"
 
 interface AdminUsersPageProps {
-    searchParams: {
+    searchParams: Promise<{
         q?: string
-    }
+    }>
 }
 
 export default async function AdminUsersPage({ searchParams }: AdminUsersPageProps) {
-    const query = searchParams.q || ""
+    const resolvedSearchParams = await searchParams
+    const query = resolvedSearchParams.q || ""
     const users = await getUsers(query)
 
     return (
