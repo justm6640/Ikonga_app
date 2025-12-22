@@ -88,7 +88,7 @@ export function HowItWorks() {
                     className="absolute left-1/2 top-0 bottom-0 w-px bg-ikonga-gradient -translate-x-1/2 origin-top hidden md:block"
                 />
 
-                <div className="relative space-y-40 md:space-y-0">
+                <div className="relative space-y-24 md:space-y-0">
                     {PHASES.map((phase, idx) => (
                         <div key={phase.id} className={`relative flex flex-col md:flex-row items-center gap-12 md:py-24 ${idx % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
                             {/* Desktop Bubble Anchor */}

@@ -35,7 +35,7 @@ export function HeroSection() {
                             <Sparkles size={16} className="text-ikonga-pink" />
                             <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Le coaching nouvelle génération</span>
                         </div>
-                        <h1 className="text-5xl md:text-7xl xl:text-8xl font-serif text-slate-950 leading-[1.05] tracking-tight">
+                        <h1 className="text-4xl sm:text-5xl md:text-7xl xl:text-8xl font-serif text-slate-950 leading-[1.05] tracking-tight">
                             La Métamorphose,<br />
                             <span className="italic bg-ikonga-gradient bg-clip-text text-transparent">sans la frustration.</span>
                         </h1>
