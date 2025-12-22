@@ -1,8 +1,29 @@
-export default function Home() {
+import { Navbar, Footer } from "@/components/landing/LandingLayout"
+import { HeroSection } from "@/components/landing/HeroSection"
+import { BentoFeatures } from "@/components/landing/BentoFeatures"
+import { ScrollShowcase } from "@/components/landing/ScrollShowcase"
+import { TestimonialsMarquee } from "@/components/landing/TestimonialsMarquee"
+
+export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold">IKONGA</h1>
-      <p className="mt-4 text-xl text-muted-foreground">Bienvenue sur l'application.</p>
-    </div>
-  );
+    <main className="relative bg-white selection:bg-pink-100 selection:text-pink-600 font-sans antialiased">
+      <Navbar />
+
+      <HeroSection />
+
+      <div id="features">
+        <BentoFeatures />
+      </div>
+
+      <div id="showcase">
+        <ScrollShowcase />
+      </div>
+
+      <div id="testimonials">
+        <TestimonialsMarquee />
+      </div>
+
+      <Footer />
+    </main>
+  )
 }

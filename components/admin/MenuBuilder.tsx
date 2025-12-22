@@ -25,7 +25,7 @@ import { Coffee, Salad, Apple, Soup } from "lucide-react"
 
 const formSchema = z.object({
     title: z.string().min(1, "Le titre est requis"),
-    isPremium: z.boolean().default(false),
+    isPremium: z.boolean(),
     phaseCompat: z.array(z.string()).min(1, "Sélectionnez au moins une phase"),
     breakfast: z.string().min(1, "Petit-déjeuner requis"),
     lunch: z.string().min(1, "Déjeuner requis"),
@@ -46,7 +46,7 @@ export function MenuBuilder() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: "",
-            isPremium: false as boolean,
+            isPremium: false,
             phaseCompat: [],
             breakfast: "",
             lunch: "",
@@ -55,11 +55,11 @@ export function MenuBuilder() {
         },
     })
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    const onSubmit = async (values: any) => {
         const formData = new FormData()
         formData.append("title", values.title)
-        formData.append("isPremium", values.isPremium.toString())
-        values.phaseCompat.forEach(phase => formData.append("phaseCompat", phase))
+        formData.append("isPremium", String(values.isPremium))
+        values.phaseCompat.forEach((phase: string) => formData.append("phaseCompat", phase))
         formData.append("breakfast", values.breakfast)
         formData.append("lunch", values.lunch)
         formData.append("snack", values.snack)
