@@ -1,22 +1,23 @@
-import { Navbar, Footer } from "@/components/landing/LandingLayout"
+import { FloatingNavbar } from "@/components/landing/FloatingNavbar"
+import { Footer } from "@/components/landing/Footer"
 import { HeroSection } from "@/components/landing/HeroSection"
-import { BentoFeatures } from "@/components/landing/BentoFeatures"
-import { ScrollShowcase } from "@/components/landing/ScrollShowcase"
+import { BentoMethod } from "@/components/landing/BentoMethod"
+import { HowItWorks } from "@/components/landing/HowItWorks"
 import { TestimonialsMarquee } from "@/components/landing/TestimonialsMarquee"
 
 export default function LandingPage() {
   return (
-    <main className="relative bg-white selection:bg-pink-100 selection:text-pink-600 font-sans antialiased">
-      <Navbar />
+    <main className="relative bg-white selection:bg-pink-100 selection:text-pink-600 font-sans antialiased overflow-x-hidden">
+      <FloatingNavbar />
 
       <HeroSection />
 
-      <div id="features">
-        <BentoFeatures />
+      <div id="method">
+        <BentoMethod />
       </div>
 
-      <div id="showcase">
-        <ScrollShowcase />
+      <div id="how-it-works">
+        <HowItWorks />
       </div>
 
       <div id="testimonials">
