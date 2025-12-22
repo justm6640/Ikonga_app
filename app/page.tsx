@@ -25,7 +25,7 @@ export default function LandingPage() {
         <TestimonialsMarquee />
       </div>
 
-      <div id="pricing">
+      <div id="tarifs">
         <PricingSection />
       </div>
 
