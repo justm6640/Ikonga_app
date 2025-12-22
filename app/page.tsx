@@ -4,6 +4,7 @@ import { HeroSection } from "@/components/landing/HeroSection"
 import { BentoMethod } from "@/components/landing/BentoMethod"
 import { HowItWorks } from "@/components/landing/HowItWorks"
 import { TestimonialsMarquee } from "@/components/landing/TestimonialsMarquee"
+import { PricingSection } from "@/components/landing/PricingSection"
 
 export default function LandingPage() {
   return (
@@ -22,6 +23,10 @@ export default function LandingPage() {
 
       <div id="testimonials">
         <TestimonialsMarquee />
+      </div>
+
+      <div id="pricing">
+        <PricingSection />
       </div>
 
       <Footer />

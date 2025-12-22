@@ -22,6 +22,7 @@ export function FloatingNavbar() {
                 <div className="hidden md:flex items-center gap-10">
                     <Link href="#method" className="text-sm font-medium text-slate-500 hover:text-ikonga-pink transition-colors">La Méthode</Link>
                     <Link href="#how-it-works" className="text-sm font-medium text-slate-500 hover:text-ikonga-pink transition-colors">Les Phases</Link>
+                    <Link href="#pricing" className="text-sm font-medium text-slate-500 hover:text-ikonga-pink transition-colors">Tarifs</Link>
                     <Link href="#testimonials" className="text-sm font-medium text-slate-500 hover:text-ikonga-pink transition-colors">Témoignages</Link>
                 </div>
 
