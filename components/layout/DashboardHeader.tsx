@@ -1,12 +1,10 @@
-import { Bell } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import prisma from "@/lib/prisma";
 import { StreakCounter } from "@/components/gamification/StreakCounter";
 import { updateStreak } from "@/lib/actions/gamification";
-
 import { User } from "@prisma/client";
+import { NotificationsPopover } from "../dashboard/NotificationsPopover";
+import Link from "next/link";
 
 interface DashboardHeaderProps {
     user: User;
@@ -16,10 +14,27 @@ export async function DashboardHeader({ user }: DashboardHeaderProps) {
     if (!user) return null;
 
     // Trigger streak update on visit (Server Action)
-    // We keep this to ensure streaks increment correctly on daily visits
     await updateStreak(user.id);
 
-    const userName = user.firstName || "Rosy";
+    // Fetch user with notifications specifically for the header
+    const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+            id: true,
+            firstName: true,
+            currentStreak: true,
+            notifications: {
+                orderBy: { createdAt: 'desc' },
+                take: 5
+            }
+        }
+    });
+
+    if (!dbUser) return null;
+
+    const userName = dbUser.firstName || "Rosy";
+    const notifications = dbUser.notifications || [];
+    const currentStreak = dbUser.currentStreak || 0;
 
     return (
         <header className="flex h-20 items-center justify-between px-6 py-4 bg-background/50 backdrop-blur-sm sticky top-0 z-40">
@@ -36,20 +51,19 @@ export async function DashboardHeader({ user }: DashboardHeaderProps) {
             {/* Right: Actions */}
             <div className="flex items-center gap-2 sm:gap-4">
                 {/* Streak Counter */}
-                <StreakCounter streak={(user as any).currentStreak || 0} />
+                <StreakCounter streak={currentStreak} />
 
-                {/* Notifications */}
-                <Button variant="ghost" size="icon" className="rounded-full relative">
-                    <Bell size={20} className="text-muted-foreground" />
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-ikonga-orange rounded-full border border-background" />
-                </Button>
+                {/* Notifications Popover (Interactive) */}
+                <NotificationsPopover notifications={notifications as any} />
 
-                {/* User Avatar */}
-                <Avatar className="h-10 w-10 border-2 border-background shadow-sm cursor-pointer hover:opacity-80 transition-opacity">
-                    <AvatarFallback className="bg-ikonga-gradient text-white font-bold">
-                        {userName.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                </Avatar>
+                {/* User Avatar - Redirects to Profile */}
+                <Link href="/profile">
+                    <Avatar className="h-10 w-10 border-2 border-background shadow-sm cursor-pointer hover:ring-2 hover:ring-ikonga-pink/20 transition-all">
+                        <AvatarFallback className="bg-ikonga-gradient text-white font-bold">
+                            {userName.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
+                </Link>
             </div>
         </header>
     );
