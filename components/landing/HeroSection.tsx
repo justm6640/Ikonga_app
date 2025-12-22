@@ -59,8 +59,7 @@ export function HeroSection() {
                         transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
                         className="text-lg md:text-xl text-slate-500 max-w-xl lg:mx-0 mx-auto leading-relaxed font-sans"
                     >
-                        Nutrition, Fitness, Bien-être. La méthode complète et holistique
-                        conçue pour révéler votre éclat naturel et durablement.
+                        Nutrition, Fitness, Bien-être. Révélez votre éclat intérieur.
                     </motion.p>
 
                     <motion.div
