@@ -45,14 +45,14 @@ export function PillarsGrid({ nutrition, fitness, wellness, beauty }: PillarsGri
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Nutrition Pillar (Full Width or Special Render) */}
-            <div className="md:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Nutrition Pillar (Full Width on mobile) */}
+            <div className="w-full">
                 <DailyMenuCard menu={nutrition} />
             </div>
 
             {/* Other Pillars Sidebar/Grid */}
-            <div className="grid grid-cols-2 gap-4 h-fit">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-4 h-fit">
                 {mainPillars.map((pillar) => {
                     const Content = (
                         <Card

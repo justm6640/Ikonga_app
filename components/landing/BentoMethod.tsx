@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { ChefHat, Activity, Moon, Sparkles, ArrowUpRight } from "lucide-react"
+import { NodeAnimation } from "./NodeAnimation"
 
 const PILLARS = [
     {
@@ -11,7 +12,7 @@ const PILLARS = [
         icon: ChefHat,
         color: "from-pink-50 to-rose-50 text-ikonga-pink",
         label: "Pillar 01",
-        span: "lg:col-span-2 lg:row-span-2",
+        span: "lg:col-span-2",
         iconBg: "bg-ikonga-pink/10",
         img: null
     },
@@ -22,7 +23,7 @@ const PILLARS = [
         icon: Activity,
         color: "from-orange-50 to-amber-50 text-orange-600",
         label: "Pillar 02",
-        span: "lg:col-span-1 lg:row-span-1",
+        span: "lg:col-span-1",
         iconBg: "bg-orange-600/10"
     },
     {
@@ -32,7 +33,7 @@ const PILLARS = [
         icon: Moon,
         color: "from-indigo-50 to-purple-50 text-indigo-600",
         label: "Pillar 03",
-        span: "lg:col-span-1 lg:row-span-1",
+        span: "lg:col-span-1",
         iconBg: "bg-indigo-600/10"
     },
     {
@@ -42,14 +43,15 @@ const PILLARS = [
         icon: Sparkles,
         color: "from-rose-50 to-pink-50 text-rose-500",
         label: "Pillar 04",
-        span: "lg:col-span-2 lg:row-span-1",
+        span: "lg:col-span-2",
         iconBg: "bg-rose-500/10"
     }
 ]
 
 export function BentoMethod() {
     return (
-        <section id="method" className="py-32 bg-white px-4 relative">
+        <section id="method" className="py-32 bg-white px-4 relative overflow-hidden">
+            <NodeAnimation />
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
                     <div className="space-y-4">
@@ -79,7 +81,7 @@ export function BentoMethod() {
                     </motion.p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-rows-auto lg:grid-rows-2 gap-8 h-auto lg:h-[700px]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {PILLARS.map((pillar, idx) => (
                         <motion.div
                             key={pillar.title}

@@ -90,7 +90,7 @@ export default async function DashboardPage() {
     const currentWeight = lastWeightLog?.weight || dbUser.startWeight || 0;
 
     return (
-        <div className="flex flex-col gap-6 max-w-xl mx-auto md:max-w-4xl">
+        <div className="flex flex-col gap-6 w-full lg:max-w-4xl mx-auto">
             {/* Analysis Widget (AI) */}
             <AnalysisWidget analysis={analysisData} />
 

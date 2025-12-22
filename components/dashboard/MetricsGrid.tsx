@@ -69,7 +69,7 @@ export function MetricsGrid({ user, currentWeight, lastLog }: MetricsGridProps) 
     ]
 
     return (
-        <div className="grid grid-cols-3 gap-2 md:gap-4">
+        <div className="grid grid-cols-3 gap-1.5 md:gap-4">
             {metrics.map((m, idx) => (
                 <motion.div
                     key={m.label}
@@ -77,16 +77,17 @@ export function MetricsGrid({ user, currentWeight, lastLog }: MetricsGridProps) 
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
                 >
-                    <Card className="border-none shadow-xl shadow-slate-100/50 rounded-[2.5rem] bg-white overflow-hidden hover:shadow-2xl transition-shadow duration-500">
-                        <CardContent className="p-2 md:p-4 flex flex-col items-center">
+                    <Card className="border-none shadow-xl shadow-slate-100/50 rounded-[2rem] md:rounded-[2.5rem] bg-white overflow-hidden hover:shadow-2xl transition-shadow duration-500">
+                        <CardContent className="p-1 md:p-4 flex flex-col items-center">
                             <AnimatedGauge
                                 value={m.value}
                                 max={m.max}
                                 label={m.label}
                                 unit={m.unit}
                                 color={m.color}
+                                className="p-1 md:p-4"
                             />
-                            <p className={cn("text-[10px] md:text-[11px] font-black uppercase tracking-tight opacity-50 -mt-2", m.color)}>
+                            <p className={cn("text-[8px] md:text-[11px] font-black uppercase tracking-tight opacity-50 -mt-1 md:-mt-2 mb-2", m.color)}>
                                 {m.status}
                             </p>
                         </CardContent>
