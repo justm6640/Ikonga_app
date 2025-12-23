@@ -7,6 +7,7 @@ import Link from "next/link";
 interface PillarItem {
     title: string;
     content: any;
+    phase?: string;
 }
 
 interface PillarsGridProps {

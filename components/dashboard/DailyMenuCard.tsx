@@ -4,8 +4,8 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Coffee, Salad, Apple, Soup, ChefHat } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getRecipeByTitle } from "@/lib/actions/recipes"
-import { RecipeSheet } from "./RecipeSheet"
+import { RecipeModal } from "./RecipeModal"
+import { getRecipeAction } from "@/lib/actions/recipe"
 import { toast } from "sonner"
 import Link from "next/link"
 
@@ -13,12 +13,13 @@ interface DailyMenuCardProps {
     nutrition: {
         title: string
         content: any
+        phase?: string
     } | null
 }
 
 export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
     const [selectedRecipe, setSelectedRecipe] = useState<any>(null)
-    const [isSheetOpen, setIsSheetOpen] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
     if (!nutrition) {
@@ -36,7 +37,7 @@ export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
         )
     }
 
-    const { content } = nutrition
+    const { content, phase = "DETOX" } = nutrition
 
     const meals = [
         { id: "breakfast", label: "Matin", icon: Coffee, text: content.breakfast, color: "text-ikonga-pink", bg: "bg-ikonga-pink/5" },
@@ -50,15 +51,17 @@ export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
 
         setIsLoading(true)
         try {
-            const recipe = await getRecipeByTitle(mealText)
-            if (recipe) {
-                setSelectedRecipe(recipe)
-                setIsSheetOpen(true)
+            // New logic: Get or Generate AI Recipe
+            const result = await getRecipeAction(mealText, phase)
+
+            if (result.success && result.data) {
+                setSelectedRecipe(result.data)
+                setIsModalOpen(true)
             } else {
-                toast.info("Aucune fiche recette détaillée pour ce repas.")
+                toast.error("Un petit souci technique... l'IA de Rosy se repose. Réessayez plus tard !")
             }
         } catch (error) {
-            toast.error("Erreur lors de la récupération de la recette.")
+            toast.error("Oups ! Impossible de charger la recette.")
         } finally {
             setIsLoading(false)
         }
@@ -107,9 +110,9 @@ export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
                 </div>
             </CardContent>
 
-            <RecipeSheet
-                isOpen={isSheetOpen}
-                onClose={() => setIsSheetOpen(false)}
+            <RecipeModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
                 recipe={selectedRecipe}
             />
         </Card>

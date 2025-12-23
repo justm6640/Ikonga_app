@@ -98,7 +98,7 @@ export default async function DashboardPage() {
     const todaysMenu = (weeklyPlan?.content as any)?.[currentDayKey] || null;
 
     pillarsData = {
-        nutrition: todaysMenu ? { title: "Mon Menu IA", content: todaysMenu } : (menu ? { title: menu.title, content: menu.content } : null),
+        nutrition: todaysMenu ? { title: "Mon Menu IA", content: todaysMenu, phase: activePhaseType } : (menu ? { title: menu.title, content: menu.content, phase: activePhaseType } : null),
         fitness: fitness ? { title: fitness.title } : null,
         wellness: wellness ? { title: wellness.title } : null,
         beauty: beauty ? { title: beauty.title } : null
