@@ -70,55 +70,55 @@ export function RecipeEditorModal({ isOpen, onClose, recipe }: RecipeEditorModal
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto border-none rounded-[2.5rem] bg-white p-8">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tighter">
+            <DialogContent className="max-w-3xl w-full h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto border-none sm:rounded-[2.5rem] bg-white p-6 sm:p-8">
+                <DialogHeader className="mt-6 sm:mt-0">
+                    <DialogTitle className="text-xl sm:text-2xl font-serif font-black text-slate-900 uppercase tracking-tighter">
                         Éditer la Recette
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-8 mt-6">
+                <div className="space-y-6 sm:space-y-8 mt-6">
                     {/* Basic Info */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-slate-400">Nom du Plat</Label>
+                            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Nom du Plat</Label>
                             <Input
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                className="rounded-2xl border-slate-100 bg-slate-50"
+                                className="h-11 sm:h-10 rounded-xl sm:rounded-2xl border-slate-100 bg-slate-50"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-slate-400">Phase</Label>
+                            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Phase</Label>
                             <Input
                                 value={formData.phase}
                                 onChange={(e) => setFormData({ ...formData, phase: e.target.value })}
-                                className="rounded-2xl border-slate-100 bg-slate-50"
+                                className="h-11 sm:h-10 rounded-xl sm:rounded-2xl border-slate-100 bg-slate-50"
                             />
                         </div>
                     </div>
 
                     {/* Macros */}
-                    <div className="grid grid-cols-5 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-slate-400">Cal</Label>
-                            <Input type="number" value={formData.calories} onChange={(e) => setFormData({ ...formData, calories: parseInt(e.target.value) })} />
+                            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Cal</Label>
+                            <Input type="number" className="h-11 sm:h-10 rounded-xl" value={formData.calories} onChange={(e) => setFormData({ ...formData, calories: parseInt(e.target.value) })} />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-slate-400">Prot</Label>
-                            <Input type="number" value={formData.protein} onChange={(e) => setFormData({ ...formData, protein: parseInt(e.target.value) })} />
+                            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Prot</Label>
+                            <Input type="number" className="h-11 sm:h-10 rounded-xl" value={formData.protein} onChange={(e) => setFormData({ ...formData, protein: parseInt(e.target.value) })} />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-slate-400">Gluc</Label>
-                            <Input type="number" value={formData.carbs} onChange={(e) => setFormData({ ...formData, carbs: parseInt(e.target.value) })} />
+                            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Gluc</Label>
+                            <Input type="number" className="h-11 sm:h-10 rounded-xl" value={formData.carbs} onChange={(e) => setFormData({ ...formData, carbs: parseInt(e.target.value) })} />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-slate-400">Lip</Label>
-                            <Input type="number" value={formData.fat} onChange={(e) => setFormData({ ...formData, fat: parseInt(e.target.value) })} />
+                            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Lip</Label>
+                            <Input type="number" className="h-11 sm:h-10 rounded-xl" value={formData.fat} onChange={(e) => setFormData({ ...formData, fat: parseInt(e.target.value) })} />
                         </div>
-                        <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-slate-400">Temps</Label>
-                            <Input type="number" value={formData.prepTime} onChange={(e) => setFormData({ ...formData, prepTime: parseInt(e.target.value) })} />
+                        <div className="col-span-2 sm:col-span-1 space-y-2">
+                            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Temps</Label>
+                            <Input type="number" className="h-11 sm:h-10 rounded-xl" value={formData.prepTime} onChange={(e) => setFormData({ ...formData, prepTime: parseInt(e.target.value) })} />
                         </div>
                     </div>
 

@@ -32,37 +32,37 @@ export function RecipeModal({ isOpen, onClose, recipe }: RecipeModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl p-0 border-none rounded-[2.5rem] overflow-hidden bg-white max-h-[90vh]">
-                <ScrollArea className="h-full max-h-[90vh]">
+            <DialogContent className="max-w-2xl p-0 border-none sm:rounded-[2.5rem] overflow-hidden bg-white h-full sm:h-auto sm:max-h-[90vh] w-full">
+                <ScrollArea className="h-full max-h-screen sm:max-h-[90vh]">
                     {/* Header Section */}
-                    <div className="p-8 pb-4">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Badge variant="outline" className="rounded-full px-4 py-1 border-ikonga-pink text-ikonga-pink font-bold bg-ikonga-pink/5 uppercase tracking-widest text-[10px]">
+                    <div className="p-6 sm:p-8 pb-4 mt-8 sm:mt-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-4">
+                            <Badge variant="outline" className="rounded-full px-4 py-1 border-ikonga-pink text-ikonga-pink font-bold bg-ikonga-pink/5 uppercase tracking-widest text-[9px] sm:text-[10px]">
                                 {recipe.phase}
                             </Badge>
-                            <Badge variant="outline" className="rounded-full px-4 py-1 border-slate-200 text-slate-500 font-bold bg-slate-50 uppercase tracking-widest text-[10px]">
+                            <Badge variant="outline" className="rounded-full px-4 py-1 border-slate-200 text-slate-500 font-bold bg-slate-50 uppercase tracking-widest text-[9px] sm:text-[10px]">
                                 <Clock size={12} className="mr-1" />
                                 {recipe.prepTime || 15} min
                             </Badge>
                         </div>
 
-                        <DialogTitle className="text-3xl font-serif font-black text-slate-900 leading-tight mb-6">
+                        <DialogTitle className="text-2xl sm:text-3xl font-serif font-black text-slate-900 leading-tight mb-6 uppercase tracking-tighter">
                             {recipe.name}
                         </DialogTitle>
 
                         {/* Macros Grid */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:grid-cols-4 sm:gap-3 mb-8">
                             {macros.map((macro) => (
-                                <div key={macro.label} className={`p-4 rounded-[2rem] ${macro.bg} flex flex-col items-center justify-center text-center border border-white/50 shadow-sm`}>
-                                    <macro.icon size={18} className={`${macro.color} mb-2`} />
-                                    <span className="text-[10px] uppercase font-black text-slate-400 leading-none mb-1">{macro.label}</span>
-                                    <span className={`font-black text-sm ${macro.color}`}>{macro.value}</span>
+                                <div key={macro.label} className={`p-3 sm:p-4 rounded-2xl sm:rounded-[2rem] ${macro.bg} flex flex-col items-center justify-center text-center border border-white/50 shadow-sm`}>
+                                    <macro.icon size={16} className={`${macro.color} mb-1 sm:mb-2`} />
+                                    <span className="text-[9px] sm:text-[10px] uppercase font-black text-slate-400 leading-none mb-1">{macro.label}</span>
+                                    <span className={`font-black text-xs sm:text-sm ${macro.color}`}>{macro.value}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    <div className="px-8 pb-12 space-y-10">
+                    <div className="px-6 sm:px-8 pb-12 space-y-10">
                         {/* Ingredients Section */}
                         <section className="space-y-4">
                             <div className="flex items-center gap-3 mb-6">
