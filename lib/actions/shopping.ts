@@ -31,18 +31,22 @@ export async function getShoppingList() {
 
         const currentPhase = dbUser.phases?.[0]?.type || "DETOX"
 
-        // 2. Fetch the active menu for this phase
-        const activeMenu = await prisma.menu.findFirst({
+        // 2. Fetch the WeeklyPlan for this user for the current week
+        const { startOfWeek } = await import("date-fns");
+        const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+
+        const weeklyPlan = await prisma.weeklyPlan.findUnique({
             where: {
-                phaseCompat: {
-                    has: currentPhase
+                userId_weekStart: {
+                    userId: dbUser.id,
+                    weekStart: weekStart
                 }
             }
-        })
+        });
 
         // 3. Fetch recipes and aggregate ingredients
         const recipes = await prisma.recipe.findMany()
-        const allIngredients = recipes.flatMap(recipe => recipe.ingredients)
+        const allIngredients = recipes.flatMap(recipe => recipe.ingredients as string[])
 
         // Normalize and deduplicate
         const uniqueIngredients = Array.from(new Set(
@@ -52,7 +56,7 @@ export async function getShoppingList() {
         return {
             ingredients: uniqueIngredients,
             phaseName: currentPhase,
-            menu: activeMenu,
+            weeklyPlan: weeklyPlan,
             error: null
         }
     } catch (error) {

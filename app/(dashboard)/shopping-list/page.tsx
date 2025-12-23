@@ -1,6 +1,6 @@
 import { getShoppingList } from "@/lib/actions/shopping"
 import { ShoppingListView } from "@/components/dashboard/ShoppingListView"
-import { DailyMenuCard } from "@/components/dashboard/DailyMenuCard"
+import { WeeklyMenuGrid } from "@/components/dashboard/WeeklyMenuGrid"
 import { Lightbulb, Sparkles } from "lucide-react"
 
 export const metadata = {
@@ -46,44 +46,45 @@ export default async function ShoppingListPage() {
 
             {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-6 py-12">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div className="flex flex-col gap-12">
 
-                    {/* Left Column: Menu Inspiration (5 cols) */}
-                    <div className="lg:col-span-5 space-y-6">
-                        {/* Menu Card with Premium Shadow */}
-                        <div className="transform transition-all duration-300 hover:scale-[1.01]">
-                            <div className="rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/60 border border-slate-100/40">
-                                <DailyMenuCard menu={data.menu} />
+                    {/* Top Section: Weekly Menu (Full Width) */}
+                    <section className="space-y-6">
+                        <WeeklyMenuGrid
+                            weeklyPlan={data.weeklyPlan}
+                            phase={data.phaseName}
+                        />
+                    </section>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mt-8 pt-12 border-t border-slate-100">
+                        {/* Left Column: Action Zone / Shopping List (7 cols) */}
+                        <div className="lg:col-span-8">
+                            <div className="rounded-[2.5rem] overflow-hidden shadow-xl shadow-slate-200/60 border border-slate-100/40 transform transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/70">
+                                <ShoppingListView
+                                    initialIngredients={data.ingredients as any}
+                                    phaseName={data.phaseName}
+                                />
                             </div>
                         </div>
 
-                        {/* Coach Tip Card - Premium Sport Style */}
-                        <div className="group rounded-[2rem] bg-white/60 backdrop-blur-sm border-2 border-ikonga-pink/20 p-8 shadow-lg shadow-ikonga-pink/5 hover:shadow-xl hover:shadow-ikonga-pink/10 transition-all duration-300">
-                            <div className="flex items-start gap-5">
-                                {/* Icon with Glow */}
-                                <div className="shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-ikonga-pink to-ikonga-orange flex items-center justify-center shadow-lg shadow-ikonga-pink/30 group-hover:shadow-ikonga-pink/50 transition-shadow">
-                                    <Lightbulb size={26} className="text-white" strokeWidth={2} />
-                                </div>
+                        {/* Right Column: Coach Tip (4 cols) */}
+                        <div className="lg:col-span-4 space-y-6">
+                            <div className="group rounded-[2rem] bg-white/60 backdrop-blur-sm border-2 border-ikonga-pink/20 p-8 shadow-lg shadow-ikonga-pink/5 hover:shadow-xl hover:shadow-ikonga-pink/10 transition-all duration-300">
+                                <div className="flex flex-col items-start gap-5">
+                                    <div className="shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-ikonga-pink to-ikonga-orange flex items-center justify-center shadow-lg shadow-ikonga-pink/30 group-hover:shadow-ikonga-pink/50 transition-shadow">
+                                        <Lightbulb size={26} className="text-white" strokeWidth={2} />
+                                    </div>
 
-                                <div className="flex-1">
-                                    <h3 className="text-lg font-serif font-normal text-slate-900 mb-2 tracking-tight">
-                                        Conseil Expert
-                                    </h3>
-                                    <p className="text-sm text-slate-600 leading-relaxed font-light">
-                                        Vérifiez votre menu avant de faire les courses. Supprimez de la liste ce que vous avez déjà en stock pour optimiser vos achats.
-                                    </p>
+                                    <div>
+                                        <h3 className="text-xl font-serif font-black text-slate-900 mb-2 tracking-tight uppercase">
+                                            Conseil de Rosy
+                                        </h3>
+                                        <p className="text-sm text-slate-600 leading-relaxed font-light">
+                                            Vérifiez votre menu hebdomadaire avant de partir en courses. Cochez ce que vous possédez déjà pour ne rien acheter en trop et rester focalisée sur votre objectif !
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Right Column: Action Zone (7 cols) */}
-                    <div className="lg:col-span-7">
-                        <div className="rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/60 border border-slate-100/40 transform transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/70">
-                            <ShoppingListView
-                                initialIngredients={data.ingredients as any}
-                                phaseName={data.phaseName}
-                            />
                         </div>
                     </div>
                 </div>
