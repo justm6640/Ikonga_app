@@ -3,7 +3,6 @@ import withPWA from "@ducanh2912/next-pwa";
 
 const config: NextConfig = {
   /* config options here */
-  output: "standalone",
   eslint: {
     ignoreDuringBuilds: true,
   },
