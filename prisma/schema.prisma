@@ -33,6 +33,7 @@ model User {
   updatedAt         DateTime         @updatedAt
   isPhaseManual     Boolean          @default(false)
   manualPhaseReason String?
+  hasCompletedOnboarding Boolean @default(false)
   channels          ChannelMember[]
   contentLogs       ContentLog[]
   dailyLogs         DailyLog[]

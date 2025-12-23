@@ -22,6 +22,10 @@ export const questionnaireSchema = z.object({
     startWeight: z.number({ invalid_type_error: "Indique ton poids actuel." })
         .min(30, "Le poids doit être supérieur à 30 kg."),
     targetWeight: z.number().optional(),
+    programStartDate: z.date({
+        required_error: "Choisis ta date de début de cure.",
+        invalid_type_error: "Format de date invalide.",
+    }).min(new Date(new Date().setHours(0, 0, 0, 0)), "La date ne peut pas être dans le passé."),
 
     // 2. NUTRITION
     allergies: z.array(z.string()).default([]),
@@ -52,6 +56,7 @@ export const stepGeneralSchema = questionnaireSchema.pick({
     heightCm: true,
     startWeight: true,
     targetWeight: true,
+    programStartDate: true,
 });
 
 // Partial schema for Step 2 (Nutrition)

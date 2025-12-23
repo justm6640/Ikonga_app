@@ -64,10 +64,12 @@ export async function submitOnboarding(data: QuestionnaireData) {
                     startWeight: data.startWeight,
                     targetWeight: finalTargetWeight,
                     pisi: pisi,
+                    startDate: data.programStartDate || new Date(),
                 }
             });
 
             // B. Create Initial Phase (DETOX)
+            const startDate = data.programStartDate || new Date();
             const existingPhase = await tx.userPhase.findFirst({
                 where: { userId: prismaUser!.id, isActive: true, type: "DETOX" }
             });
@@ -77,8 +79,8 @@ export async function submitOnboarding(data: QuestionnaireData) {
                     data: {
                         userId: prismaUser!.id,
                         type: "DETOX",
-                        startDate: new Date(),
-                        plannedEndDate: addDays(new Date(), 14),
+                        startDate: startDate,
+                        plannedEndDate: addDays(startDate, 14),
                         isActive: true
                     }
                 });
@@ -122,12 +124,22 @@ export async function submitOnboarding(data: QuestionnaireData) {
             }
         });
 
+        // 5. Finalize Onboarding & Generate First Menu
+        const { generateUserWeeklyPlan } = await import("@/lib/ai/menu-generator");
+
+        await Promise.all([
+            prisma.user.update({
+                where: { id: prismaUser!.id },
+                data: { hasCompletedOnboarding: true }
+            }),
+            generateUserWeeklyPlan(prismaUser!.id)
+        ]);
+
         revalidatePath("/dashboard")
         return { success: true, nextPath: "/dashboard" }
 
     } catch (error) {
         console.error("Erreur onboarding détaillée:", error)
-        // Return explicit error message for debugging
         const errorMessage = error instanceof Error ? error.message : "Une erreur inconnue est survenue";
         return { success: false, error: errorMessage }
     }

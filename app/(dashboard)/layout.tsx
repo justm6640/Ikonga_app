@@ -22,6 +22,13 @@ export default async function DashboardLayout({
     const tier = user.subscriptionTier ?? null;
     const role = user.role ?? null;
 
+    // 🚀 NEW: Reward/Redirect logic - If onboarding is NOT completed, force redirect
+    // (Except for ADMINs who might want to bypass for testing - but let's be strict for now)
+    if (!user.hasCompletedOnboarding && role !== 'ADMIN') {
+        console.log(`[DashboardLayout] User ${user.id} hasn't completed onboarding - redirecting`);
+        redirect("/onboarding");
+    }
+
     return (
         <SubscriptionProvider tier={tier} role={role}>
             <div className="flex h-screen bg-background overflow-hidden font-sans">

@@ -39,6 +39,8 @@ export function StepGeneral({ onNext }: StepGeneralProps) {
             heightCm: data.heightCm || undefined,
             startWeight: data.startWeight || undefined,
             targetWeight: data.targetWeight || undefined,
+            // @ts-ignore
+            programStartDate: data.programStartDate ? new Date(data.programStartDate) : new Date(),
         },
     })
 
@@ -186,19 +188,25 @@ export function StepGeneral({ onNext }: StepGeneralProps) {
 
                 <FormField
                     control={form.control}
-                    name="targetWeight"
+                    name="programStartDate"
                     render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Objectif (optionnel)</FormLabel>
+                        <FormItem className="flex flex-col border-2 border-ikonga-pink/20 p-4 rounded-2xl bg-pink-50/30">
+                            <FormLabel className="text-ikonga-pink font-bold flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-ikonga-pink animate-pulse" />
+                                Quand souhaites-tu commencer ?
+                            </FormLabel>
                             <FormControl>
                                 <Input
-                                    type="number"
-                                    placeholder="60"
-                                    className="h-12 text-lg"
-                                    {...field}
-                                    onChange={e => field.onChange(e.target.valueAsNumber)}
+                                    type="date"
+                                    className="h-12 text-lg w-full bg-white border-none shadow-sm mt-2"
+                                    min={new Date().toISOString().split('T')[0]}
+                                    value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                                    onChange={(e) => field.onChange(e.target.valueAsDate)}
                                 />
                             </FormControl>
+                            <p className="text-[10px] text-slate-400 mt-2 italic">
+                                * Ton programme et tes menus s'adapteront à cette date.
+                            </p>
                             <FormMessage />
                         </FormItem>
                     )}
