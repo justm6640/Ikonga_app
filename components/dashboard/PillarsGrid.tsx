@@ -48,7 +48,7 @@ export function PillarsGrid({ nutrition, fitness, wellness, beauty }: PillarsGri
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Nutrition Pillar (Full Width or Special Render) */}
             <div className="md:col-span-1">
-                <DailyMenuCard menu={nutrition} />
+                <DailyMenuCard nutrition={nutrition} />
             </div>
 
             {/* Other Pillars Sidebar/Grid */}

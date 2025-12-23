@@ -7,32 +7,36 @@ import { cn } from "@/lib/utils"
 import { getRecipeByTitle } from "@/lib/actions/recipes"
 import { RecipeSheet } from "./RecipeSheet"
 import { toast } from "sonner"
+import Link from "next/link"
 
 interface DailyMenuCardProps {
-    menu: {
+    nutrition: {
         title: string
         content: any
     } | null
 }
 
-export function DailyMenuCard({ menu }: DailyMenuCardProps) {
+export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
     const [selectedRecipe, setSelectedRecipe] = useState<any>(null)
     const [isSheetOpen, setIsSheetOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
-    if (!menu) {
+    if (!nutrition) {
         return (
-            <Card className="rounded-[2.5rem] border-dashed border-slate-200 bg-slate-50/50 shadow-none h-full flex flex-col items-center justify-center p-8 text-center">
-                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                    <ChefHat className="text-slate-400" size={32} />
+            <Card className="rounded-[2.5rem] border-dashed border-ikonga-pink/20 bg-ikonga-pink/[0.02] shadow-none h-full flex flex-col items-center justify-center p-8 text-center group hover:bg-ikonga-pink/[0.04] transition-colors">
+                <div className="w-16 h-16 rounded-full bg-ikonga-pink/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <ChefHat className="text-ikonga-pink" size={32} />
                 </div>
-                <h3 className="text-lg font-serif font-bold text-slate-400 uppercase tracking-widest">Repos aujourd'hui</h3>
-                <p className="text-sm text-slate-400 mt-2 italic">Suivez vos propres envies saines...</p>
+                <h3 className="text-lg font-serif font-bold text-slate-900 uppercase tracking-widest">Menu à venir</h3>
+                <p className="text-sm text-slate-500 mt-2 italic max-w-[200px]">Votre menu personnalisé est en cours de préparation...</p>
+                <Link href="/onboarding" className="mt-6 text-xs font-bold text-ikonga-pink uppercase tracking-widest hover:underline">
+                    Générer mon menu →
+                </Link>
             </Card>
         )
     }
 
-    const { content } = menu
+    const { content } = nutrition
 
     const meals = [
         { id: "breakfast", label: "Matin", icon: Coffee, text: content.breakfast, color: "text-ikonga-pink", bg: "bg-ikonga-pink/5" },
@@ -65,7 +69,7 @@ export function DailyMenuCard({ menu }: DailyMenuCardProps) {
             <CardContent className="p-6 space-y-4">
                 <div className="flex items-center justify-between mb-2">
                     <h3 className="font-serif font-bold text-slate-900 uppercase tracking-tighter text-lg">
-                        {menu.title}
+                        {nutrition.title}
                     </h3>
                     <ChefHat className="text-ikonga-pink opacity-20" size={24} />
                 </div>

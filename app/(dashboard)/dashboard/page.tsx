@@ -14,7 +14,7 @@ import { AnalyticsWidget } from "@/components/dashboard/AnalyticsWidget";
 import { WellnessChart } from "@/components/dashboard/WellnessChart";
 import { getRecentWellnessLogs } from "@/lib/actions/journal";
 import { analyzeTrend } from "@/lib/engines/wellness";
-import { format, startOfDay } from "date-fns";
+import { format, startOfDay, startOfWeek } from "date-fns";
 import { MetricsGrid } from "@/components/dashboard/MetricsGrid";
 import { getOrCreateUser } from "@/lib/actions/user";
 import Link from "next/link";
@@ -79,8 +79,26 @@ export default async function DashboardPage() {
         })
     ]);
 
+    // C. AI Weekly Plan Fetching
+    const today = new Date();
+    const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+
+    const weeklyPlan = await prisma.weeklyPlan.findUnique({
+        where: {
+            userId_weekStart: {
+                userId: dbUser.id,
+                weekStart: currentWeekStart
+            }
+        }
+    });
+
+    // Helper to get day key (monday, tuesday...)
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const currentDayKey = days[today.getDay()];
+    const todaysMenu = (weeklyPlan?.content as any)?.[currentDayKey] || null;
+
     pillarsData = {
-        nutrition: menu ? { title: menu.title, content: menu.content } : null,
+        nutrition: todaysMenu ? { title: "Mon Menu IA", content: todaysMenu } : (menu ? { title: menu.title, content: menu.content } : null),
         fitness: fitness ? { title: fitness.title } : null,
         wellness: wellness ? { title: wellness.title } : null,
         beauty: beauty ? { title: beauty.title } : null
