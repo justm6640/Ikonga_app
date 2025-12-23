@@ -1,57 +1,55 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ChefHat, Activity, Moon, Sparkles, ArrowUpRight } from "lucide-react"
-import { NodeAnimation } from "./NodeAnimation"
+import { Salad, Activity, Moon, Sparkles, ArrowUpRight } from "lucide-react"
 
 const PILLARS = [
     {
-        title: "Menus Gourmands",
-        subtitle: "Nutrition Intuitive",
+        title: "Nutrition",
+        subtitle: "Gourmande & Intuitive",
         desc: "Finies les privations. Apprenez à nourrir votre corps avec des recettes éclatantes qui soutiennent votre métabolisme.",
-        icon: ChefHat,
+        icon: Salad,
         color: "from-pink-50 to-rose-50 text-ikonga-pink",
         label: "Pillar 01",
-        span: "lg:col-span-2",
+        span: "lg:col-span-2 lg:row-span-2",
         iconBg: "bg-ikonga-pink/10",
         img: null
     },
     {
-        title: "Sport Adapté",
+        title: "Fitness",
         subtitle: "Ciblé & Court",
-        desc: "20 minutes par jour pour sculpter et tonifier sans s'épuiser.",
+        desc: "20 minutes par jour pour sculpter et tonifier.",
         icon: Activity,
         color: "from-orange-50 to-amber-50 text-orange-600",
         label: "Pillar 02",
-        span: "lg:col-span-1",
+        span: "lg:col-span-1 lg:row-span-1",
         iconBg: "bg-orange-600/10"
     },
     {
-        title: "Bien-être Mental",
-        subtitle: "Équilibre & Sérénité",
-        desc: "Méditation et rituels de sérénité pour un esprit apaisé.",
+        title: "Wellness",
+        subtitle: "Équilibre Mental",
+        desc: "Méditation et rituels de sérénité.",
         icon: Moon,
         color: "from-indigo-50 to-purple-50 text-indigo-600",
         label: "Pillar 03",
-        span: "lg:col-span-1",
+        span: "lg:col-span-1 lg:row-span-1",
         iconBg: "bg-indigo-600/10"
     },
     {
-        title: "Éclat & Soins",
-        subtitle: "Beauté Holistique",
+        title: "Beauté",
+        subtitle: "Éclat Naturel",
         desc: "Ressentez la différence de l'intérieur vers l'extérieur avec nos conseils skincare et routine éclat.",
         icon: Sparkles,
         color: "from-rose-50 to-pink-50 text-rose-500",
         label: "Pillar 04",
-        span: "lg:col-span-2",
+        span: "lg:col-span-2 lg:row-span-1",
         iconBg: "bg-rose-500/10"
     }
 ]
 
 export function BentoMethod() {
     return (
-        <section id="method" className="py-32 bg-white px-4 relative overflow-hidden">
-            <NodeAnimation />
+        <section id="method" className="py-32 bg-white px-4 relative">
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
                     <div className="space-y-4">
@@ -67,8 +65,8 @@ export function BentoMethod() {
                             whileInView={{ opacity: 1, y: 0 }}
                             className="text-4xl md:text-6xl font-serif text-slate-950"
                         >
-                            Les 4 Piliers<br />
-                            <span className="italic">du Quotidien.</span>
+                            Quatre piliers,<br />
+                            <span className="italic">une seule harmonie.</span>
                         </motion.h2>
                     </div>
                     <motion.p
@@ -81,7 +79,7 @@ export function BentoMethod() {
                     </motion.p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-rows-auto lg:grid-rows-2 gap-8 h-auto lg:h-[700px]">
                     {PILLARS.map((pillar, idx) => (
                         <motion.div
                             key={pillar.title}

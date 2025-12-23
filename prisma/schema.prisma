@@ -59,6 +59,7 @@ model User {
   longestStreak    Int              @default(0)
   lastActivityDate DateTime?
   badges           UserBadge[]
+  weeklyPlans      WeeklyPlan[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
@@ -298,4 +299,31 @@ model UserBadge {
   earnedAt DateTime @default(now())
 
   @@unique([userId, badgeId])
+}
+
+model WeeklyPlan {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  weekStart DateTime // La date du Lundi de la semaine concernée
+  phase     PhaseType // La phase du programme à ce moment là (DETOX, EQUILIBRE...)
+  
+  // Contenu JSON généré par l'IA.
+  // Structure attendue : 
+  // {
+  //   "monday": { "breakfast": "...", "lunch": "...", "dinner": "...", "snack": "..." },
+  //   "tuesday": { ... },
+  //   ...
+  //   "shoppingList": ["Ingrédient 1", "Ingrédient 2"]
+  // }
+  content   Json
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Un seul plan par utilisateur pour une semaine donnée
+  @@unique([userId, weekStart])
+  // Index pour retrouver rapidement le plan de la semaine en cours
+  @@index([userId, weekStart])
 }
