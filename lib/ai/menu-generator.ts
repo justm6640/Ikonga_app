@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import prisma from '@/lib/prisma';
 import { SYSTEM_PROMPT_MENU } from './prompts';
-import { nextMonday } from 'date-fns';
+import { startOfWeek, nextMonday, isFriday, isWeekend } from 'date-fns';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -9,11 +9,12 @@ const openai = new OpenAI({
 
 /**
  * Generates a personalized weekly meal plan using GPT-4o-mini.
- * The plan is tailored to the user's current phase and allergies.
- * It is saved for the following Monday to ensure the user has time to prep.
+ * Smart Date Logic:
+ * - Mon-Thu: Generates for CURRENT week (startOfWeek).
+ * - Fri-Sun: Generates for NEXT week (nextMonday).
  */
 export async function generateUserWeeklyPlan(userId: string) {
-    // 1. Récupération des données utilisateur
+    // 1. Récupération User + Analyse
     const user = await prisma.user.findUnique({
         where: { id: userId },
         include: {
@@ -25,20 +26,19 @@ export async function generateUserWeeklyPlan(userId: string) {
     if (!user) throw new Error("Utilisateur introuvable");
 
     const currentPhase = user.phases[0]?.type || "DETOX";
-    // On récupère les allergies du JSON d'analyse s'il existe, sinon vide
-    const analysisData = user.analysis?.content as any;
+    // Gestion sécurisée si l'analyse n'existe pas encore
+    const analysisData = user.analysis?.content ? (user.analysis.content as any) : {};
     const allergies = analysisData?.nutrition?.allergies || "Aucune";
 
-    // 2. Construction du Prompt
+    // 2. Prompt IA
     const userPrompt = `
-    Génère le menu pour : ${user.firstName || 'Une abonnée'}
-    Phase actuelle : ${currentPhase}
-    Allergies/Intolérances : ${allergies}
-    Objectif : Perte de poids et vitalité.
+    Génère le menu pour : ${user.firstName || 'Abonnée'}
+    Phase : ${currentPhase}
+    Allergies : ${allergies}
+    Objectif : Perte de poids.
   `;
 
     try {
-        // 3. Appel OpenAI (GPT-4o Mini)
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
@@ -46,7 +46,6 @@ export async function generateUserWeeklyPlan(userId: string) {
                 { role: "user", content: userPrompt }
             ],
             response_format: { type: "json_object" },
-            temperature: 0.7,
         });
 
         const content = completion.choices[0].message.content;
@@ -54,17 +53,25 @@ export async function generateUserWeeklyPlan(userId: string) {
 
         const menuJson = JSON.parse(content);
 
-        // 4. Calcul de la date (Prochain Lundi)
+        // 3. LOGIQUE DE DATE INTELLIGENTE
         const today = new Date();
-        const nextWeekStart = nextMonday(today);
+        let targetWeekStart;
 
-        // 5. Sauvegarde en Base
-        // On utilise upsert pour écraser l'ancien si on régénère
+        // Si on est Vendredi ou Weekend -> On prépare la semaine prochaine
+        if (isFriday(today) || isWeekend(today)) {
+            targetWeekStart = nextMonday(today);
+        } else {
+            // Sinon (Lundi-Jeudi) -> On génère pour la semaine EN COURS
+            // weekStartsOn: 1 signifie que la semaine commence le Lundi
+            targetWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+        }
+
+        // 4. Sauvegarde (Upsert)
         await prisma.weeklyPlan.upsert({
             where: {
                 userId_weekStart: {
                     userId: user.id,
-                    weekStart: nextWeekStart
+                    weekStart: targetWeekStart
                 }
             },
             update: {
@@ -73,16 +80,16 @@ export async function generateUserWeeklyPlan(userId: string) {
             },
             create: {
                 userId: user.id,
-                weekStart: nextWeekStart,
+                weekStart: targetWeekStart,
                 phase: currentPhase,
                 content: menuJson
             }
         });
 
-        return { success: true, menu: menuJson };
+        return { success: true };
 
     } catch (error) {
-        console.error("Erreur génération menu:", error);
-        return { success: false, error: "Impossible de générer le menu" };
+        console.error(`Erreur Menu (User ${userId}):`, error);
+        return { success: false, error: "Erreur IA" };
     }
 }

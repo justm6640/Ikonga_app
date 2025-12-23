@@ -2,65 +2,59 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { generateUserWeeklyPlan } from '@/lib/ai/menu-generator';
 
-export const dynamic = 'force-dynamic'; // Important pour éviter le cache
+export const dynamic = 'force-dynamic';
 
+/**
+ * Standard API route for Cron jobs (Self-Hosted/Dokploy compatible).
+ * Triggers weekly menu generation for all active users.
+ * Security: Authorization Header with CRON_SECRET.
+ */
 export async function GET(req: Request) {
-  // 1. Vérification Sécurité
-  const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    console.log("🚀 CRON START: Début de la génération des menus...");
-
-    // 2. Récupération des utilisateurs (On log le nombre trouvé)
-    // NOTE: Pour le test, on enlève temporairement le filtre isActive pour être sûr de trouver quelqu'un
-    // Si ça marche, remettez { where: { isActive: true } }
-    const users = await prisma.user.findMany({
-        // where: { isActive: true }  <-- DÉCOMMENTEZ APRÈS LE TEST
-    });
-
-    console.log(`👥 UTILISATEURS TROUVÉS : ${users.length}`);
-
-    if (users.length === 0) {
-        return NextResponse.json({ message: "Aucun utilisateur trouvé", generated: 0 });
+    // 1. Security Check
+    const authHeader = req.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 3. Exécution avec logs détaillés
-    const results = await Promise.allSettled(
-      users.map(async (user) => {
-        console.log(`👉 Tentative pour : ${user.email || user.id}`);
-        try {
-            const result = await generateUserWeeklyPlan(user.id);
-            if(result.success) {
-                console.log(`✅ Succès pour ${user.email}`);
-                return "success";
-            } else {
-                console.error(`❌ Échec IA pour ${user.email}:`, result.error);
-                throw new Error(result.error);
-            }
-        } catch (e: any) {
-            console.error(`❌ Crash pour ${user.email}:`, e.message);
-            throw e;
-        }
-      })
-    );
+    try {
+        // 2. Fetch Active Users
+        const activeUsers = await prisma.user.findMany({
+            where: { isActive: true },
+            select: { id: true, firstName: true }
+        });
 
-    const successCount = results.filter((r) => r.status === 'fulfilled').length;
-    const errorCount = results.filter((r) => r.status === 'rejected').length;
+        console.log(`[Cron] Starting weekly menu generation for ${activeUsers.length} users.`);
 
-    console.log(`🏁 CRON FINI. Succès: ${successCount}, Erreurs: ${errorCount}`);
+        // 3. Parallel Generation with Promise.allSettled
+        // Using allSettled to ensure failure for one user doesn't crash the whole job.
+        const results = await Promise.allSettled(
+            activeUsers.map(async (user) => {
+                const result = await generateUserWeeklyPlan(user.id);
+                if (result.success) {
+                    console.log(`[Cron] Success: Menu generated for ${user.firstName || user.id}`);
+                } else {
+                    console.error(`[Cron] Error for ${user.firstName || user.id}: ${result.error}`);
+                    throw new Error(result.error);
+                }
+                return result;
+            })
+        );
 
-    return NextResponse.json({
-      success: true,
-      totalUsers: users.length,
-      generated: successCount,
-      errors: errorCount
-    });
+        // 4. Summarize Results
+        const generated = results.filter((r) => r.status === 'fulfilled').length;
+        const errors = results.filter((r) => r.status === 'rejected').length;
 
-  } catch (error: any) {
-    console.error("🔥 CRON CRITICAL ERROR:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+        console.log(`[Cron] Job completed. Generated: ${generated}, Errors: ${errors}`);
+
+        return NextResponse.json({
+            success: true,
+            total: activeUsers.length,
+            generated,
+            errors
+        });
+
+    } catch (error) {
+        console.error('[Cron] Critical failure:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
 }
