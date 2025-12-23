@@ -1,92 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-enum Role {
-  USER
-  COACH
-  ADMIN
-}
-
-enum Gender {
-  FEMALE
-  MALE
-}
-
-enum SubscriptionTier {
-  STANDARD_6
-  STANDARD_12
-  STANDARD_24
-  STANDARD_48
-  VIP_12
-  VIP_PLUS_16
-}
-
 model User {
-  id               String           @id @default(uuid())
-  email            String           @unique
-  role             Role             @default(USER)
-  firstName        String?
-  lastName         String?
-  gender           Gender           @default(FEMALE)
-  birthDate        DateTime?
-  heightCm         Float?
-  startWeight      Float?
-  targetWeight     Float?
-  pisi             Float?
-  startDate        DateTime         @default(now())
-  goalDate         DateTime?
-  subscriptionTier SubscriptionTier @default(STANDARD_6)
-  planStartDate    DateTime?        @default(now())
-  isPhaseManual    Boolean          @default(false)
+  id                String           @id @default(uuid())
+  email             String           @unique
+  role              Role             @default(USER)
+  firstName         String?
+  lastName          String?
+  gender            Gender           @default(FEMALE)
+  birthDate         DateTime?
+  heightCm          Float?
+  startWeight       Float?
+  targetWeight      Float?
+  pisi              Float?
+  startDate         DateTime         @default(now())
+  goalDate          DateTime?
+  subscriptionTier  SubscriptionTier @default(STANDARD_6)
+  planStartDate     DateTime?        @default(now())
+  subEndDate        DateTime?
+  isActive          Boolean          @default(true)
+  currentStreak     Int              @default(0)
+  longestStreak     Int              @default(0)
+  lastActivityDate  DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  isPhaseManual     Boolean          @default(false)
   manualPhaseReason String?
-  subEndDate       DateTime?
-  isActive         Boolean          @default(true)
-  phases           UserPhase[]
-  sessions         IkongaSession[]
-  dailyLogs        DailyLog[]
-  messages         Message[]
-  channels         ChannelMember[]
-  notifications    Notification[]
-  contentLogs      ContentLog[]
-  currentStreak    Int              @default(0)
-  longestStreak    Int              @default(0)
-  lastActivityDate DateTime?
-  badges           UserBadge[]
-  weeklyPlans      WeeklyPlan[]
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-
-  analysis         UserAnalysis?
+  channels          ChannelMember[]
+  contentLogs       ContentLog[]
+  dailyLogs         DailyLog[]
+  sessions          IkongaSession[]
+  messages          Message[]
+  notifications     Notification[]
+  analysis          UserAnalysis?
+  badges            UserBadge[]
+  phases            UserPhase[]
+  weeklyPlans       WeeklyPlan[]
 
   @@index([email])
 }
 
-model UserAnalysis {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id])
-  content   Json
-  createdAt DateTime @default(now())
-}
-
-enum PhaseType {
-  DETOX
-  EQUILIBRE
-  CONSOLIDATION
-  ENTRETIEN
-}
 
 model UserPhase {
   id               String    @id @default(uuid())
   userId           String
-  user             User      @relation(fields: [userId], references: [id])
   type             PhaseType
   startDate        DateTime  @default(now())
   plannedEndDate   DateTime?
@@ -94,6 +58,7 @@ model UserPhase {
   isManualOverride Boolean   @default(false)
   adminNote        String?
   isActive         Boolean   @default(true)
+  user             User      @relation(fields: [userId], references: [id])
 
   @@index([userId, isActive])
 }
@@ -101,53 +66,38 @@ model UserPhase {
 model IkongaSession {
   id                 String   @id @default(uuid())
   userId             String
-  user               User     @relation(fields: [userId], references: [id])
   sessionNumber      Int
   startDate          DateTime
   endDate            DateTime
   projectedWeightEnd Float
   targetLoss         Float
   realWeightEnd      Float?
+  user               User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, sessionNumber])
 }
 
 model DailyLog {
-  id               String   @id @default(uuid())
+  id               String     @id @default(uuid())
   userId           String
-  user             User     @relation(fields: [userId], references: [id])
-  date             DateTime @default(now())
+  date             DateTime   @default(now())
   weight           Float?
   photoUrl         String?
   menuId           String?
   caloriesConsumed Int?
-  workoutDone      Boolean  @default(false)
-  hydration        Int      @default(0)
+  workoutDone      Boolean    @default(false)
+  hydration        Int        @default(0)
   sleepHours       Int?
   mood             Mood?
   digestion        Digestion?
-  stressLevel      Int?     // 1-10
-  energyLevel      Int?     // 1-10
-  wellnessScore    Float?   // Calculated
+  stressLevel      Int?
+  energyLevel      Int?
+  wellnessScore    Float?
   notes            String?
   dayStatus        String?
+  user             User       @relation(fields: [userId], references: [id])
 
   @@unique([userId, date])
-}
-
-enum Mood {
-  GREAT
-  GOOD
-  NEUTRAL
-  BAD
-  STRESSED
-}
-
-enum Digestion {
-  GREAT
-  NORMAL
-  BLOATED
-  CONSTIPATED
 }
 
 model WellnessAnalysis {
@@ -178,7 +128,7 @@ model ContentLibrary {
   targetPhases  PhaseType[]
   emotionalTags String[]
   metadata      Json
-  duration      Int? // in minutes
+  duration      Int?
   difficulty    Difficulty?
   description   String?
   logs          ContentLog[]
@@ -187,30 +137,12 @@ model ContentLibrary {
 model ContentLog {
   id          String         @id @default(uuid())
   userId      String
-  user        User           @relation(fields: [userId], references: [id])
   contentId   String
-  content     ContentLibrary @relation(fields: [contentId], references: [id])
   completedAt DateTime       @default(now())
+  content     ContentLibrary @relation(fields: [contentId], references: [id])
+  user        User           @relation(fields: [userId], references: [id])
 
   @@unique([userId, contentId, completedAt])
-}
-
-enum Difficulty {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-}
-
-enum ChannelType {
-  PRIVATE_COACH
-  GROUP_DETOX
-  GROUP_ECE
-}
-
-enum MemberStatus {
-  ACTIVE
-  LOCKED
-  READ_ONLY
 }
 
 model Channel {
@@ -224,11 +156,11 @@ model Channel {
 model ChannelMember {
   id        String       @id @default(uuid())
   userId    String
-  user      User         @relation(fields: [userId], references: [id])
   channelId String
-  channel   Channel      @relation(fields: [channelId], references: [id])
   status    MemberStatus @default(ACTIVE)
   joinedAt  DateTime     @default(now())
+  channel   Channel      @relation(fields: [channelId], references: [id])
+  user      User         @relation(fields: [userId], references: [id])
 
   @@unique([userId, channelId])
 }
@@ -238,32 +170,24 @@ model Message {
   content      String?
   mediaUrl     String?
   senderId     String
-  sender       User     @relation(fields: [senderId], references: [id])
   channelId    String
-  channel      Channel  @relation(fields: [channelId], references: [id])
   isSystem     Boolean  @default(false)
   emotionalTag String?
   priority     String   @default("NORMAL")
   createdAt    DateTime @default(now())
-}
-
-enum NotifCategory {
-  PROGRAM
-  WEIGHT
-  COACH
-  SOCIAL
-  WELLNESS
+  channel      Channel  @relation(fields: [channelId], references: [id])
+  sender       User     @relation(fields: [senderId], references: [id])
 }
 
 model Notification {
   id        String        @id @default(uuid())
   userId    String
-  user      User          @relation(fields: [userId], references: [id])
   title     String
   body      String
   category  NotifCategory
   isRead    Boolean       @default(false)
   createdAt DateTime      @default(now())
+  user      User          @relation(fields: [userId], references: [id])
 }
 
 model Recipe {
@@ -285,6 +209,26 @@ model Recipe {
   @@unique([name, phase])
 }
 
+model WeeklyPlan {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  weekStart DateTime
+  phase     String   // Phase au moment de la génération (DETOX, etc.)
+  content   Json     // Le menu complet (Days x Meals)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, weekStart])
+}
+
+model UserAnalysis {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  content   Json     // L'analyse complète (introduction, nutrition, fitness, wellness, conclusion)
+  createdAt DateTime @default(now())
+}
+
 model Badge {
   id          String      @id @default(uuid())
   code        String      @unique
@@ -297,37 +241,79 @@ model Badge {
 model UserBadge {
   id       String   @id @default(uuid())
   userId   String
-  user     User     @relation(fields: [userId], references: [id])
   badgeId  String
-  badge    Badge    @relation(fields: [badgeId], references: [id])
   earnedAt DateTime @default(now())
+  badge    Badge    @relation(fields: [badgeId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, badgeId])
 }
 
-model WeeklyPlan {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  
-  weekStart DateTime // La date du Lundi de la semaine concernée
-  phase     PhaseType // La phase du programme à ce moment là (DETOX, EQUILIBRE...)
-  
-  // Contenu JSON généré par l'IA.
-  // Structure attendue : 
-  // {
-  //   "monday": { "breakfast": "...", "lunch": "...", "dinner": "...", "snack": "..." },
-  //   "tuesday": { ... },
-  //   ...
-  //   "shoppingList": ["Ingrédient 1", "Ingrédient 2"]
-  // }
-  content   Json
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  // Un seul plan par utilisateur pour une semaine donnée
-  @@unique([userId, weekStart])
-  // Index pour retrouver rapidement le plan de la semaine en cours
-  @@index([userId, weekStart])
+enum Role {
+  USER
+  COACH
+  ADMIN
+}
+
+enum Gender {
+  FEMALE
+  MALE
+}
+
+enum SubscriptionTier {
+  STANDARD_6
+  STANDARD_12
+  STANDARD_24
+  STANDARD_48
+  VIP_12
+  VIP_PLUS_16
+}
+
+enum PhaseType {
+  DETOX
+  EQUILIBRE
+  CONSOLIDATION
+  ENTRETIEN
+}
+
+enum Mood {
+  GREAT
+  GOOD
+  NEUTRAL
+  BAD
+  STRESSED
+}
+
+enum Digestion {
+  GREAT
+  NORMAL
+  BLOATED
+  CONSTIPATED
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ChannelType {
+  PRIVATE_COACH
+  GROUP_DETOX
+  GROUP_ECE
+}
+
+enum MemberStatus {
+  ACTIVE
+  LOCKED
+  READ_ONLY
+}
+
+enum NotifCategory {
+  PROGRAM
+  WEIGHT
+  COACH
+  SOCIAL
+  WELLNESS
 }

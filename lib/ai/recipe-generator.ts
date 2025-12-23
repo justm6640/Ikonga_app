@@ -12,14 +12,19 @@ const openai = new OpenAI({
  */
 export async function getOrGenerateRecipe(mealName: string, phase: string) {
     // 1. Check Database Cache
-    const existingRecipe = await prisma.recipe.findFirst({
-        where: {
-            name: mealName,
-            phase: phase
-        }
-    });
+    try {
+        const existingRecipe = await prisma.recipe.findFirst({
+            where: {
+                name: mealName,
+                phase: phase
+            }
+        });
 
-    if (existingRecipe) return existingRecipe;
+        if (existingRecipe) return existingRecipe;
+    } catch (dbError: any) {
+        console.error("Erreur Database Cache (Recette):", dbError);
+        // On continue quand même vers l'IA si c'est juste un souci de cache
+    }
 
     // 2. Generate with AI if not found
     try {
