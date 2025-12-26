@@ -33,31 +33,34 @@ export function AnimatedGauge({
     const clampedValue = Math.min(max, Math.max(min, value))
     const percentage = ((clampedValue - min) / (max - min)) * 100
 
-    const radius = 40
+    const radius = 45 // Increased radius slightly to use more space
     const circumference = 2 * Math.PI * radius
     const offset = circumference - (percentage / 100) * circumference
 
     return (
-        <div className={cn("flex flex-col items-center justify-center p-4", className)}>
-            <div className="relative w-32 h-32">
-                {/* Background Circle */}
-                <svg className="w-full h-full transform -rotate-90">
+        <div className={cn("flex flex-col items-center justify-center w-full", className)}>
+            <div className="relative w-full aspect-square max-w-[140px] flex items-center justify-center">
+                {/* Responsive SVG using viewBox */}
+                <svg
+                    viewBox="0 0 120 120"
+                    className="w-full h-full transform -rotate-90 block"
+                >
                     <circle
-                        cx="64"
-                        cy="64"
+                        cx="60"
+                        cy="60"
                         r={radius}
                         stroke="currentColor"
-                        strokeWidth="8"
+                        strokeWidth="10"
                         fill="transparent"
-                        className="text-slate-100"
+                        className="text-slate-50"
                     />
                     {/* Animated Progress Circle */}
                     <motion.circle
-                        cx="64"
-                        cy="64"
+                        cx="60"
+                        cy="60"
                         r={radius}
                         stroke="currentColor"
-                        strokeWidth="8"
+                        strokeWidth="10"
                         strokeDasharray={circumference}
                         initial={{ strokeDashoffset: circumference }}
                         animate={isMounted ? { strokeDashoffset: offset } : {}}
@@ -68,25 +71,25 @@ export function AnimatedGauge({
                     />
                 </svg>
 
-                {/* Value Text in Center */}
+                {/* Value Text in Center - Responsive font sizes */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <motion.span
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="text-2xl font-black text-slate-900"
+                        className="text-lg md:text-2xl font-black text-slate-900 leading-none"
                     >
                         {value}
                     </motion.span>
                     {unit && (
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest -mt-1">
+                        <span className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
                             {unit}
                         </span>
                     )}
                 </div>
             </div>
 
-            <span className="mt-4 text-[10px] uppercase font-black tracking-[0.2em] text-slate-400">
+            <span className="mt-2 md:mt-4 text-[9px] md:text-[10px] uppercase font-black tracking-[0.15em] text-slate-400 text-center px-1">
                 {label}
             </span>
         </div>

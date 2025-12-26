@@ -63,12 +63,18 @@ export async function getWeightAnalytics() {
         )
 
         // Actual weight if log exists for this day
-        const actualLog = logs.find(l => isSameDay(l.date, day))
+        const actualLog = logs.find(l => isSameDay(new Date(l.date), day))
+
+        // Ensure the first day starts with the startWeight if no log exists
+        let actualWeight = actualLog ? actualLog.weight : null
+        if (index === 0 && actualWeight === null) {
+            actualWeight = dbUser.startWeight
+        }
 
         return {
             date: dateStr,
             projected: Number(projectedWeight.toFixed(1)),
-            actual: actualLog ? actualLog.weight : null
+            actual: actualWeight
         }
     })
 

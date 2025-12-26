@@ -29,7 +29,7 @@ export function FloatingNavbar() {
                 <div className="flex items-center gap-2 sm:gap-4">
                     <Link
                         href="/login"
-                        className="text-sm font-bold text-slate-900 hover:text-ikonga-pink transition-colors px-2 sm:px-4 py-2 hidden sm:inline-block"
+                        className="text-[10px] sm:text-sm font-bold text-slate-900 hover:text-ikonga-pink transition-colors px-2 sm:px-4 py-2"
                     >
                         Connexion
                     </Link>

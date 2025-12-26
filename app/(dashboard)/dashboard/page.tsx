@@ -139,18 +139,11 @@ export default async function DashboardPage() {
                     lastLog={dbUser.dailyLogs[0] || null}
                 />
 
-                {/* Interactive Weight Chart - Moved below Gauges */}
-                <Link href="/weigh-in" className="block w-full group">
-                    <div className="h-[180px] w-full rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50 bg-white transition-all duration-300 group-hover:scale-[1.01] group-hover:shadow-2xl group-hover:shadow-slate-200/60 transition-all">
-                        <WeightMiniChart
-                            currentWeight={currentWeight}
-                            startWeight={dbUser.startWeight || 0}
-                            data={recentWeightLogs.map(l => ({ date: l.date, weight: l.weight! }))}
-                        />
-                    </div>
-                </Link>
+                {/* Performance Analytics (Ma Progression) */}
+                <AnalyticsWidget />
 
-                {/* Mes Piliers - Moved above Analytics */}
+
+                {/* Mes Piliers - Moved above Wellness */}
                 <div className="mt-2">
                     <h3 className="text-lg font-serif font-medium mb-4 ml-1">Mes Piliers</h3>
                     <PillarsGrid
@@ -160,9 +153,6 @@ export default async function DashboardPage() {
                         beauty={pillarsData.beauty}
                     />
                 </div>
-
-                {/* Performance Analytics (Full Width) */}
-                <AnalyticsWidget />
 
                 {/* Wellness Analytics (Full Width) */}
                 <WellnessWrapper />

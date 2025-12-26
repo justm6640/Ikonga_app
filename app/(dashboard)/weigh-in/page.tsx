@@ -2,9 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import prisma from "@/lib/prisma"
 import { WeighInModal } from "@/components/weigh-in/WeighInModal"
 import { WeightChartFull } from "@/components/weigh-in/WeightChartFull"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { Card } from "@/components/ui/card"
+import { WeightHistoryList } from "@/components/weigh-in/WeightHistoryList"
 import { Scale } from "lucide-react"
 
 export default async function WeighInPage() {
@@ -19,15 +17,16 @@ export default async function WeighInPage() {
         include: {
             dailyLogs: {
                 where: { weight: { not: null } },
-                orderBy: { date: 'asc' },
+                orderBy: { date: 'desc' }, // Order by date desc for newest first
+                take: 20 // Take up to 20 for the history list
             }
         }
     });
 
     if (!dbUser) return <div>Utilisateur introuvable</div>
 
-    // Recent History (Reverse order for list)
-    const recentLogs = [...dbUser.dailyLogs].reverse().slice(0, 6);
+    // Sort for chart (ascending)
+    const chartLogs = [...dbUser.dailyLogs].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     return (
         <div className="max-w-5xl mx-auto space-y-12 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -43,12 +42,12 @@ export default async function WeighInPage() {
             </div>
 
             {/* Main Chart Area (Emphasis) */}
-            <div className="bg-white/60 backdrop-blur-md rounded-[2.5rem] p-6 md:p-10 shadow-xl shadow-slate-200/50 border border-slate-100/50 relative overflow-hidden group">
+            <div className="bg-white/60 backdrop-blur-md rounded-[2.5rem] p-4 md:p-10 shadow-xl shadow-slate-200/50 border border-slate-100/50 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-8 opacity-5">
                     <Scale size={120} className="text-slate-900 rotate-12" />
                 </div>
                 <WeightChartFull
-                    data={dbUser.dailyLogs as any[]}
+                    data={chartLogs as any[]}
                     targetWeight={dbUser.targetWeight || undefined}
                 />
             </div>
@@ -59,45 +58,7 @@ export default async function WeighInPage() {
             </div>
 
             {/* Recent History List */}
-            <div className="space-y-8">
-                <div className="flex items-center justify-between px-2">
-                    <h3 className="text-2xl font-serif text-slate-900 tracking-tight">Historique récent</h3>
-                    {recentLogs.length > 0 && (
-                        <span className="text-sm font-medium text-slate-400">Dernières pesées</span>
-                    )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {recentLogs.map((log) => (
-                        <Card key={log.id} className="group overflow-hidden rounded-[2rem] border-none shadow-premium bg-white/50 backdrop-blur-sm hover:bg-white transition-all hover:-translate-y-1 duration-300">
-                            <div className="p-6 flex justify-between items-center">
-                                <div className="flex flex-col">
-                                    <span className="font-serif text-lg text-slate-900 capitalize">
-                                        {format(log.date, "EEEE d MMMM", { locale: fr })}
-                                    </span>
-                                    <span className="text-sm text-slate-400 font-light">
-                                        Enregistré à {format(log.date, "HH:mm")}
-                                    </span>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-2xl font-bold bg-clip-text text-transparent bg-ikonga-gradient">
-                                            {log.weight}
-                                        </span>
-                                        <span className="text-sm font-medium text-slate-400">kg</span>
-                                    </div>
-                                    <div className="h-1.5 w-8 rounded-full bg-slate-100 mt-2 block sm:hidden md:block" />
-                                </div>
-                            </div>
-                        </Card>
-                    ))}
-                    {recentLogs.length === 0 && (
-                        <p className="col-span-full text-center text-slate-400 py-12 bg-slate-50/50 rounded-[2rem] border-2 border-dashed border-slate-100">
-                            Aucune pesée enregistrée pour le moment.
-                        </p>
-                    )}
-                </div>
-            </div>
+            <WeightHistoryList logs={dbUser.dailyLogs as any[]} />
         </div>
     )
 }
