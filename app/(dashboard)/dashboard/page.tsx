@@ -14,10 +14,11 @@ import { AnalyticsWidget } from "@/components/dashboard/AnalyticsWidget";
 import { WellnessChart } from "@/components/dashboard/WellnessChart";
 import { getRecentWellnessLogs } from "@/lib/actions/journal";
 import { analyzeTrend } from "@/lib/engines/wellness";
-import { format, startOfDay, startOfWeek } from "date-fns";
+import { format, startOfDay, startOfWeek, isAfter } from "date-fns";
 import { MetricsGrid } from "@/components/dashboard/MetricsGrid";
 import { getOrCreateUser } from "@/lib/actions/user";
 import Link from "next/link";
+import { CountdownHero } from "@/components/dashboard/CountdownHero";
 
 export default async function DashboardPage() {
     // 1. Fetch User (Self-healing)
@@ -38,6 +39,28 @@ export default async function DashboardPage() {
     });
 
     if (!dbUser) redirect("/login");
+
+    // 2. Temporal Logic - Check if program has started
+    if (!dbUser.startDate) {
+        redirect("/onboarding"); // Security: No start date = incomplete onboarding
+    }
+
+    const today = startOfDay(new Date());
+    const programStart = startOfDay(new Date(dbUser.startDate));
+    const hasStarted = !isAfter(programStart, today); // Program starts if startDate <= today
+
+    // 3. If not started yet, show Countdown Hero
+    if (!hasStarted) {
+        const userName = dbUser.firstName || "Champion";
+        return (
+            <div className="flex flex-col gap-6 max-w-4xl mx-auto p-6">
+                <CountdownHero targetDate={dbUser.startDate} userName={userName} />
+                {/* Optional: Add some educational content or blog articles here */}
+            </div>
+        );
+    }
+
+    // 4. Program has started - Show full dashboard
 
     // Fetch 7 most recent weight logs for the mini chart (chronological for graph)
     const recentWeightLogs = await prisma.dailyLog.findMany({
@@ -80,8 +103,8 @@ export default async function DashboardPage() {
     ]);
 
     // C. AI Weekly Plan Fetching
-    const today = new Date();
-    const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+    const now = new Date();
+    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
 
     const weeklyPlan = await prisma.weeklyPlan.findUnique({
         where: {
@@ -94,7 +117,7 @@ export default async function DashboardPage() {
 
     // Helper to get day key (monday, tuesday...)
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const currentDayKey = days[today.getDay()];
+    const currentDayKey = days[now.getDay()];
     const todaysMenu = (weeklyPlan?.content as any)?.[currentDayKey] || null;
 
     pillarsData = {

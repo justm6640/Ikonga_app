@@ -1,51 +1,68 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
 import prisma from "@/lib/prisma"
-import { ProfileSchema } from "@/lib/validators/profile"
 import { revalidatePath } from "next/cache"
-import { calculatePISI } from "@/lib/engines/calculators"
+import { Gender } from "@prisma/client"
 
-export async function updateProfile(data: ProfileSchema) {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+interface UpdateProfileData {
+    name?: string
+    phone?: string
+    height?: number
+    startingWeight?: number
+    targetWeight?: number
+    gender?: Gender
+    birthDate?: Date
+}
 
-    if (authError || !user || !user.email) {
-        return { error: "Non authentifié" }
-    }
-
+export async function updateUserProfile(userId: string, data: UpdateProfileData) {
     try {
-        // Fetch current user to get gender/birthDate for PISI recalculation if needed
-        const currentUser = await prisma.user.findUnique({
-            where: { email: user.email },
-            select: { gender: true, birthDate: true }
-        })
-
-        if (!currentUser) return { error: "Utilisateur non trouvé" }
-
-        // Recalculate PISI if height is provided
-        let pisi = undefined
-        if (data.heightCm) {
-            pisi = calculatePISI(data.heightCm, currentUser.gender)
+        if (!userId) {
+            return { success: false, message: "ID utilisateur manquant" }
         }
 
+        // 1. Validation de base
+        if (data.height && (data.height < 50 || data.height > 300)) {
+            return { success: false, message: "La taille doit être comprise entre 50 et 300 cm" }
+        }
+        if (data.startingWeight && (data.startingWeight < 20 || data.startingWeight > 500)) {
+            return { success: false, message: "Le poids de départ semble incorrect" }
+        }
+        if (data.targetWeight && (data.targetWeight < 20 || data.targetWeight > 500)) {
+            return { success: false, message: "Le poids cible semble incorrect" }
+        }
+
+        // 2. Préparation des données Prisma
+        // On sépare le name en firstName/lastName si fourni
+        let firstName, lastName;
+        if (data.name) {
+            const parts = data.name.trim().split(' ');
+            firstName = parts[0];
+            lastName = parts.slice(1).join(' ') || '';
+        }
+
+        // 3. Mise à jour via Prisma
         await prisma.user.update({
-            where: { email: user.email },
+            where: { id: userId },
             data: {
-                firstName: data.firstName,
-                lastName: data.lastName,
-                heightCm: data.heightCm,
-                targetWeight: typeof data.targetWeight === 'number' ? data.targetWeight : null,
-                pisi: pisi ?? undefined
+                ...(firstName && { firstName }),
+                ...(lastName !== undefined && { lastName }), // On update lastName seulement si name était fourni
+                ...(data.phone && { phoneNumber: data.phone }),
+                ...(data.height && { heightCm: data.height }),
+                ...(data.startingWeight && { startWeight: data.startingWeight }),
+                ...(data.targetWeight && { targetWeight: data.targetWeight }),
+                ...(data.gender && { gender: data.gender }),
+                ...(data.birthDate && { birthDate: data.birthDate }),
             }
         })
 
-        revalidatePath("/profile")
-        revalidatePath("/dashboard")
+        // 4. Revalidation
+        revalidatePath('/profile')
+        revalidatePath('/dashboard')
 
-        return { success: true }
-    } catch (e) {
-        console.error("Update Profile Error:", e)
-        return { error: "Une erreur est survenue lors de la mise à jour du profil" }
+        return { success: true, message: "Profil mis à jour avec succès" }
+
+    } catch (error) {
+        console.error("[UPDATE_USER_PROFILE]", error)
+        return { success: false, message: "Erreur lors de la mise à jour du profil" }
     }
 }
