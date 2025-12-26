@@ -4,8 +4,8 @@ import { WeeklyMenuGrid } from "@/components/dashboard/WeeklyMenuGrid"
 import { Lightbulb, Sparkles } from "lucide-react"
 
 export const metadata = {
-    title: "Menus & Liste | IKONGA",
-    description: "Retrouvez vos menus de la semaine et la liste de courses associée.",
+    title: "Mes Menus | IKONGA",
+    description: "Retrouvez vos menus de la semaine personnalisés.",
 }
 
 import { protectFeature } from "@/lib/security/permissions"
@@ -26,7 +26,7 @@ export default async function ShoppingListPage() {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
                             <h1 className="text-4xl md:text-5xl font-serif font-normal text-slate-900 tracking-tight">
-                                Menus & Liste
+                                Mes Menus
                             </h1>
                             <p className="text-base text-slate-600 font-light mt-2">
                                 Votre plan nutritionnel personnalisé
@@ -56,37 +56,6 @@ export default async function ShoppingListPage() {
                         />
                     </section>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mt-8 pt-12 border-t border-slate-100">
-                        {/* Left Column: Action Zone / Shopping List (7 cols) */}
-                        <div className="lg:col-span-8">
-                            <div className="rounded-[2.5rem] overflow-hidden shadow-xl shadow-slate-200/60 border border-slate-100/40 transform transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/70">
-                                <ShoppingListView
-                                    initialIngredients={data.ingredients as any}
-                                    phaseName={data.phaseName}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Right Column: Coach Tip (4 cols) */}
-                        <div className="lg:col-span-4 space-y-6">
-                            <div className="group rounded-[2rem] bg-white/60 backdrop-blur-sm border-2 border-ikonga-pink/20 p-8 shadow-lg shadow-ikonga-pink/5 hover:shadow-xl hover:shadow-ikonga-pink/10 transition-all duration-300">
-                                <div className="flex flex-col items-start gap-5">
-                                    <div className="shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-ikonga-pink to-ikonga-orange flex items-center justify-center shadow-lg shadow-ikonga-pink/30 group-hover:shadow-ikonga-pink/50 transition-shadow">
-                                        <Lightbulb size={26} className="text-white" strokeWidth={2} />
-                                    </div>
-
-                                    <div>
-                                        <h3 className="text-xl font-serif font-black text-slate-900 mb-2 tracking-tight uppercase">
-                                            Conseil de Rosy
-                                        </h3>
-                                        <p className="text-sm text-slate-600 leading-relaxed font-light">
-                                            Vérifiez votre menu hebdomadaire avant de partir en courses. Cochez ce que vous possédez déjà pour ne rien acheter en trop et rester focalisée sur votre objectif !
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
