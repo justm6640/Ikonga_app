@@ -132,6 +132,7 @@ model ContentLibrary {
   duration      Int?
   difficulty    Difficulty?
   description   String?
+  createdAt     DateTime      @default(now())
   logs          ContentLog[]
 }
 
@@ -181,14 +182,17 @@ model Message {
 }
 
 model Notification {
-  id        String        @id @default(uuid())
-  userId    String
-  title     String
-  body      String
-  category  NotifCategory
-  isRead    Boolean       @default(false)
-  createdAt DateTime      @default(now())
-  user      User          @relation(fields: [userId], references: [id])
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title       String
+  message     String
+  type        NotificationType @default(INFO) 
+  isRead      Boolean          @default(false)
+  link        String?          // Lien optionnel (ex: "/dashboard/weight")
+  
+  createdAt   DateTime         @default(now())
 }
 
 model Recipe {
@@ -299,10 +303,12 @@ enum Difficulty {
   ADVANCED
 }
 
-enum ChannelType {
-  PRIVATE_COACH
-  GROUP_DETOX
-  GROUP_ECE
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  COACH // Spécial pour les messages du coach
 }
 
 enum MemberStatus {
@@ -311,10 +317,8 @@ enum MemberStatus {
   READ_ONLY
 }
 
-enum NotifCategory {
-  PROGRAM
-  WEIGHT
-  COACH
-  SOCIAL
-  WELLNESS
+enum ChannelType {
+  PRIVATE_COACH
+  GROUP_DETOX
+  GROUP_ECE
 }

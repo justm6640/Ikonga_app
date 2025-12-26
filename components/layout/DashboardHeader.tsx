@@ -7,6 +7,8 @@ import { StreakCounter } from "@/components/gamification/StreakCounter";
 import { updateStreak } from "@/lib/actions/gamification";
 
 import { User } from "@prisma/client";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { getUserNotifications, getUnreadCount } from "@/lib/actions/notifications";
 
 interface DashboardHeaderProps {
     user: User;
@@ -16,8 +18,13 @@ export async function DashboardHeader({ user }: DashboardHeaderProps) {
     if (!user) return null;
 
     // Trigger streak update on visit (Server Action)
-    // We keep this to ensure streaks increment correctly on daily visits
     await updateStreak(user.id);
+
+    // Fetch initial notifications and count
+    const [initialNotifications, unreadCount] = await Promise.all([
+        getUserNotifications(user.id),
+        getUnreadCount(user.id)
+    ]);
 
     const userName = user.firstName || "Rosy";
 
@@ -38,11 +45,12 @@ export async function DashboardHeader({ user }: DashboardHeaderProps) {
                 {/* Streak Counter */}
                 <StreakCounter streak={(user as any).currentStreak || 0} />
 
-                {/* Notifications */}
-                <Button variant="ghost" size="icon" className="rounded-full relative">
-                    <Bell size={20} className="text-muted-foreground" />
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-ikonga-orange rounded-full border border-background" />
-                </Button>
+                {/* Notifications Bell */}
+                <NotificationBell
+                    userId={user.id}
+                    initialNotifications={initialNotifications as any}
+                    unreadCount={unreadCount}
+                />
 
                 {/* User Avatar */}
                 <Avatar className="h-10 w-10 border-2 border-background shadow-sm cursor-pointer hover:opacity-80 transition-opacity">

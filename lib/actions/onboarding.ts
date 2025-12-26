@@ -144,3 +144,38 @@ export async function submitOnboarding(data: QuestionnaireData) {
         return { success: false, error: errorMessage }
     }
 }
+
+/**
+ * Définit la date de début du parcours et envoie une notification de bienvenue.
+ */
+export async function setJourneyStartDate(userId: string, date: Date | 'NOW') {
+    try {
+        const startDate = date === 'NOW' ? new Date() : date;
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                startDate,
+                isActive: true
+            }
+        });
+
+        // Add the welcome notification
+        const { createNotification } = await import("./notifications");
+        await createNotification(
+            userId,
+            "C'est parti ! 🚀",
+            "Ton programme Ikonga commence. Prépare-toi à transformer ta vie !",
+            "SUCCESS",
+            "/dashboard"
+        );
+
+        revalidatePath("/dashboard");
+        revalidatePath("/onboarding");
+
+        return { success: true };
+    } catch (error) {
+        console.error("[SET_JOURNEY_START_DATE]", error);
+        return { success: false, error: "Impossible de définir la date de début." };
+    }
+}
