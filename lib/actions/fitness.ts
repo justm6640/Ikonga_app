@@ -131,3 +131,46 @@ export async function getAllFitnessVideos() {
         return []
     }
 }
+
+/**
+ * Alterne l'état de complétion d'une vidéo (ContentLog).
+ */
+export async function toggleVideoCompletion(contentId: string) {
+    try {
+        const { getOrCreateUser } = await import("./user")
+        const user = await getOrCreateUser()
+        if (!user) throw new Error("Non autorisé")
+
+        // Vérifier si un log existe déjà pour cette vidéo et cet user
+        const existingLog = await prisma.contentLog.findFirst({
+            where: {
+                userId: user.id,
+                contentId: contentId
+            }
+        })
+
+        if (existingLog) {
+            // Toggle OFF : Supprimer le log
+            await prisma.contentLog.delete({
+                where: { id: existingLog.id }
+            })
+        } else {
+            // Toggle ON : Créer le log
+            await prisma.contentLog.create({
+                data: {
+                    userId: user.id,
+                    contentId: contentId,
+                    completedAt: new Date()
+                }
+            })
+        }
+
+        revalidatePath('/fitness')
+        revalidatePath('/dashboard')
+
+        return { success: true }
+    } catch (error) {
+        console.error("[TOGGLE_VIDEO_COMPLETION]", error)
+        return { success: false, error: "Erreur lors de la mise à jour" }
+    }
+}
