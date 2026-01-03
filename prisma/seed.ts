@@ -162,6 +162,54 @@ async function main() {
             throw err
         }
 
+        // 6. SEED SYSTEM DATA: FITNESS VIDEOS
+        console.log("🏋️ Seeding Fitness Videos...")
+        const fitnessVideos = [
+            {
+                title: "Réveil Musculaire",
+                description: "Une séance douce pour réveiller ton corps en douceur et démarrer la journée du bon pied.",
+                videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", // Placeholder
+                thumbnailUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=800",
+                duration: 10,
+                difficulty: "BEGINNER",
+                category: "YOGA"
+            },
+            {
+                title: "Cardio Brûle-Graisse",
+                description: "Une séance intense pour booster ton métabolisme et brûler un maximum de calories.",
+                videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", // Placeholder
+                thumbnailUrl: "https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?q=80&w=800",
+                duration: 20,
+                difficulty: "INTERMEDIATE",
+                category: "HIIT"
+            },
+            {
+                title: "Abdos en Béton",
+                description: "Un renforcement ciblé pour sculpter ta sangle abdominale et améliorer ta posture.",
+                videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", // Placeholder
+                thumbnailUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=800",
+                duration: 15,
+                difficulty: "ADVANCED",
+                category: "RENFO"
+            }
+        ]
+        for (const video of fitnessVideos) {
+            try {
+                process.stdout.write(`   → Seeding video: ${video.title}... `)
+                const { title, ...rest } = video;
+                await prisma.fitnessVideo.upsert({
+                    where: { title },
+                    update: rest,
+                    create: video
+                })
+                console.log("✅")
+            } catch (err) {
+                console.log("❌")
+                console.error(`Failed to seed fitness video ${video.title}:`, err)
+                throw err
+            }
+        }
+
         console.log("✨ Seeding completed successfully. Ready for PROD.")
     } catch (error) {
         process.stdout.write("\n")

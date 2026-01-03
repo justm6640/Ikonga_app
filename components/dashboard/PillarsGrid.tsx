@@ -25,7 +25,8 @@ export function PillarsGrid({ nutrition, fitness, wellness, beauty }: PillarsGri
             icon: Activity,
             color: "bg-pillar-fitness",
             textColor: "text-[#EF6C00]",
-            data: fitness
+            data: fitness,
+            href: "/fitness"
         },
         {
             key: "wellness",
@@ -33,7 +34,8 @@ export function PillarsGrid({ nutrition, fitness, wellness, beauty }: PillarsGri
             icon: Moon,
             color: "bg-pillar-wellness",
             textColor: "text-[#7B1FA2]",
-            data: wellness
+            data: wellness,
+            href: "/wellness"
         },
         {
             key: "beauty",
@@ -41,7 +43,8 @@ export function PillarsGrid({ nutrition, fitness, wellness, beauty }: PillarsGri
             icon: Sparkles,
             color: "bg-pillar-beauty",
             textColor: "text-[#C2185B]",
-            data: beauty
+            data: beauty,
+            href: "/beauty"
         },
     ];
 
@@ -54,10 +57,9 @@ export function PillarsGrid({ nutrition, fitness, wellness, beauty }: PillarsGri
 
             {/* Other Pillars Sidebar/Grid */}
             <div className="grid grid-cols-2 gap-4 h-fit">
-                {mainPillars.map((pillar) => {
-                    const Content = (
+                {mainPillars.map((pillar) => (
+                    <Link key={pillar.key} href={pillar.href} className="w-full">
                         <Card
-                            key={pillar.key}
                             className={cn(
                                 "border-none shadow-sm flex flex-col items-center justify-center p-4 py-6 rounded-3xl cursor-pointer transition-transform hover:scale-105 active:scale-95 text-center min-h-[140px] w-full",
                                 pillar.color
@@ -81,18 +83,8 @@ export function PillarsGrid({ nutrition, fitness, wellness, beauty }: PillarsGri
                                 </span>
                             )}
                         </Card>
-                    );
-
-                    if (pillar.key === "fitness") {
-                        return (
-                            <Link key={pillar.key} href="/fitness" className="w-full">
-                                {Content}
-                            </Link>
-                        );
-                    }
-
-                    return Content;
-                })}
+                    </Link>
+                ))}
             </div>
         </div>
     );

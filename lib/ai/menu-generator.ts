@@ -10,10 +10,12 @@ const openai = new OpenAI({
 /**
  * Generates a personalized weekly meal plan using GPT-4o-mini.
  * Smart Date Logic:
- * - Mon-Thu: Generates for CURRENT week (startOfWeek).
- * - Fri-Sun: Generates for NEXT week (nextMonday).
+ * - forceCurrentWeek=true: Always generates for CURRENT week (useful for onboarding).
+ * - forceCurrentWeek=false (default):
+ *   - Mon-Thu: Generates for CURRENT week (startOfWeek).
+ *   - Fri-Sun: Generates for NEXT week (nextMonday).
  */
-export async function generateUserWeeklyPlan(userId: string) {
+export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: boolean = false) {
     // 1. Récupération User + Analyse
     const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -57,13 +59,17 @@ export async function generateUserWeeklyPlan(userId: string) {
         const today = new Date();
         let targetWeekStart;
 
-        // Si on est Vendredi ou Weekend -> On prépare la semaine prochaine
-        if (isFriday(today) || isWeekend(today)) {
-            targetWeekStart = nextMonday(today);
-        } else {
-            // Sinon (Lundi-Jeudi) -> On génère pour la semaine EN COURS
-            // weekStartsOn: 1 signifie que la semaine commence le Lundi
+        if (forceCurrentWeek) {
+            // Force la génération pour la semaine EN COURS (ex: onboarding le week-end)
             targetWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+        } else {
+            // Logique standard : Si Vendredi ou Weekend -> semaine prochaine
+            if (isFriday(today) || isWeekend(today)) {
+                targetWeekStart = nextMonday(today);
+            } else {
+                // Sinon (Lundi-Jeudi) -> semaine EN COURS
+                targetWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+            }
         }
 
         // 4. Sauvegarde (Upsert)

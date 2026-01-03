@@ -45,6 +45,8 @@ model User {
   badges            UserBadge[]
   phases            UserPhase[]
   weeklyPlans       WeeklyPlan[]
+  wellnessLogs      WellnessLog[]
+  workoutLogs       WorkoutLog[]
 
   @@index([email])
 }
@@ -322,4 +324,62 @@ enum ChannelType {
   PRIVATE_COACH
   GROUP_DETOX
   GROUP_ECE
+}
+
+model WellnessLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime // La date du log (on stocke à minuit)
+  
+  // 1. HYDRATATION
+  waterIntake Int @default(0) // En nombre de verres (250ml)
+  
+  // 2. SOMMEIL
+  sleepHours   Float? // Nombre d'heures (ex: 7.5)
+  sleepQuality String? // "BAD", "AVERAGE", "GOOD", "EXCELLENT"
+  
+  // 3. HUMEUR / ÉNERGIE
+  mood      String? // Emoji ou Enum : "TIRED", "ENERGETIC", "STRESSED", "HAPPY"
+  
+  // 4. MOUVEMENT
+  steps     Int?    // Nombre de pas
+  sport     Boolean @default(false) // A fait du sport aujourd'hui ?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Contrainte : Un seul log par jour par user
+  @@unique([userId, date])
+}
+
+model FitnessVideo {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  videoUrl    String   // Lien YouTube ou Vimeo ou S3
+  thumbnailUrl String? // Image de couverture
+  duration    Int      // En minutes (ex: 15, 30)
+  
+  difficulty  String   // "BEGINNER", "INTERMEDIATE", "ADVANCED"
+  category    String   // "CARDIO", "YOGA", "RENFO", "HIIT"
+  
+  createdAt   DateTime @default(now())
+  workoutLogs WorkoutLog[]
+}
+
+model WorkoutLog {
+  id             String       @id @default(uuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  fitnessVideoId String
+  fitnessVideo   FitnessVideo @relation(fields: [fitnessVideoId], references: [id])
+  
+  date           DateTime     // Date de réalisation
+  feedback       String?      // "TOO_HARD", "PERFECT", "TOO_EASY"
+  
+  createdAt      DateTime     @default(now())
+
+  @@index([userId, date])
 }

@@ -1,101 +1,133 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
-import { startOfDay, endOfDay } from "date-fns"
+import { startOfDay } from "date-fns"
 
-export async function getDailyWorkout() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user || !user.email) return null
-
+/**
+ * Récupère la séance du jour pour l'utilisateur.
+ * Retourne une vidéo aléatoire adaptée au niveau (BEGINNER par défaut en MVP).
+ * Vérifie si la séance a déjà été complétée aujourd'hui.
+ */
+export async function getTodayWorkout(userId: string) {
     try {
-        const dbUser = await prisma.user.findUnique({
-            where: { email: user.email },
-            include: {
-                phases: {
-                    where: { isActive: true },
-                    take: 1
-                }
-            }
-        })
-
-        if (!dbUser || !dbUser.phases.length) return null
-
-        const activePhase = dbUser.phases[0]
-        const today = new Date()
-
-        // Calculate the day number in the phase (starts at 0)
-        const diffTime = Math.abs(today.getTime() - activePhase.startDate.getTime())
-        const dayIndex = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-
-        // Get fitness content compatible with this phase
-        const workouts = await prisma.contentLibrary.findMany({
+        // 1. Récupérer une vidéo adaptée (MVP: on prend BEGINNER ou toutes)
+        const videos = await prisma.fitnessVideo.findMany({
             where: {
-                category: "FITNESS",
-                targetPhases: {
-                    has: activePhase.type
-                }
+                OR: [
+                    { difficulty: "BEGINNER" },
+                    { difficulty: "INTERMEDIATE" }
+                ]
             },
             orderBy: { createdAt: 'asc' }
         })
 
-        if (workouts.length === 0) return null
+        if (videos.length === 0) {
+            return { video: null, isCompleted: false }
+        }
 
-        // Select workout using rotation (modulo)
-        const video = workouts[dayIndex % workouts.length]
+        // Sélectionner une vidéo aléatoire (ou la première pour la démo)
+        const randomIndex = Math.floor(Math.random() * videos.length)
+        const selectedVideo = videos[randomIndex]
 
-        // Check if completed today
-        const completion = await prisma.contentLog.findFirst({
+        // 2. Vérifier si déjà complétée aujourd'hui
+        const today = startOfDay(new Date())
+        const todayLog = await prisma.workoutLog.findFirst({
             where: {
-                userId: dbUser.id,
-                contentId: video.id,
-                completedAt: {
-                    gte: startOfDay(today),
-                    lte: endOfDay(today)
+                userId,
+                fitnessVideoId: selectedVideo.id,
+                date: {
+                    gte: today,
+                    lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
                 }
             }
         })
 
         return {
-            video,
-            isCompleted: !!completion
+            video: selectedVideo,
+            isCompleted: !!todayLog
         }
     } catch (error) {
-        console.error("Error fetching daily workout:", error)
-        return null
+        console.error("[GET_TODAY_WORKOUT]", error)
+        return { video: null, isCompleted: false }
     }
 }
 
-export async function completeWorkout(contentId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user || !user.email) return { error: "Non autorisé" }
-
+/**
+ * Marque une séance comme complétée.
+ * Crée une entrée dans WorkoutLog.
+ */
+export async function completeWorkout(
+    userId: string,
+    videoId: string,
+    feedback?: string
+) {
     try {
-        const dbUser = await prisma.user.findUnique({
-            where: { email: user.email }
-        })
+        const today = startOfDay(new Date())
 
-        if (!dbUser) return { error: "Utilisateur non trouvé" }
-
-        // Create log entry
-        await prisma.contentLog.create({
-            data: {
-                userId: dbUser.id,
-                contentId: contentId
+        // Vérifier si déjà complétée aujourd'hui
+        const existing = await prisma.workoutLog.findFirst({
+            where: {
+                userId,
+                fitnessVideoId: videoId,
+                date: {
+                    gte: today,
+                    lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+                }
             }
         })
 
-        revalidatePath("/fitness")
-        revalidatePath("/dashboard")
+        if (existing) {
+            return { success: true, message: "Séance déjà validée aujourd'hui" }
+        }
 
-        return { success: true }
+        // Créer le log
+        await prisma.workoutLog.create({
+            data: {
+                userId,
+                fitnessVideoId: videoId,
+                date: today,
+                feedback
+            }
+        })
+
+        revalidatePath("/dashboard")
+        return { success: true, message: "Bravo ! Séance validée 🎉" }
     } catch (error) {
-        console.error("Error completing workout:", error)
-        return { error: "Erreur lors de la validation" }
+        console.error("[COMPLETE_WORKOUT]", error)
+        return { success: false, message: "Erreur lors de la validation" }
+    }
+}
+
+/**
+ * Récupère l'historique des entraînements d'un utilisateur.
+ */
+export async function getWorkoutHistory(userId: string, limit: number = 7) {
+    try {
+        const logs = await prisma.workoutLog.findMany({
+            where: { userId },
+            include: { fitnessVideo: true },
+            orderBy: { date: 'desc' },
+            take: limit
+        })
+
+        return logs
+    } catch (error) {
+        console.error("[GET_WORKOUT_HISTORY]", error)
+        return []
+    }
+}
+
+/**
+ * Récupère toutes les vidéos disponibles (pour un catalogue).
+ */
+export async function getAllFitnessVideos() {
+    try {
+        return await prisma.fitnessVideo.findMany({
+            orderBy: { createdAt: 'asc' }
+        })
+    } catch (error) {
+        console.error("[GET_ALL_FITNESS_VIDEOS]", error)
+        return []
     }
 }
