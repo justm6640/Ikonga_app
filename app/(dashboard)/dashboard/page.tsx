@@ -104,21 +104,34 @@ export default async function DashboardPage() {
 
     // C. AI Weekly Plan Fetching
     const now = new Date();
-    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
 
-    const weeklyPlan = await prisma.weeklyPlan.findUnique({
+    // Logic: Look for the most recent plan that has started (weekStart <= today)
+    const weeklyPlan = await prisma.weeklyPlan.findFirst({
         where: {
-            userId_weekStart: {
-                userId: dbUser.id,
-                weekStart: currentWeekStart
+            userId: dbUser.id,
+            weekStart: {
+                lte: now
             }
+        },
+        orderBy: {
+            weekStart: 'desc'
         }
     });
+
+    // Special case: If it's the weekend and we only have a plan for NEXT week, 
+    // it means onboarding happened during the weekend. Let's look for any plan.
+    let activePlan = weeklyPlan;
+    if (!activePlan) {
+        activePlan = await prisma.weeklyPlan.findFirst({
+            where: { userId: dbUser.id },
+            orderBy: { weekStart: 'asc' }
+        });
+    }
 
     // Helper to get day key (monday, tuesday...)
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const currentDayKey = days[now.getDay()];
-    const todaysMenu = (weeklyPlan?.content as any)?.[currentDayKey] || null;
+    const todaysMenu = (activePlan?.content as any)?.[currentDayKey] || null;
 
     pillarsData = {
         nutrition: todaysMenu ? { title: "Mon Menu IA", content: todaysMenu, phase: activePhaseType } : (menu ? { title: menu.title, content: menu.content, phase: activePhaseType } : null),
