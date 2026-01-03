@@ -149,3 +149,75 @@ export async function getRecentWellnessLogs(userId: string, days: number = 7) {
         return []
     }
 }
+
+/**
+ * Soumet le check-in bien-être quotidien (Sauvegarde dans DailyLog).
+ */
+export async function submitWellnessLog(data: {
+    sleepHours: number
+    stressLevel: number
+    energyLevel: number
+}) {
+    try {
+        const { getOrCreateUser } = await import("./user")
+        const { calculateDailyScore } = await import("@/lib/engines/wellness")
+
+        const user = await getOrCreateUser()
+        if (!user) throw new Error("Utilisateur non authentifié")
+
+        const today = startOfDay(new Date())
+        const score = calculateDailyScore(data.stressLevel, data.energyLevel, data.sleepHours)
+
+        const result = await prisma.dailyLog.upsert({
+            where: {
+                userId_date: {
+                    userId: user.id,
+                    date: today
+                }
+            },
+            update: {
+                sleepHours: Math.round(data.sleepHours),
+                stressLevel: data.stressLevel,
+                energyLevel: data.energyLevel,
+                wellnessScore: score
+            },
+            create: {
+                userId: user.id,
+                date: today,
+                sleepHours: Math.round(data.sleepHours),
+                stressLevel: data.stressLevel,
+                energyLevel: data.energyLevel,
+                wellnessScore: score
+            }
+        })
+
+        revalidatePath("/wellness")
+        revalidatePath("/dashboard")
+
+        return { success: true, data: result }
+    } catch (error) {
+        console.error("[SUBMIT_WELLNESS_LOG]", error)
+        return { success: false, error: "Erreur lors de la sauvegarde" }
+    }
+}
+
+/**
+ * Récupère les logs DailyLog récents pour alimenter le WellnessChart.
+ */
+export async function getRecentDailyWellnessLogs(userId: string, days: number = 7) {
+    try {
+        const logs = await prisma.dailyLog.findMany({
+            where: {
+                userId,
+                wellnessScore: { not: null }
+            },
+            orderBy: { date: 'desc' },
+            take: days
+        })
+
+        return logs
+    } catch (error) {
+        console.error("[GET_RECENT_DAILY_WELLNESS_LOGS]", error)
+        return []
+    }
+}
