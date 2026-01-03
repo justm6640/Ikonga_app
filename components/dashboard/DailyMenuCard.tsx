@@ -108,6 +108,16 @@ export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
                         </div>
                     ))}
                 </div>
+
+                {/* Shopping List Link */}
+                <Link
+                    href="/shopping-list"
+                    className="block w-full p-4 mt-4 rounded-2xl bg-gradient-to-r from-ikonga-pink/10 to-pink-100/50 border border-ikonga-pink/20 hover:border-ikonga-pink/40 transition-all text-center group"
+                >
+                    <span className="text-sm font-bold text-ikonga-pink group-hover:underline">
+                        📋 Voir ma liste de courses
+                    </span>
+                </Link>
             </CardContent>
 
             <RecipeModal
