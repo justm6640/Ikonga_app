@@ -14,7 +14,7 @@ import { AnalyticsWidget } from "@/components/dashboard/AnalyticsWidget";
 import { WellnessChart } from "@/components/dashboard/WellnessChart";
 import { getRecentWellnessLogs } from "@/lib/actions/journal";
 import { analyzeTrend } from "@/lib/engines/wellness";
-import { format, startOfDay, startOfWeek, isAfter } from "date-fns";
+import { format, startOfDay, startOfWeek, isAfter, differenceInCalendarDays } from "date-fns";
 import { MetricsGrid } from "@/components/dashboard/MetricsGrid";
 import { getOrCreateUser } from "@/lib/actions/user";
 import Link from "next/link";
@@ -52,9 +52,10 @@ export default async function DashboardPage() {
     // 3. If not started yet, show Countdown Hero
     if (!hasStarted) {
         const userName = dbUser.firstName || "Champion";
+        const daysRemaining = differenceInCalendarDays(programStart, today);
         return (
             <div className="flex flex-col gap-6 max-w-4xl mx-auto p-6">
-                <CountdownHero targetDate={dbUser.startDate} userName={userName} />
+                <CountdownHero daysRemaining={daysRemaining} userName={userName} />
                 {/* Optional: Add some educational content or blog articles here */}
             </div>
         );

@@ -8,12 +8,11 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
 interface CountdownHeroProps {
-    targetDate: Date
+    daysRemaining: number
     userName: string
 }
 
-export function CountdownHero({ targetDate, userName }: CountdownHeroProps) {
-    const daysRemaining = differenceInCalendarDays(new Date(targetDate), new Date())
+export function CountdownHero({ daysRemaining, userName }: CountdownHeroProps) {
     const isPreparationMode = daysRemaining <= 2
 
     return (
