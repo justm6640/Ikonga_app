@@ -6,9 +6,12 @@ import { createClient } from "@/lib/supabase/server"
 import prisma from "@/lib/prisma"
 import { z } from "zod"
 
-// 1. Schéma de validation Zod pour l'inscription
-const SignUpSchema = z.object({
+// 1. Schémas de validation Zod
+const EmailSchema = z.object({
     email: z.string().email("Format d'email invalide"),
+})
+
+const SignUpSchema = EmailSchema.extend({
     password: z
         .string()
         .min(8, "Le mot de passe doit contenir au moins 8 caractères")
@@ -108,6 +111,34 @@ export async function signup(formData: FormData) {
     // On retourne success pour permettre au front d'afficher un message ou de rediriger
     // NOTE: redirect() jette une erreur interne Next.js, on le place après toute autre logique
     redirect("/verify-email")
+}
+
+/**
+ * Action pour réinitialiser le mot de passe.
+ * Utilise la redirection vers /auth/callback?next=/update-password
+ */
+export async function forgotPassword(formData: FormData) {
+    const supabase = await createClient()
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+
+    const email = formData.get("email") as string
+    const validatedFields = EmailSchema.safeParse({ email })
+
+    if (!validatedFields.success) {
+        return { success: false, error: "Email invalide" }
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${appUrl}/auth/callback?next=/update-password`,
+    })
+
+    if (error) {
+        console.error("Forgot Password Error:", error.message)
+        // On retourne quand même success ou un message générique pour éviter l'énumération d'emails
+        return { success: false, error: "Une erreur est survenue lors de l'envoi." }
+    }
+
+    return { success: true }
 }
 
 export async function signout() {

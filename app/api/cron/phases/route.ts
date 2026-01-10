@@ -1,29 +1,27 @@
-import { NextRequest, NextResponse } from "next/server";
-import { processDailyTransitions } from "@/lib/engines/phase-transition";
+import { NextResponse } from "next/server"
+import { runPhaseEngine } from "@/lib/engines/phase-engine"
 
-export async function GET(req: NextRequest) {
+/**
+ * Cron Job route to trigger the Phase Engine.
+ * Targeted by Dokploy or any CRON service.
+ */
+export async function GET(request: Request) {
+    // 1. Security Check
+    const authHeader = request.headers.get("authorization")
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     try {
-        // 1. Security Check
-        const authHeader = req.headers.get("authorization");
-        const expectedSecret = process.env.CRON_SECRET;
-
-        if (!expectedSecret || authHeader !== `Bearer ${expectedSecret}`) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
-        // 2. Process Transitions
-        const result = await processDailyTransitions();
+        // 2. Run Engine
+        const summary = await runPhaseEngine()
 
         return NextResponse.json({
             success: true,
-            ...result
-        });
-
+            summary
+        })
     } catch (error) {
-        console.error("Cron Phase Transition Error:", error);
-        return NextResponse.json({
-            error: "Internal Server Error",
-            details: error instanceof Error ? error.message : String(error)
-        }, { status: 500 });
+        console.error("[CRON_PHASE_ENGINE_ERROR]", error)
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }

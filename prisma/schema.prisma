@@ -274,7 +274,10 @@ enum SubscriptionTier {
   STANDARD_12
   STANDARD_24
   STANDARD_48
+  VIP_6
   VIP_12
+  VIP_24
+  VIP_48
   VIP_PLUS_16
 }
 
