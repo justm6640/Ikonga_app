@@ -90,6 +90,7 @@ model DailyLog {
   menuId           String?
   caloriesConsumed Int?
   workoutDone      Boolean    @default(false)
+  nutritionDone    Boolean    @default(false)
   hydration        Int        @default(0)
   sleepHours       Int?
   mood             Mood?
