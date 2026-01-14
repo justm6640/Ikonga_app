@@ -13,7 +13,7 @@ export function BottomNav() {
 
     // Select top 5 essential items for mobile view AND check access
     const MOBILE_NAV_ITEMS = NAV_ITEMS.filter(item =>
-        ["Accueil", "Fitness", "Pesée", "Menus", "Profil"].includes(item.label) &&
+        ["Accueil", "Fitness", "Pesée", "Nutrition", "Profil"].includes(item.label) &&
         (!item.requiredFeature || hasAccess(item.requiredFeature))
     );
 

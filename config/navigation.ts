@@ -28,10 +28,10 @@ export const NAV_ITEMS: NavItem[] = [
         requiredFeature: 'FITNESS'
     },
     {
-        label: "Menus",
-        href: "/shopping-list",
+        label: "Nutrition",
+        href: "/nutrition",
         icon: Utensils,
-        requiredFeature: 'SHOPPING_LIST'
+        requiredFeature: 'MENUS'
     },
     {
         label: "Pesée",

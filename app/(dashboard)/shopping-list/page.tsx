@@ -46,16 +46,27 @@ export default async function ShoppingListPage() {
 
             {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-6 py-12">
-                <div className="flex flex-col gap-12">
+                <div className="flex flex-col gap-16">
 
-                    {/* Top Section: Weekly Menu (Full Width) */}
+                    {/* Shopping List Section */}
                     <section className="space-y-6">
+                        <ShoppingListView
+                            categories={data.categories}
+                            phaseName={data.phaseName}
+                        />
+                    </section>
+
+                    {/* Weekly Menu Overview (Secondary in this view) */}
+                    <section className="space-y-8">
+                        <div className="flex items-center gap-4 px-2">
+                            <div className="w-1 h-8 bg-ikonga-pink rounded-full" />
+                            <h2 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tighter">Aperçu de la semaine</h2>
+                        </div>
                         <WeeklyMenuGrid
                             weeklyPlan={data.weeklyPlan}
                             phase={data.phaseName}
                         />
                     </section>
-
                 </div>
             </div>
         </div>

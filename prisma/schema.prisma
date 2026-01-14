@@ -47,6 +47,7 @@ model User {
   weeklyPlans       WeeklyPlan[]
   wellnessLogs      WellnessLog[]
   workoutLogs       WorkoutLog[]
+  customMenus       UserCustomMenu[]
 
   @@index([email])
 }
@@ -211,11 +212,38 @@ model Recipe {
   carbs       Int?
   fat         Int?
   prepTime    Int?     // En minutes
+  cookingTime Int?     // En minutes
+  difficulty  Difficulty?
+  isPremium   Boolean     @default(false)
   
   createdAt   DateTime @default(now())
 
   // On indexe par nom et phase pour retrouver la recette rapidement
   @@unique([name, phase])
+}
+
+model UserCustomMenu {
+  id        String   @id @default(uuid())
+  userId    String
+  date      DateTime // Date du menu customized
+  content   Json     // Structure du menu (Breakfast, Lunch, etc.)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model PhaseGuideline {
+  id        String        @id @default(uuid())
+  phase     PhaseType
+  type      GuidelineType
+  content   String
+  order     Int           @default(0)
+  createdAt DateTime      @default(now())
+
+  @@index([phase])
 }
 
 model WeeklyPlan {
@@ -224,7 +252,8 @@ model WeeklyPlan {
   user      User     @relation(fields: [userId], references: [id])
   weekStart DateTime
   phase     String   // Phase au moment de la génération (DETOX, etc.)
-  content   Json     // Le menu complet (Days x Meals)
+  content   Json     // Le menu complet standard
+  overrides Json?    // "Level 2" overrides (Modifs Coach/Admin)
   createdAt DateTime @default(now())
 
   @@unique([userId, weekStart])
@@ -322,6 +351,11 @@ enum MemberStatus {
   ACTIVE
   LOCKED
   READ_ONLY
+}
+
+enum GuidelineType {
+  ALLOWED
+  FORBIDDEN
 }
 
 enum ChannelType {
