@@ -31,7 +31,19 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    await supabase.auth.getUser()
+    // Debug logs for environment variables
+    if (process.env.NODE_ENV === 'development') {
+        console.log('[Middleware] URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+    }
+
+    try {
+        const { data: { user }, error } = await supabase.auth.getUser()
+        if (error) {
+            console.error('[Middleware] Auth Error:', error.message)
+        }
+    } catch (err: any) {
+        console.error('[Middleware] Unexpected Error:', err.message || err)
+    }
 
     return response
 }

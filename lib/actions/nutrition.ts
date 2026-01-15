@@ -1,118 +1,112 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { startOfDay, addDays, isAfter, subHours, isBefore } from "date-fns"
 import prisma from "@/lib/prisma"
 import { getOrCreateUser } from "./user"
-import { startOfDay, endOfDay, addHours, isAfter, subHours } from "date-fns"
 import { PhaseType } from "@prisma/client"
 
 /**
- * Retrieves nutrition data for a specific date, adhering to security and hierarchy rules.
+ * Récupère les données nutritionnelles pour une date donnée.
+ * Respecte la hiérarchie des menus et la règle de verrouillage J-48h.
  */
-export async function getNutritionData(dateRaw?: Date | string) {
+export async function getNutritionData(dateInput?: Date) {
     const user = await getOrCreateUser()
     if (!user) {
-        throw new Error("Utilisateur non authentifié")
+        console.log("DEBUG: No user found in getNutritionData")
+        return null
     }
 
-    const targetDate = dateRaw ? new Date(dateRaw) : new Date()
-    const targetDateStart = startOfDay(targetDate)
-    const now = new Date()
+    console.log(`DEBUG: Fetching nutrition for user ${user.id} (${user.email})`)
 
-    // 1. SECURITY: J-48h Rule
-    // We check if the target date belongs to a future phase that isn't unlocked yet.
-    const activePhase = user.phases[0] // Assuming phases are ordered by startDate DESC or filtered in getOrCreateUser
+    const targetDate = startOfDay(dateInput || new Date())
+    const activePhase = user.phases[0] // La phase actuelle active
 
-    // Check if the target date is beyond the active phase
-    if (activePhase && activePhase.plannedEndDate && isAfter(targetDateStart, activePhase.plannedEndDate)) {
+    if (!activePhase) {
+        console.log("DEBUG: No active phase for user")
+        return null
+    }
+
+    console.log(`DEBUG: Active phase found: ${activePhase.type}`)
+
+    // --- 1. Règle J-48h et Sécurité de Phase ---
+    // On doit déterminer si la targetDate appartient à la phase actuelle ou une phase future.
+    // Ce calcul dépend de la durée des phases. Pour simplifier, on regarde si la date est après la fin de la phase active.
+
+    let targetPhase = activePhase.type
+
+    if (activePhase.plannedEndDate && isAfter(targetDate, activePhase.plannedEndDate)) {
+        // La date est dans le futur, après la phase actuelle. 
+        // Vérification du verrouillage : on débloque 48h avant le début de la phase suivante (fin de l'actuelle).
         const unlockTime = subHours(activePhase.plannedEndDate, 48)
-        if (isAfter(now, unlockTime)) {
-            // Unlocked (J-48h)
-        } else {
-            // Locked content
-            return null
+        const now = new Date()
+
+        if (isBefore(now, unlockTime)) {
+            return { locked: true, unlockDate: unlockTime, reason: "Contenu verrouillé (J-48h)" }
         }
+
+        // Note: Dans un système réel, on déterminerait quelle est la phase N+1.
+        // Ici on suppose que l'utilisateur progresse selon la séquence définie dans le business logic.
+        // Pour les guidelines, on pourrait avoir besoin de savoir laquelle c'est.
+        // Par simplicité, on va chercher s'il y a un plan hebdomadaire qui définit la phase pour cette date.
     }
 
-    // 2. Determine target phase for guidelines and recipe lookup
-    // If targetDate is during activePhase, use activePhase.type
-    // Otherwise, we might need to find which phase the targetDate belongs to in UserPhase history or projected timeline.
-    let targetPhaseType: PhaseType = activePhase?.type || "DETOX"
-
-    // Simple logic: if targetDate is after activePhase, we assume it's the "next" phase in sequence 
-    // or we fetch the UserPhase covering that date if it exists.
-    const specificPhase = await prisma.userPhase.findFirst({
-        where: {
-            userId: user.id,
-            startDate: { lte: targetDateStart },
-            OR: [
-                { actualEndDate: { gte: targetDateStart } },
-                { actualEndDate: null, plannedEndDate: { gte: targetDateStart } },
-                { actualEndDate: null, plannedEndDate: null }
-            ]
-        }
-    })
-    if (specificPhase) targetPhaseType = specificPhase.type
-
-    // 3. MENU HIERARCHY
-    // Priority: UserCustomMenu -> WeeklyPlan
-    let menuJson: any = null
-
-    // Attempt Level 3 (Custom Menu)
-    const customMenu = await prisma.userCustomMenu.findUnique({
+    // --- 2. Hiérarchie des Menus ---
+    // A. UserCustomMenu (Niveau 3 - Priorité absolue)
+    let menuContent = await prisma.userCustomMenu.findUnique({
         where: {
             userId_date: {
                 userId: user.id,
-                date: targetDateStart
+                date: targetDate
             }
         }
     })
 
-    if (customMenu) {
-        menuJson = customMenu.content
+    let finalMenu: any = null
+    let sourcePhase: PhaseType = activePhase.type
+
+    if (menuContent) {
+        finalMenu = menuContent.content
     } else {
-        // Fallback Level 2 (Weekly Plan)
-        // WeeklyPlan is usually stored by weekStart
-        const dayOfWeek = targetDateStart.getDay() // 0 is Sunday
-        const diff = targetDateStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) // Adjust to Monday
-        const weekStart = startOfDay(new Date(targetDateStart.setDate(diff)))
-
-        // Reset targetDateStart to original value after manipulation
-        const originalTargetDateStart = startOfDay(new Date(dateRaw || new Date()))
-
-        const weeklyPlan = await prisma.weeklyPlan.findUnique({
+        // B. WeeklyPlan (Niveau 1/2 - Menu généré)
+        // On cherche le plan qui englobe la targetDate
+        const weeklyPlan = await prisma.weeklyPlan.findFirst({
             where: {
-                userId_weekStart: {
-                    userId: user.id,
-                    weekStart: weekStart
-                }
-            }
+                userId: user.id,
+                weekStart: { lte: targetDate }
+            },
+            orderBy: { weekStart: 'desc' }
         })
 
-        if (weeklyPlan && weeklyPlan.content) {
-            const fullContent = weeklyPlan.content as any
-            // Extract the specific day from the weekly JSON structure (e.g., { "Monday": { ... }, "Tuesday": { ... } })
-            const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-            const dayKey = dayNames[originalTargetDateStart.getDay()]
-            menuJson = fullContent[dayKey] || null
+        // Vérification que la date est bien dans la semaine du plan
+        if (weeklyPlan && isBefore(targetDate, addDays(weeklyPlan.weekStart, 7))) {
+            const content = weeklyPlan.content as any
+            const dayIndex = Math.floor((targetDate.getTime() - weeklyPlan.weekStart.getTime()) / (1000 * 60 * 60 * 24))
+
+            // On récupère le menu spécifique au jour dans le JSON du WeeklyPlan
+            // Structure attendue : { "days": [ { "breakfast": "...", ... }, ... ] }
+            if (content.days && content.days[dayIndex]) {
+                finalMenu = content.days[dayIndex]
+                sourcePhase = weeklyPlan.phase as PhaseType
+            }
         }
     }
 
-    if (!menuJson) return null
+    if (!finalMenu) return { menu: null, phase: activePhase.type }
 
-    // 4. FETCH RECIPE DETAILS
-    // Typical menuJson structure: { breakfast: "Recipe Name", lunch: "Recipe Name", ... }
-    const mealKeys = ["breakfast", "lunch", "dinner", "snack"]
-    const menuDetails: any = {}
+    // --- 3. Récupération des Recettes ---
+    // finalMenu est supposé être { breakfast: "NomRecette", lunch: "...", ... }
+    const meals = ['breakfast', 'lunch', 'dinner', 'snack']
+    const enrichedMenu: any = {}
 
-    for (const key of mealKeys) {
-        const recipeName = menuJson[key]
+    for (const meal of meals) {
+        const recipeName = finalMenu[meal]
         if (recipeName) {
             const recipe = await prisma.recipe.findUnique({
                 where: {
                     name_phase: {
                         name: recipeName,
-                        phase: targetPhaseType
+                        phase: sourcePhase
                     }
                 },
                 select: {
@@ -129,73 +123,71 @@ export async function getNutritionData(dateRaw?: Date | string) {
                     isPremium: true
                 }
             })
-            menuDetails[key] = recipe
-        } else {
-            menuDetails[key] = null
+            if (recipe) {
+                console.log(`DEBUG: Recipe found: ${recipe.name}`)
+            } else {
+                console.log(`DEBUG: Recipe NOT FOUND: ${recipeName} for phase ${sourcePhase}`)
+            }
+            enrichedMenu[meal] = recipe
         }
     }
 
-    // 5. FETCH GUIDELINES (PhaseGuideline)
+    // --- 4. Guidelines (PhaseGuideline) ---
     const guidelines = await prisma.phaseGuideline.findMany({
-        where: { phase: targetPhaseType },
-        orderBy: { order: "asc" }
+        where: { phase: sourcePhase },
+        orderBy: { order: 'asc' }
     })
 
-    const allowed = guidelines.filter(g => g.type === "ALLOWED").map(g => g.content)
-    const forbidden = guidelines.filter(g => g.type === "FORBIDDEN").map(g => g.content)
+    const formattedGuidelines = {
+        allowed: guidelines.filter(g => g.type === 'ALLOWED').map(g => g.content),
+        forbidden: guidelines.filter(g => g.type === 'FORBIDDEN').map(g => g.content)
+    }
 
-    // 6. CHECK COMPLETION (DailyLog)
+    // --- 5. État de complétion (DailyLog) ---
     const dailyLog = await prisma.dailyLog.findUnique({
-        where: {
-            userId_date: {
-                userId: user.id,
-                date: startOfDay(targetDate)
-            }
-        },
-        select: { nutritionDone: true }
-    })
-
-    return {
-        menu: menuDetails,
-        guidelines: {
-            allowed,
-            forbidden
-        },
-        phase: targetPhaseType,
-        isCompleted: dailyLog?.nutritionDone || false
-    }
-}
-
-/**
- * Validates daily nutrition by marking it as done in the DailyLog.
- */
-export async function validateDailyNutrition(dateRaw: Date | string) {
-    const user = await getOrCreateUser()
-    if (!user) {
-        throw new Error("Utilisateur non authentifié")
-    }
-
-    const targetDate = startOfDay(new Date(dateRaw))
-
-    await prisma.dailyLog.upsert({
         where: {
             userId_date: {
                 userId: user.id,
                 date: targetDate
             }
-        },
-        update: {
-            nutritionDone: true
+        }
+    })
+
+    return {
+        menu: enrichedMenu,
+        guidelines: formattedGuidelines,
+        phase: sourcePhase,
+        isCompleted: dailyLog?.nutritionDone || false,
+        date: targetDate
+    }
+}
+
+/**
+ * Valide la nutrition pour une journée donnée.
+ */
+export async function validateDailyNutrition(dateInput: Date) {
+    const user = await getOrCreateUser()
+    if (!user) throw new Error("Non autorisé")
+
+    const date = startOfDay(dateInput)
+
+    await prisma.dailyLog.upsert({
+        where: {
+            userId_date: {
+                userId: user.id,
+                date: date
+            }
         },
         create: {
             userId: user.id,
-            date: targetDate,
+            date: date,
+            nutritionDone: true
+        },
+        update: {
             nutritionDone: true
         }
     })
 
     revalidatePath("/nutrition")
-    revalidatePath("/dashboard")
-
     return { success: true }
 }
