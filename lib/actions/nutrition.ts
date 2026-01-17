@@ -163,6 +163,139 @@ export async function getNutritionData(dateInput?: Date) {
 }
 
 /**
+ * Récupère tous les jours de la phase active avec leurs informations.
+ */
+export async function getPhaseDays() {
+    const user = await getOrCreateUser()
+    if (!user) return []
+
+    const activePhase = user.phases[0]
+    if (!activePhase) return []
+
+    const startDate = startOfDay(activePhase.startDate)
+    const endDate = activePhase.plannedEndDate
+        ? startOfDay(activePhase.plannedEndDate)
+        : addDays(startDate, 7) // Default 7 days if no end date
+
+    const days = []
+    let currentDate = startDate
+    let dayNumber = 1
+
+    while (isBefore(currentDate, endDate) || currentDate.getTime() === endDate.getTime()) {
+        days.push({
+            dayNumber,
+            date: currentDate,
+            label: `Jour ${dayNumber}`
+        })
+        currentDate = addDays(currentDate, 1)
+        dayNumber++
+    }
+
+    return days
+}
+
+/**
+ * Récupère les données de menu pour une semaine complète.
+ */
+export async function getWeekData(weekNumber: number = 1) {
+    const user = await getOrCreateUser()
+    if (!user) return null
+
+    const activePhase = user.phases[0]
+    if (!activePhase) return null
+
+    const phaseStartDate = startOfDay(activePhase.startDate)
+    const weekStartDate = addDays(phaseStartDate, (weekNumber - 1) * 7)
+
+    const daysData = []
+    for (let i = 0; i < 7; i++) {
+        const currentDate = addDays(weekStartDate, i)
+        const dayNumber = Math.floor((currentDate.getTime() - phaseStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+
+        // Fetch menu for this day
+        const menuData = await getNutritionData(currentDate)
+
+        daysData.push({
+            dayNumber,
+            date: currentDate,
+            menu: menuData?.menu || null,
+            isCompleted: menuData?.isCompleted || false
+        })
+    }
+
+    return {
+        weekNumber,
+        weekStartDate,
+        days: daysData,
+        phase: activePhase.type
+    }
+}
+
+/**
+ * Récupère les données complètes de la phase active.
+ */
+export async function getPhaseData() {
+    const user = await getOrCreateUser()
+    if (!user) return null
+
+    const activePhase = user.phases[0]
+    if (!activePhase) return null
+
+    const phaseStartDate = startOfDay(activePhase.startDate)
+    const phaseEndDate = activePhase.plannedEndDate
+        ? startOfDay(activePhase.plannedEndDate)
+        : addDays(phaseStartDate, 84) // Default 12 weeks
+
+    // Calculate total days and current day
+    const totalDays = Math.floor((phaseEndDate.getTime() - phaseStartDate.getTime()) / (1000 * 60 * 60 * 24))
+    const currentDay = Math.floor((new Date().getTime() - phaseStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+    const totalWeeks = Math.ceil(totalDays / 7)
+
+    // Build weeks data
+    const weeksData = []
+    for (let weekNum = 1; weekNum <= totalWeeks; weekNum++) {
+        const weekStart = addDays(phaseStartDate, (weekNum - 1) * 7)
+        const weekEnd = addDays(weekStart, 6)
+
+        // Count completed days in this week
+        let completedDays = 0
+        for (let i = 0; i < 7; i++) {
+            const dayDate = addDays(weekStart, i)
+            if (isBefore(dayDate, phaseEndDate) || dayDate.getTime() === phaseEndDate.getTime()) {
+                const log = await prisma.dailyLog.findUnique({
+                    where: {
+                        userId_date: {
+                            userId: user.id,
+                            date: startOfDay(dayDate)
+                        }
+                    }
+                })
+                if (log?.nutritionDone) completedDays++
+            }
+        }
+
+        weeksData.push({
+            weekNumber: weekNum,
+            weekStart,
+            weekEnd,
+            completedDays,
+            totalDays: 7
+        })
+    }
+
+    return {
+        phase: activePhase.type,
+        startDate: phaseStartDate,
+        endDate: phaseEndDate,
+        currentDay,
+        totalDays,
+        totalWeeks,
+        weeks: weeksData,
+        progressPercentage: Math.min(100, Math.round((currentDay / totalDays) * 100))
+    }
+}
+
+/**
  * Valide la nutrition pour une journée donnée.
  */
 export async function validateDailyNutrition(dateInput: Date) {
