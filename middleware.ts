@@ -41,6 +41,20 @@ export async function middleware(request: NextRequest) {
         if (error) {
             console.error('[Middleware] Auth Error:', error.message)
         }
+
+        // 🔒 Route Protection
+        const isProtectedRoute = ['/dashboard', '/onboarding', '/profile'].some(path =>
+            request.nextUrl.pathname.startsWith(path)
+        )
+
+        if (isProtectedRoute && !user) {
+            const redirectUrl = request.nextUrl.clone()
+            redirectUrl.pathname = '/login'
+            // Optional: Add redirect param to return after login
+            // redirectUrl.searchParams.set('next', request.nextUrl.pathname)
+            return NextResponse.redirect(redirectUrl)
+        }
+
     } catch (err: any) {
         console.error('[Middleware] Unexpected Error:', err.message || err)
     }

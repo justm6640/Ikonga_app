@@ -34,7 +34,7 @@ export function FloatingNavbar() {
                         Connexion
                     </Link>
                     <Link
-                        href="/dashboard"
+                        href="/signup"
                         className="bg-ikonga-gradient text-white px-5 sm:px-7 py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg shadow-pink-500/20 hover:scale-[1.05] transition-all active:scale-95 whitespace-nowrap"
                     >
                         Bilan Gratuit
