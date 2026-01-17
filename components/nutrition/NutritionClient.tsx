@@ -5,6 +5,9 @@ import { NutritionHeader } from "./NutritionHeader"
 import { MealCard } from "./MealCard"
 import { WeeklyView } from "./WeeklyView"
 import { PhaseView } from "./PhaseView"
+import { RecipesView } from "./RecipesView"
+import { ShoppingListView } from "./ShoppingListView"
+import { ComposerView } from "./ComposerView"
 import { RecipeModal } from "@/components/dashboard/RecipeModal"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { ChevronDown, BookOpen } from "lucide-react"
@@ -15,7 +18,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { getNutritionData, getWeekData, getPhaseData } from "@/lib/actions/nutrition"
+import { getNutritionData, getWeekData, getPhaseData, getRecipes, getShoppingList } from "@/lib/actions/nutrition"
 import { format, addDays } from "date-fns"
 import { fr } from "date-fns/locale"
 
@@ -33,6 +36,9 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
     const [currentData, setCurrentData] = useState(initialData)
     const [weekData, setWeekData] = useState<any>(null)
     const [phaseData, setPhaseData] = useState<any>(null)
+    const [recipes, setRecipes] = useState<any[]>([])
+    const [shoppingData, setShoppingData] = useState<any>(null)
+    const [currentView, setCurrentView] = useState<"menus" | "recipes" | "alternatives" | "shopping" | "composer">("menus")
     const [isPending, startTransition] = useTransition()
 
     // Calculate number of weeks in phase
@@ -56,6 +62,13 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
         startTransition(async () => {
             const data = await getWeekData(weekNum)
             setWeekData(data)
+        })
+    }
+
+    const handleShoppingWeekChange = (weekNum: number) => {
+        startTransition(async () => {
+            const data = await getShoppingList(weekNum)
+            setShoppingData(data)
         })
     }
 
@@ -98,37 +111,89 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                     <DropdownMenuTrigger asChild>
                         <button className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                             <div className="flex items-center gap-3">
-                                <BookOpen size={20} className="text-slate-400" />
-                                <span className="font-serif font-black text-slate-900">Menus</span>
+                                {currentView === "menus" && <BookOpen size={20} className="text-slate-400" />}
+                                {currentView === "recipes" && <span className="text-lg">🍽️</span>}
+                                {currentView === "alternatives" && <span className="text-lg">🔄</span>}
+                                {currentView === "shopping" && <span className="text-lg">🛒</span>}
+                                {currentView === "composer" && <span className="text-lg">✏️</span>}
+                                <span className="font-serif font-black text-slate-900">
+                                    {currentView === "menus" && "Menus"}
+                                    {currentView === "recipes" && "Recettes"}
+                                    {currentView === "alternatives" && "Alternatives"}
+                                    {currentView === "shopping" && "Liste courses"}
+                                    {currentView === "composer" && "Composer"}
+                                </span>
                             </div>
                             <ChevronDown size={20} className="text-slate-400" />
                         </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-[250px]">
-                        <DropdownMenuItem className="cursor-pointer py-3 px-4 bg-blue-50">
+                        <DropdownMenuItem onClick={() => setCurrentView("menus")} className="cursor-pointer py-3 px-4 bg-blue-50">
                             <BookOpen size={18} className="mr-3 text-purple-500" />
                             <span className="font-bold">Menus</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer py-3 px-4">
+                        <DropdownMenuItem
+                            onClick={() => {
+                                setCurrentView("recipes")
+                                startTransition(async () => {
+                                    const allRecipes = await getRecipes()
+                                    setRecipes(allRecipes)
+                                })
+                            }}
+                            className="cursor-pointer py-3 px-4"
+                        >
                             <span className="mr-3 text-lg">🍽️</span>
                             <span className="font-bold">Recettes</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer py-3 px-4">
+                        <DropdownMenuItem onClick={() => setCurrentView("alternatives")} className="cursor-pointer py-3 px-4">
                             <span className="mr-3 text-lg">🔄</span>
                             <span className="font-bold">Alternatives</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer py-3 px-4">
+                        <DropdownMenuItem
+                            onClick={() => {
+                                setCurrentView("shopping")
+                                startTransition(async () => {
+                                    const data = await getShoppingList(1)
+                                    setShoppingData(data)
+                                })
+                            }}
+                            className="cursor-pointer py-3 px-4"
+                        >
                             <span className="mr-3 text-lg">🛒</span>
                             <span className="font-bold">Liste courses</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer py-3 px-4">
+                        <DropdownMenuItem onClick={() => setCurrentView("composer")} className="cursor-pointer py-3 px-4">
                             <span className="mr-3 text-lg">✏️</span>
                             <span className="font-bold">Composer</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                {isMenuOpen && (
+                {currentView === "recipes" ? (
+                    <div className="p-4 border-t border-slate-50">
+                        <RecipesView
+                            initialRecipes={recipes}
+                            currentPhase={currentData.phase}
+                            onRecipeClick={handleRecipeClick}
+                        />
+                    </div>
+                ) : currentView === "shopping" ? (
+                    <div className="p-4 border-t border-slate-50">
+                        <ShoppingListView
+                            shoppingData={shoppingData}
+                            availableWeeks={totalWeeks}
+                            onWeekChange={handleShoppingWeekChange}
+                        />
+                    </div>
+                ) : currentView === "composer" ? (
+                    <div className="p-4 border-t border-slate-50">
+                        <ComposerView
+                            phaseDays={phaseDays}
+                            currentPhase={currentData.phase}
+                            initialData={currentData}
+                        />
+                    </div>
+                ) : isMenuOpen && (
                     <div className="p-4 pt-0 border-t border-slate-50 animate-in slide-in-from-top-2">
                         {/* Segmented Control / Tabs */}
                         <Tabs defaultValue="day" onValueChange={handleTabChange} className="w-full">

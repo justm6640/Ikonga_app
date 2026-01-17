@@ -102,6 +102,7 @@ export async function getNutritionData(dateInput?: Date) {
     for (const meal of meals) {
         const recipeName = finalMenu[meal]
         if (recipeName) {
+            // First try to find a real recipe
             const recipe = await prisma.recipe.findUnique({
                 where: {
                     name_phase: {
@@ -123,12 +124,19 @@ export async function getNutritionData(dateInput?: Date) {
                     isPremium: true
                 }
             })
+
             if (recipe) {
-                console.log(`DEBUG: Recipe found: ${recipe.name}`)
+                enrichedMenu[meal] = recipe
             } else {
-                console.log(`DEBUG: Recipe NOT FOUND: ${recipeName} for phase ${sourcePhase}`)
+                // If no recipe found (it's a custom text), create a text-only placeholder
+                enrichedMenu[meal] = {
+                    id: `custom-${Math.random()}`, // Temporary ID
+                    name: recipeName,
+                    ingredients: [],
+                    instructions: [],
+                    isCustom: true // Flag to indicate it's text only
+                }
             }
-            enrichedMenu[meal] = recipe
         }
     }
 
@@ -296,6 +304,135 @@ export async function getPhaseData() {
 }
 
 /**
+ * Récupère toutes les recettes avec filtres optionnels.
+ */
+export async function getRecipes(filters?: {
+    phase?: PhaseType
+    mealType?: string
+    search?: string
+}) {
+    const user = await getOrCreateUser()
+    if (!user) return []
+
+    const where: any = {}
+
+    // Filter by phase
+    if (filters?.phase) {
+        where.allowedPhases = {
+            has: filters.phase
+        }
+    }
+
+    // Filter by meal type
+    if (filters?.mealType && filters.mealType !== "Tous") {
+        where.mealType = filters.mealType
+    }
+
+    // Search filter
+    if (filters?.search) {
+        where.name = {
+            contains: filters.search,
+            mode: 'insensitive'
+        }
+    }
+
+    const recipes = await prisma.recipe.findMany({
+        where,
+        orderBy: {
+            name: 'asc'
+        },
+        take: 50 // Limit results
+    })
+
+    return recipes
+}
+
+/**
+ * Génère une liste de courses basée sur les menus de la semaine.
+ */
+export async function getShoppingList(weekNumber: number = 1) {
+    const user = await getOrCreateUser()
+    if (!user) return null
+
+    const activePhase = user.phases[0]
+    if (!activePhase) return null
+
+    const phaseStartDate = startOfDay(activePhase.startDate)
+    const weekStartDate = addDays(phaseStartDate, (weekNumber - 1) * 7)
+
+    // Collect all ingredients from the week's recipes
+    const ingredientsMap = new Map<string, { name: string; quantity: string; category: string }>()
+
+    for (let i = 0; i < 7; i++) {
+        const currentDate = addDays(weekStartDate, i)
+        const menuData = await getNutritionData(currentDate)
+
+        if (menuData?.menu) {
+            const recipes = [
+                menuData.menu.breakfast,
+                menuData.menu.snack,
+                menuData.menu.lunch,
+                menuData.menu.dinner
+            ].filter(Boolean)
+
+            for (const recipe of recipes) {
+                if (recipe?.ingredients) {
+                    // Parse ingredients (assuming they're stored as JSON array)
+                    const ingredients = typeof recipe.ingredients === 'string'
+                        ? JSON.parse(recipe.ingredients)
+                        : recipe.ingredients
+
+                    if (Array.isArray(ingredients)) {
+                        ingredients.forEach((ing: any) => {
+                            const key = ing.name?.toLowerCase() || ''
+                            if (key && !ingredientsMap.has(key)) {
+                                ingredientsMap.set(key, {
+                                    name: ing.name || '',
+                                    quantity: ing.quantity || '',
+                                    category: ing.category || 'Autres'
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+        }
+    }
+
+    // Group by category
+    const categorized: Record<string, Array<{ name: string; quantity: string }>> = {}
+
+    ingredientsMap.forEach((ingredient) => {
+        const category = ingredient.category || 'Autres'
+        if (!categorized[category]) {
+            categorized[category] = []
+        }
+        categorized[category].push({
+            name: ingredient.name,
+            quantity: ingredient.quantity
+        })
+    })
+
+    // Sort categories and items
+    const sortedCategories = Object.keys(categorized).sort()
+    const result: Array<{ category: string; items: Array<{ name: string; quantity: string }> }> = []
+
+    sortedCategories.forEach(category => {
+        result.push({
+            category,
+            items: categorized[category].sort((a, b) => a.name.localeCompare(b.name))
+        })
+    })
+
+    return {
+        weekNumber,
+        weekStartDate,
+        categories: result,
+        totalItems: ingredientsMap.size
+    }
+}
+
+/**
  * Valide la nutrition pour une journée donnée.
  */
 export async function validateDailyNutrition(dateInput: Date) {
@@ -323,4 +460,34 @@ export async function validateDailyNutrition(dateInput: Date) {
 
     revalidatePath("/nutrition")
     return { success: true }
+}
+
+/**
+ * Sauvegarde un menu personnalisé pour une date donnée.
+ */
+export async function saveCustomMenu(date: Date, content: any) {
+    const user = await getOrCreateUser()
+    if (!user) return null
+
+    const targetDate = startOfDay(date)
+
+    const result = await prisma.userCustomMenu.upsert({
+        where: {
+            userId_date: {
+                userId: user.id,
+                date: targetDate
+            }
+        },
+        update: {
+            content
+        },
+        create: {
+            userId: user.id,
+            date: targetDate,
+            content
+        }
+    })
+
+    revalidatePath("/nutrition")
+    return result
 }
