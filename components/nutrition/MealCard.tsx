@@ -10,13 +10,11 @@ interface MealCardProps {
 }
 
 export function MealCard({ category, recipe, onClick }: MealCardProps) {
-    if (!recipe) return null
-
     return (
         <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
             {/* Thumbnail/Icon */}
             <div className="w-16 h-16 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 overflow-hidden">
-                {recipe.imageUrl ? (
+                {recipe?.imageUrl ? (
                     <img src={recipe.imageUrl} alt={recipe.name} className="w-full h-full object-cover" />
                 ) : (
                     <ChefHat size={32} className="text-slate-300" />
@@ -29,14 +27,18 @@ export function MealCard({ category, recipe, onClick }: MealCardProps) {
                     {category}
                 </span>
                 <h3 className="text-lg font-serif font-black text-slate-900 leading-tight">
-                    {recipe.name}
+                    {recipe?.name || "Menu en préparation"}
                 </h3>
-                <Button
-                    onClick={onClick}
-                    className="h-8 px-4 rounded-full bg-[#FF7F50] hover:bg-[#FF6347] text-white text-[10px] font-bold uppercase tracking-widest"
-                >
-                    Voir la recette
-                </Button>
+                {recipe ? (
+                    <Button
+                        onClick={onClick}
+                        className="h-8 px-4 rounded-full bg-[#FF7F50] hover:bg-[#FF6347] text-white text-[10px] font-bold uppercase tracking-widest"
+                    >
+                        Voir la recette
+                    </Button>
+                ) : (
+                    <p className="text-xs text-slate-400 italic">Votre menu sera bientôt disponible</p>
+                )}
             </div>
         </div>
     )
