@@ -42,7 +42,7 @@ export default async function DashboardLayout({
 
                     {/* Page Content - Scrollable */}
                     {/* pb-24 ensures content isn't hidden behind BottomNav on Mobile */}
-                    <main className="flex-1 overflow-y-auto p-4 pb-24 md:p-8 md:pb-8">
+                    <main className="flex-1 overflow-y-auto p-0 pb-24 md:p-8 md:pb-8">
                         {children}
                     </main>
 

@@ -24,7 +24,7 @@ export default async function NutritionPage() {
     }
 
     return (
-        <div className="bg-slate-50 min-h-screen p-4 sm:p-8">
+        <div className="bg-slate-50 min-h-screen p-0 sm:p-8">
             <NutritionClient
                 initialData={safeData}
                 subscriptionTier={user.subscriptionTier.replace('_', ' ') + " SEM."}

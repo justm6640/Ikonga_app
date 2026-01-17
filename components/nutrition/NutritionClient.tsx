@@ -86,7 +86,7 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
     }
 
     return (
-        <div className="max-w-full mx-auto space-y-8 animate-in fade-in duration-700 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-full mx-auto space-y-8 animate-in fade-in duration-700 px-0 sm:px-6 lg:px-8">
             <NutritionHeader
                 subscriptionTier={subscriptionTier}
                 phase={currentData.phase}
