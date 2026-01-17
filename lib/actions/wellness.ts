@@ -1,223 +1,116 @@
 "use server"
 
 import prisma from "@/lib/prisma"
+import { getOrCreateUser } from "@/lib/actions/user"
 import { revalidatePath } from "next/cache"
-import { startOfDay } from "date-fns"
+import { WellnessEngine } from "@/lib/engines/wellness-engine"
 
-/**
- * Récupère le log wellness du jour pour un utilisateur.
- * Retourne un objet vide par défaut si inexistant.
- */
-export async function getDailyWellness(userId: string, date: Date) {
-    try {
-        const normalizedDate = startOfDay(date)
-
-        const log = await prisma.wellnessLog.findUnique({
-            where: {
-                userId_date: {
-                    userId,
-                    date: normalizedDate
-                }
-            }
-        })
-
-        return log || {
-            waterIntake: 0,
-            sleepHours: null,
-            sleepQuality: null,
-            mood: null,
-            steps: null,
-            sport: false
-        }
-    } catch (error) {
-        console.error("[GET_DAILY_WELLNESS]", error)
-        return {
-            waterIntake: 0,
-            sleepHours: null,
-            sleepQuality: null,
-            mood: null,
-            steps: null,
-            sport: false
-        }
-    }
-}
-
-/**
- * Ajoute ou retire un verre d'eau (250ml).
- * Crée automatiquement le log s'il n'existe pas.
- */
-export async function toggleWaterGlass(userId: string, date: Date, increment: boolean) {
-    try {
-        const normalizedDate = startOfDay(date)
-
-        // Récupérer la valeur actuelle ou créer avec upsert
-        const result = await prisma.wellnessLog.upsert({
-            where: {
-                userId_date: {
-                    userId,
-                    date: normalizedDate
-                }
-            },
-            update: {
-                waterIntake: {
-                    increment: increment ? 1 : -1
-                }
-            },
-            create: {
-                userId,
-                date: normalizedDate,
-                waterIntake: increment ? 1 : 0
-            }
-        })
-
-        // S'assurer que waterIntake ne descend jamais en dessous de 0
-        if (result.waterIntake < 0) {
-            await prisma.wellnessLog.update({
-                where: { id: result.id },
-                data: { waterIntake: 0 }
-            })
-            revalidatePath("/dashboard")
-            return 0
-        }
-
-        revalidatePath("/dashboard")
-        return result.waterIntake
-    } catch (error) {
-        console.error("[TOGGLE_WATER_GLASS]", error)
-        throw new Error("Impossible de mettre à jour l'hydratation")
-    }
-}
-
-/**
- * Met à jour une métrique wellness spécifique.
- * Fonction générique pour sommeil, humeur, pas, sport, etc.
- */
-export async function updateWellnessMetric(
-    userId: string,
-    date: Date,
-    field: string,
-    value: any
-) {
-    try {
-        const normalizedDate = startOfDay(date)
-
-        // Liste blanche des champs autorisés
-        const allowedFields = ['sleepHours', 'sleepQuality', 'mood', 'steps', 'sport']
-        if (!allowedFields.includes(field)) {
-            throw new Error("Champ non autorisé")
-        }
-
-        const result = await prisma.wellnessLog.upsert({
-            where: {
-                userId_date: {
-                    userId,
-                    date: normalizedDate
-                }
-            },
-            update: {
-                [field]: value
-            },
-            create: {
-                userId,
-                date: normalizedDate,
-                [field]: value
-            }
-        })
-
-        revalidatePath("/dashboard")
-        return { success: true, data: result }
-    } catch (error) {
-        console.error("[UPDATE_WELLNESS_METRIC]", error)
-        return { success: false, error: "Impossible de mettre à jour la métrique" }
-    }
-}
-
-/**
- * Récupère les logs wellness des N derniers jours.
- */
-export async function getRecentWellnessLogs(userId: string, days: number = 7) {
-    try {
-        const logs = await prisma.wellnessLog.findMany({
-            where: { userId },
-            orderBy: { date: 'desc' },
-            take: days
-        })
-
-        return logs
-    } catch (error) {
-        console.error("[GET_RECENT_WELLNESS_LOGS]", error)
-        return []
-    }
-}
-
-/**
- * Soumet le check-in bien-être quotidien (Sauvegarde dans DailyLog).
- */
-export async function submitWellnessLog(data: {
-    sleepHours: number
-    stressLevel: number
-    energyLevel: number
+export async function logWellnessData(data: {
+    date: Date
+    waterIntake?: number
+    sleepHours?: number
+    sleepQuality?: string
+    stressLevel?: number
+    energyLevel?: number
+    mood?: string
+    feeling?: string
+    needs?: string
+    steps?: number
+    sport?: boolean
 }) {
-    try {
-        const { getOrCreateUser } = await import("./user")
-        const { calculateDailyScore } = await import("@/lib/engines/wellness")
+    const user = await getOrCreateUser()
+    if (!user) throw new Error("Unauthorized")
 
-        const user = await getOrCreateUser()
-        if (!user) throw new Error("Utilisateur non authentifié")
+    const userId = user.id
 
-        const today = startOfDay(new Date())
-        const score = calculateDailyScore(data.stressLevel, data.energyLevel, data.sleepHours)
+    // 1. We already have the user details from getOrCreateUser, typically.
+    // However, if we need specific analysis or latest weight, we can assume user object has correct basics or refetch if critical.
+    // For weight calculation:
+    const waterGoal = user.startWeight ? WellnessEngine.calculateWaterGoal(user.startWeight) / 250 : 8 // est. glasses
 
-        const result = await prisma.dailyLog.upsert({
-            where: {
-                userId_date: {
-                    userId: user.id,
-                    date: today
-                }
-            },
-            update: {
-                sleepHours: Math.round(data.sleepHours),
-                stressLevel: data.stressLevel,
-                energyLevel: data.energyLevel,
-                wellnessScore: score
-            },
-            create: {
-                userId: user.id,
-                date: today,
-                sleepHours: Math.round(data.sleepHours),
-                stressLevel: data.stressLevel,
-                energyLevel: data.energyLevel,
-                wellnessScore: score
+    // We merge existing data with new data for accurate scoring
+    const existingLog = await prisma.wellnessLog.findUnique({
+        where: {
+            userId_date: {
+                userId,
+                date: data.date
             }
-        })
+        }
+    })
 
-        revalidatePath("/wellness")
-        revalidatePath("/dashboard")
+    const mergedData = { ...existingLog, ...data }
 
-        return { success: true, data: result }
-    } catch (error) {
-        console.error("[SUBMIT_WELLNESS_LOG]", error)
-        return { success: false, error: "Erreur lors de la sauvegarde" }
-    }
+    const score = WellnessEngine.calculateScore({
+        sleepHours: mergedData.sleepHours,
+        sleepQuality: mergedData.sleepQuality,
+        stressLevel: mergedData.stressLevel,
+        energyLevel: mergedData.energyLevel,
+        waterIntake: mergedData.waterIntake,
+        waterGoal: waterGoal
+    })
+
+    const status = WellnessEngine.determineStatus({
+        stressLevel: mergedData.stressLevel,
+        sleepQuality: mergedData.sleepQuality,
+        energyLevel: mergedData.energyLevel,
+        score
+    })
+
+    // Upsert Log
+    await prisma.wellnessLog.upsert({
+        where: {
+            userId_date: {
+                userId,
+                date: data.date
+            }
+        },
+        update: {
+            ...data,
+            wellnessScore: score,
+            dayStatus: status,
+            updatedAt: new Date()
+        },
+        create: {
+            userId,
+            ...data,
+            wellnessScore: score,
+            dayStatus: status,
+        }
+    })
+
+    revalidatePath("/dashboard")
+    revalidatePath("/wellness")
+
+    return { success: true, score, status }
 }
 
-/**
- * Récupère les logs DailyLog récents pour alimenter le WellnessChart.
- */
-export async function getRecentDailyWellnessLogs(userId: string, days: number = 7) {
-    try {
-        const logs = await prisma.dailyLog.findMany({
-            where: {
-                userId,
-                wellnessScore: { not: null }
-            },
-            orderBy: { date: 'desc' },
-            take: days
-        })
+export async function getWellnessDashboardData() {
+    const user = await getOrCreateUser()
+    if (!user) return null
 
-        return logs
-    } catch (error) {
-        console.error("[GET_RECENT_DAILY_WELLNESS_LOGS]", error)
-        return []
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const log = await prisma.wellnessLog.findUnique({
+        where: {
+            userId_date: {
+                userId: user.id,
+                date: today
+            }
+        }
+    })
+
+    const waterGoal = user.startWeight ? WellnessEngine.calculateWaterGoal(user.startWeight) : 2000
+
+    // Coach Message
+    const message = log?.dayStatus
+        ? WellnessEngine.generateCoachMessage(log.dayStatus, user.gender, log)
+        : "Connecte-toi à tes sensations pour démarrer la journée."
+
+    return {
+        log,
+        waterGoal,
+        message,
+        gender: user.gender
     }
 }

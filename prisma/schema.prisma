@@ -376,19 +376,48 @@ model WellnessLog {
   // 2. SOMMEIL
   sleepHours   Float? // Nombre d'heures (ex: 7.5)
   sleepQuality String? // "BAD", "AVERAGE", "GOOD", "EXCELLENT"
+  sleepStart   DateTime?
+  sleepEnd     DateTime?
+
+  // 3. STRESS (Nouveau)
+  stressLevel Int?   // 1-10
+  stressTags  Json?  // ["Examen", "Travail", "Famille"]
+
+  // 4. ÉNERGIE (Nouveau)
+  energyLevel Int?   // 1-10
+
+  // 5. HUMEUR / JOURNAL (Mise à jour)
+  mood      String? // Emoji ou Enum principal
+  feeling   String? // "Ce que je ressens" (Texte court)
+  needs     String? // "Ce dont j'ai besoin" (Texte court)
   
-  // 3. HUMEUR / ÉNERGIE
-  mood      String? // Emoji ou Enum : "TIRED", "ENERGETIC", "STRESSED", "HAPPY"
-  
-  // 4. MOUVEMENT
+  // 6. MOUVEMENT
   steps     Int?    // Nombre de pas
   sport     Boolean @default(false) // A fait du sport aujourd'hui ?
+  
+  // 7. INTELLIGENCE IKONGA
+  wellnessScore Float? // 0-100
+  recoveryScore Float? // 0-100
+  dayStatus     WellnessStatus? // FRAGILE, STABLE, POWERFUL
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Contrainte : Un seul log par jour par user
   @@unique([userId, date])
+}
+
+enum WellnessStatus {
+  FRAGILE
+  STABLE
+  POWERFUL
+}
+
+enum CyclePhase {
+  MENSTRUATION
+  FOLLICULAR
+  OVULATION
+  LUTEAL
 }
 
 model Workout {

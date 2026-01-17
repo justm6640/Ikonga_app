@@ -16,8 +16,8 @@ export const NAV_ITEMS: NavItem[] = [
         requiredFeature: 'DASHBOARD_VIEW'
     },
     {
-        label: "Journal",
-        href: "/journal",
+        label: "IKOWELLNESS",
+        href: "/wellness",
         icon: Map, // Keeping Map or switching to something else if needed
         requiredFeature: 'JOURNAL'
     },
