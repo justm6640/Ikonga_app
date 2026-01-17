@@ -391,33 +391,59 @@ model WellnessLog {
   @@unique([userId, date])
 }
 
-model FitnessVideo {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  videoUrl    String   // Lien YouTube ou Vimeo ou S3
-  thumbnailUrl String? // Image de couverture
-  duration    Int      // En minutes (ex: 15, 30)
+model Workout {
+  id            String         @id @default(uuid())
+  title         String
+  description   String?
+  videoUrl      String
+  thumbnailUrl  String?
+  duration      Int            // En minutes
+  metValue      Float          // Metabolic Equivalent of Task
   
-  difficulty  String   // "BEGINNER", "INTERMEDIATE", "ADVANCED"
-  category    String   // "CARDIO", "YOGA", "RENFO", "HIIT"
+  intensity     WorkoutIntensity
+  type          WorkoutType
   
-  createdAt   DateTime @default(now())
-  workoutLogs WorkoutLog[]
+  allowedPhases PhaseType[]
+  gender        WorkoutGender  @default(ALL)
+
+  createdAt     DateTime       @default(now())
+  workoutLogs   WorkoutLog[]
 }
 
 model WorkoutLog {
-  id             String       @id @default(uuid())
-  userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  fitnessVideoId String
-  fitnessVideo   FitnessVideo @relation(fields: [fitnessVideoId], references: [id])
+  workoutId    String
+  workout      Workout  @relation(fields: [workoutId], references: [id])
   
-  date           DateTime     // Date de réalisation
-  feedback       String?      // "TOO_HARD", "PERFECT", "TOO_EASY"
+  date         DateTime 
+  calories     Int?     @default(0)
+  feedback     String?  
   
-  createdAt      DateTime     @default(now())
+  createdAt    DateTime @default(now())
 
   @@index([userId, date])
+}
+
+enum WorkoutIntensity {
+  LOW
+  MODERATE
+  HIGH
+}
+
+enum WorkoutType {
+  CARDIO
+  HIIT
+  STRENGTH
+  YOGA
+  DANCE
+  MIXED
+}
+
+enum WorkoutGender {
+  MALE
+  FEMALE
+  ALL
 }

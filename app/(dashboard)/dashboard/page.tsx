@@ -19,6 +19,7 @@ import { MetricsGrid } from "@/components/dashboard/MetricsGrid";
 import { getOrCreateUser } from "@/lib/actions/user";
 import Link from "next/link";
 import { CountdownHero } from "@/components/dashboard/CountdownHero";
+import { FitnessEngine } from "@/lib/engines/fitness-engine";
 
 export default async function DashboardPage() {
     // 1. Fetch User (Self-healing)
@@ -88,13 +89,11 @@ export default async function DashboardPage() {
     const activePhaseType = activePhase?.type || "DETOX";
 
     // Parallel Fetch for Pillars
-    const [menu, fitness, wellness, beauty] = await Promise.all([
+    const [menu, workout, wellness, beauty] = await Promise.all([
         prisma.menu.findFirst({
             where: { phaseCompat: { has: activePhaseType } }
         }),
-        prisma.contentLibrary.findFirst({
-            where: { category: "FITNESS", targetPhases: { has: activePhaseType } }
-        }),
+        FitnessEngine.getDailyWorkoutRecommendation(dbUser),
         prisma.contentLibrary.findFirst({
             where: { category: "WELLNESS", targetPhases: { has: activePhaseType } }
         }),
@@ -136,7 +135,7 @@ export default async function DashboardPage() {
 
     pillarsData = {
         nutrition: todaysMenu ? { title: "Mon Menu IA", content: todaysMenu, phase: activePhaseType } : (menu ? { title: menu.title, content: menu.content, phase: activePhaseType } : null),
-        fitness: fitness ? { title: fitness.title } : null,
+        fitness: workout ? { title: workout.title } : { title: "Accéder au Hub" },
         wellness: wellness ? { title: wellness.title } : null,
         beauty: beauty ? { title: beauty.title } : null
     };

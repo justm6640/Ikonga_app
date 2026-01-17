@@ -3,7 +3,6 @@
 import { useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, PlayCircle, Loader2 } from "lucide-react"
-import { toggleVideoCompletion } from "@/lib/actions/fitness"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
@@ -12,9 +11,10 @@ interface VideoPlayerProps {
     videoUrl: string
     isCompleted: boolean
     title?: string
+    onComplete?: (id: string) => Promise<any>
 }
 
-export function VideoPlayer({ videoId, videoUrl, isCompleted, title }: VideoPlayerProps) {
+export function VideoPlayer({ videoId, videoUrl, isCompleted, title, onComplete }: VideoPlayerProps) {
     const [isPending, startTransition] = useTransition()
 
     // Extract YouTube ID if not provided (fallback)
@@ -28,12 +28,18 @@ export function VideoPlayer({ videoId, videoUrl, isCompleted, title }: VideoPlay
     const id = getYouTubeId(videoUrl) || "dQw4w9WgXcQ" // Fallback to safe placeholder
 
     const handleToggle = () => {
+        if (!onComplete) return
+
         startTransition(async () => {
-            const res = await toggleVideoCompletion(videoId)
-            if (res.success) {
-                toast.success(isCompleted ? "Séance retirée de ton historique." : "Séance validée ! Bravo pour tes efforts. ✨")
-            } else {
-                toast.error(res.error || "Une erreur est survenue")
+            try {
+                const res = await onComplete(videoId)
+                if (res?.success || res === undefined) {
+                    toast.success(isCompleted ? "Séance retirée de ton historique." : "Séance validée ! Bravo pour tes efforts. ✨")
+                } else {
+                    toast.error("Une erreur est survenue")
+                }
+            } catch (e) {
+                toast.error("Une erreur est survenue")
             }
         })
     }

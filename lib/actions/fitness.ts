@@ -1,176 +1,104 @@
 "use server"
 
-import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import prisma from "@/lib/prisma"
+import { getOrCreateUser } from "./user" // Assuming this exists common
+import { FitnessEngine } from "@/lib/engines/fitness-engine"
 import { startOfDay } from "date-fns"
 
 /**
- * Récupère la séance du jour pour l'utilisateur.
- * Retourne une vidéo aléatoire adaptée au niveau (BEGINNER par défaut en MVP).
- * Vérifie si la séance a déjà été complétée aujourd'hui.
+ * Récupère les données pour le Fitness Hub
  */
-export async function getTodayWorkout(userId: string) {
-    try {
-        // 1. Récupérer une vidéo adaptée (MVP: on prend BEGINNER ou toutes)
-        const videos = await prisma.fitnessVideo.findMany({
-            where: {
-                OR: [
-                    { difficulty: "BEGINNER" },
-                    { difficulty: "INTERMEDIATE" }
-                ]
-            },
-            orderBy: { createdAt: 'asc' }
-        })
+export async function getFitnessHubData() {
+    const user = await getOrCreateUser()
+    if (!user) return null
 
-        if (videos.length === 0) {
-            return { video: null, isCompleted: false }
-        }
+    // Charger les phases pour l'engine
+    const userWithPhases = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: { phases: { where: { isActive: true } } }
+    })
 
-        // Sélectionner une vidéo aléatoire (ou la première pour la démo)
-        const randomIndex = Math.floor(Math.random() * videos.length)
-        const selectedVideo = videos[randomIndex]
+    if (!userWithPhases) return null
 
-        // 2. Vérifier si déjà complétée aujourd'hui
-        const today = startOfDay(new Date())
-        const todayLog = await prisma.workoutLog.findFirst({
-            where: {
-                userId,
-                fitnessVideoId: selectedVideo.id,
-                date: {
-                    gte: today,
-                    lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
-                }
+    const recommendedWorkout = await FitnessEngine.getDailyWorkoutRecommendation(userWithPhases)
+    const alternatives = await FitnessEngine.getAlternatives(userWithPhases, recommendedWorkout?.id)
+
+    // Vérifier si une séance est déjà loggée aujourd'hui
+    const todayLog = await prisma.workoutLog.findFirst({
+        where: {
+            userId: user.id,
+            date: {
+                gte: startOfDay(new Date()),
+                lt: startOfDay(new Date(new Date().setDate(new Date().getDate() + 1)))
             }
-        })
-
-        return {
-            video: selectedVideo,
-            isCompleted: !!todayLog
         }
-    } catch (error) {
-        console.error("[GET_TODAY_WORKOUT]", error)
-        return { video: null, isCompleted: false }
+    })
+
+    return {
+        user: userWithPhases,
+        recommendedWorkout,
+        alternatives,
+        todayLog
     }
 }
 
 /**
- * Marque une séance comme complétée.
- * Crée une entrée dans WorkoutLog.
+ * Enregistre une séance réalisée
  */
-export async function completeWorkout(
-    userId: string,
-    videoId: string,
-    feedback?: string
-) {
-    try {
-        const today = startOfDay(new Date())
+export async function logWorkout(workoutId: string) {
+    const user = await getOrCreateUser()
+    if (!user) throw new Error("User not found")
 
-        // Vérifier si déjà complétée aujourd'hui
-        const existing = await prisma.workoutLog.findFirst({
-            where: {
-                userId,
-                fitnessVideoId: videoId,
-                date: {
-                    gte: today,
-                    lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
-                }
-            }
-        })
+    const workout = await prisma.workout.findUnique({
+        where: { id: workoutId }
+    })
 
-        if (existing) {
-            return { success: true, message: "Séance déjà validée aujourd'hui" }
+    if (!workout) throw new Error("Workout not found")
+
+    // Calcul des calories
+    // On utilise le poids actuel (last weight logged) ou startWeight ou vide
+    // Cherchons le dernier poids enregistré
+    const lastWeightLog = await prisma.dailyLog.findFirst({
+        where: { userId: user.id, weight: { not: null } },
+        orderBy: { date: 'desc' }
+    })
+
+    const userWeight = lastWeightLog?.weight || user.startWeight || 70 // Default 70kg if nothing
+    const calories = FitnessEngine.calculateCalories(userWeight, workout.duration, workout.metValue)
+
+    const date = new Date()
+
+    // 1. Créer le WorkoutLog
+    const log = await prisma.workoutLog.create({
+        data: {
+            userId: user.id,
+            workoutId: workout.id,
+            date: date,
+            calories: calories
         }
+    })
 
-        // Créer le log
-        await prisma.workoutLog.create({
-            data: {
-                userId,
-                fitnessVideoId: videoId,
-                date: today,
-                feedback
-            }
-        })
-
-        revalidatePath("/dashboard")
-        return { success: true, message: "Bravo ! Séance validée 🎉" }
-    } catch (error) {
-        console.error("[COMPLETE_WORKOUT]", error)
-        return { success: false, message: "Erreur lors de la validation" }
-    }
-}
-
-/**
- * Récupère l'historique des entraînements d'un utilisateur.
- */
-export async function getWorkoutHistory(userId: string, limit: number = 7) {
-    try {
-        const logs = await prisma.workoutLog.findMany({
-            where: { userId },
-            include: { fitnessVideo: true },
-            orderBy: { date: 'desc' },
-            take: limit
-        })
-
-        return logs
-    } catch (error) {
-        console.error("[GET_WORKOUT_HISTORY]", error)
-        return []
-    }
-}
-
-/**
- * Récupère toutes les vidéos disponibles (pour un catalogue).
- */
-export async function getAllFitnessVideos() {
-    try {
-        return await prisma.fitnessVideo.findMany({
-            orderBy: { createdAt: 'asc' }
-        })
-    } catch (error) {
-        console.error("[GET_ALL_FITNESS_VIDEOS]", error)
-        return []
-    }
-}
-
-/**
- * Alterne l'état de complétion d'une vidéo (ContentLog).
- */
-export async function toggleVideoCompletion(contentId: string) {
-    try {
-        const { getOrCreateUser } = await import("./user")
-        const user = await getOrCreateUser()
-        if (!user) throw new Error("Non autorisé")
-
-        // Vérifier si un log existe déjà pour cette vidéo et cet user
-        const existingLog = await prisma.contentLog.findFirst({
-            where: {
+    // 2. Mettre à jour le DailyLog (Workout Done)
+    await prisma.dailyLog.upsert({
+        where: {
+            userId_date: {
                 userId: user.id,
-                contentId: contentId
+                date: startOfDay(date)
             }
-        })
-
-        if (existingLog) {
-            // Toggle OFF : Supprimer le log
-            await prisma.contentLog.delete({
-                where: { id: existingLog.id }
-            })
-        } else {
-            // Toggle ON : Créer le log
-            await prisma.contentLog.create({
-                data: {
-                    userId: user.id,
-                    contentId: contentId,
-                    completedAt: new Date()
-                }
-            })
+        },
+        update: {
+            workoutDone: true
+        },
+        create: {
+            userId: user.id,
+            date: startOfDay(date),
+            workoutDone: true
         }
+    })
 
-        revalidatePath('/fitness')
-        revalidatePath('/dashboard')
+    revalidatePath("/fitness")
+    revalidatePath("/dashboard")
 
-        return { success: true }
-    } catch (error) {
-        console.error("[TOGGLE_VIDEO_COMPLETION]", error)
-        return { success: false, error: "Erreur lors de la mise à jour" }
-    }
+    return { success: true, calories }
 }
