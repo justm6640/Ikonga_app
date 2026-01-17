@@ -50,6 +50,11 @@ model User {
   customMenus       UserCustomMenu[]
   beautyProfile     BeautyProfile?
   beautyRecipes     BeautyRecipe[]
+  
+  // Admin Relations
+  adminActions      AdminLog[]       @relation("AdminActions")
+  targetedActions   AdminLog[]       @relation("TargetUser")
+  adminAlerts       AdminAlert[]
 
   @@index([email])
 }
@@ -452,6 +457,62 @@ enum SkinType {
     NORMAL
     MIXED
     SENSITIVE
+}
+
+// --- ADMIN BACK-OFFICE MODELS ---
+
+model AdminLog {
+    id           String   @id @default(cuid())
+    adminId      String
+    admin        User     @relation("AdminActions", fields: [adminId], references: [id])
+    targetUserId String?
+    targetUser   User?    @relation("TargetUser", fields: [targetUserId], references: [id])
+    actionType   AdminActionType
+    details      Json?    // Context about the change (e.g. "Changed phase from Detox to Equilibre")
+    timestamp    DateTime @default(now())
+
+    @@index([adminId])
+    @@index([targetUserId])
+}
+
+model AdminAlert {
+    id        String      @id @default(cuid())
+    userId    String
+    user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    type      AlertType
+    status    AlertStatus @default(PENDING)
+    details   Json?       // e.g. "No weigh-in for 7 days"
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
+
+    @@index([userId])
+    @@index([status])
+}
+
+enum AdminActionType {
+    SUBSCRIPTION_CHANGE
+    PHASE_OVERRIDE
+    ALERT_RESOLVE
+    MESSAGE_SENT
+    USER_NOTE
+    CONTENT_UPDATE
+    OTHER
+}
+
+enum AlertType {
+    NO_WEIGH_IN       // 7 days silence
+    WEIGHT_GAIN       // 3 consecutive gains
+    STAGNATION        // No loss for X days
+    SILENCE           // No activity/login
+    RISK_BEHAVIOR     // Too much sport, low calories etc.
+    OTHER
+}
+
+enum AlertStatus {
+    PENDING
+    ACKNOWLEDGED
+    RESOLVED
+    IGNORED
 }
 
 model Workout {
