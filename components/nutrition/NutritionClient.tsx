@@ -244,6 +244,7 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                     <NutritionHeader
                         subscriptionTier={subscriptionTier}
                         phase={currentData.phase}
+                        showTitle={false}
                     />
 
                     {/* Existing Tabs Logic */}
