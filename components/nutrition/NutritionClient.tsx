@@ -8,6 +8,7 @@ import { PhaseView } from "./PhaseView"
 import { RecipesView } from "./RecipesView"
 import { ShoppingListView } from "./ShoppingListView"
 import { ComposerView } from "./ComposerView"
+import { GlobalMenusView } from "./GlobalMenusView"
 import { RecipeModal } from "@/components/dashboard/RecipeModal"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { ChevronDown, BookOpen } from "lucide-react"
@@ -19,6 +20,7 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { getNutritionData, getWeekData, getPhaseData, getRecipes, getShoppingList } from "@/lib/actions/nutrition"
+import { getGlobalMenus } from "@/lib/actions/admin-menu" // Import action
 import { format, addDays } from "date-fns"
 import { fr } from "date-fns/locale"
 
@@ -32,13 +34,14 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
     const [selectedTab, setSelectedTab] = useState("day")
     const [selectedRecipe, setSelectedRecipe] = useState<any>(null)
     const [isMenuOpen, setIsMenuOpen] = useState(true)
-    const [selectedDay, setSelectedDay] = useState(phaseDays[0] || { dayNumber: 1, label: "Jour 1" })
+    const [selectedDay, setSelectedDay] = useState(phaseDays[0] || { dayNumber: 1, label: "Jour 1", date: new Date() }) // Fixed missing date prop
     const [currentData, setCurrentData] = useState(initialData)
     const [weekData, setWeekData] = useState<any>(null)
     const [phaseData, setPhaseData] = useState<any>(null)
     const [recipes, setRecipes] = useState<any[]>([])
+    const [globalMenus, setGlobalMenus] = useState<any[]>([]) // New state
     const [shoppingData, setShoppingData] = useState<any>(null)
-    const [currentView, setCurrentView] = useState<"menus" | "recipes" | "alternatives" | "shopping" | "composer">("menus")
+    const [currentView, setCurrentView] = useState<"menus" | "recipes" | "alternatives" | "shopping" | "composer" | "templates">("menus")
     const [isPending, startTransition] = useTransition()
 
     // Calculate number of weeks in phase
@@ -116,12 +119,14 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                                 {currentView === "alternatives" && <span className="text-lg">🔄</span>}
                                 {currentView === "shopping" && <span className="text-lg">🛒</span>}
                                 {currentView === "composer" && <span className="text-lg">✏️</span>}
+                                {currentView === "templates" && <span className="text-lg">📚</span>}
                                 <span className="font-serif font-black text-slate-900">
                                     {currentView === "menus" && "Menus"}
                                     {currentView === "recipes" && "Recettes"}
                                     {currentView === "alternatives" && "Alternatives"}
                                     {currentView === "shopping" && "Liste courses"}
                                     {currentView === "composer" && "Composer"}
+                                    {currentView === "templates" && "Bibliothèque"}
                                 </span>
                             </div>
                             <ChevronDown size={20} className="text-slate-400" />
@@ -144,6 +149,19 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                         >
                             <span className="mr-3 text-lg">🍽️</span>
                             <span className="font-bold">Recettes</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => {
+                                setCurrentView("templates")
+                                startTransition(async () => {
+                                    const menus = await getGlobalMenus(currentData.phase as any)
+                                    setGlobalMenus(menus)
+                                })
+                            }}
+                            className="cursor-pointer py-3 px-4"
+                        >
+                            <span className="mr-3 text-lg">📚</span>
+                            <span className="font-bold">Bibliothèque</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setCurrentView("alternatives")} className="cursor-pointer py-3 px-4">
                             <span className="mr-3 text-lg">🔄</span>
@@ -191,6 +209,13 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                             phaseDays={phaseDays}
                             currentPhase={currentData.phase}
                             initialData={currentData}
+                        />
+                    </div>
+                ) : currentView === "templates" ? (
+                    <div className="p-4 border-t border-slate-50">
+                        <GlobalMenusView
+                            menus={globalMenus}
+                            currentPhase={currentData.phase}
                         />
                     </div>
                 ) : isMenuOpen && (

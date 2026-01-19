@@ -85,3 +85,141 @@ export async function createDailyMenu(prevState: MenuActionState, formData: Form
     revalidatePath("/admin/menus")
     return { success: true }
 }
+
+export async function getGlobalMenus(phase?: PhaseType) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // Allow both Admin and Authenticated Users to fetch (since users need to see templates)
+    if (!user) return []
+
+    const where: any = {}
+    if (phase) {
+        where.phaseCompat = { has: phase }
+    }
+
+    try {
+        const menus = await prisma.menu.findMany({
+            where,
+            orderBy: { title: 'asc' }
+        })
+        return menus
+    } catch (error) {
+        console.error("Get Menus Error:", error)
+        return []
+    }
+}
+
+export async function deleteMenu(menuId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: "Non authentifié" }
+
+    const dbUser = await prisma.user.findUnique({
+        where: { email: user.email! },
+        select: { role: true }
+    })
+
+    if (dbUser?.role !== 'ADMIN') {
+        return { error: "Accès refusé" }
+    }
+
+    try {
+        await prisma.menu.delete({
+            where: { id: menuId }
+        })
+        revalidatePath("/admin/menus")
+        return { success: true }
+    } catch (error) {
+        console.error("Delete Menu Error:", error)
+        return { error: "Impossible de supprimer le menu" }
+    }
+}
+
+/**
+ * Assigne un menu (contenu brut) à un utilisateur spécifique pour une date donnée.
+ * Écrase tout UserCustomMenu existant pour ce jour.
+ */
+export async function assignMenuToUser(userId: string, date: Date, content: any) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // Admin check
+    if (!user) return { error: "Non authentifié" }
+    const dbUser = await prisma.user.findUnique({ where: { email: user.email! }, select: { role: true } })
+    if (dbUser?.role !== 'ADMIN') return { error: "Accès refusé" }
+
+    try {
+        await prisma.userCustomMenu.upsert({
+            where: {
+                userId_date: {
+                    userId,
+                    date: date
+                }
+            },
+            create: {
+                userId,
+                date,
+                content
+            },
+            update: {
+                content
+            }
+        })
+
+        revalidatePath("/admin/menus")
+        return { success: true }
+    } catch (error) {
+        console.error("Assign User Menu Error:", error)
+        return { error: "Erreur lors de l'assignation" }
+    }
+}
+
+/**
+ * Assigne un menu à TOUS les utilisateurs d'une phase active donnée pour une date.
+ */
+export async function assignMenuToGroup(phase: PhaseType, date: Date, content: any) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: "Non authentifié" }
+    const dbUser = await prisma.user.findUnique({ where: { email: user.email! }, select: { role: true } })
+    if (dbUser?.role !== 'ADMIN') return { error: "Accès refusé" }
+
+    try {
+        // 1. Find all users currently in this phase
+        const usersInPhase = await prisma.userPhase.findMany({
+            where: {
+                type: phase,
+                isActive: true
+            },
+            select: { userId: true }
+        })
+
+        if (usersInPhase.length === 0) {
+            return { success: true, message: "Aucun utilisateur trouvé dans cette phase" }
+        }
+
+        // 2. Batch Upsert (Prisma doesn't support batch upsert natively easily, so we loop or use raw query)
+        // For safety and logic, we'll use a transaction with individual upserts or a delete+create strategy if acceptable.
+        // Given we want to OVERRIDE, delete+create is cleaner but risky if creating fails. 
+        // Let's use Promise.all with individual upserts for now (safer for data integrity).
+
+        // Note: For large datasets, this should be optimized.
+        await prisma.$transaction(
+            usersInPhase.map(u =>
+                prisma.userCustomMenu.upsert({
+                    where: { userId_date: { userId: u.userId, date } },
+                    create: { userId: u.userId, date, content },
+                    update: { content }
+                })
+            )
+        )
+
+        return { success: true, count: usersInPhase.length }
+    } catch (error) {
+        console.error("Assign Group Menu Error:", error)
+        return { error: "Erreur lors de l'assignation de groupe" }
+    }
+}
