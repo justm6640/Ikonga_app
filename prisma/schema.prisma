@@ -35,6 +35,12 @@ model User {
   isPhaseManual     Boolean          @default(false)
   manualPhaseReason String?
   hasCompletedOnboarding Boolean @default(false)
+  
+  // Extended Profile for Menu Gen
+  allergies        String[]        // e.g. ["Gluten", "Peanuts"]
+  dietaryUsage     String?         // e.g. "Vegetarian", "Halal"
+  countryOrigin    String?         // e.g. "France", "Senegal"
+  
   channels          ChannelMember[]
   contentLogs       ContentLog[]
   dailyLogs         DailyLog[]
@@ -214,6 +220,12 @@ model Recipe {
   
   ingredients Json     // Liste des ingrédients avec quantités
   instructions Json    // Liste des étapes
+  
+  // Metadata for Menu Gen
+  allergens   String[]
+  dietaryTags String[] // e.g. "Vegetarian", "Halal"
+  cuisineType String?  // e.g. "African", "European"
+  
   calories    Int?
   protein     Int?
   carbs       Int?

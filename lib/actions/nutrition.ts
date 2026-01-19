@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { startOfDay, addDays, isAfter, subHours, isBefore } from "date-fns"
+import { startOfDay, addDays, isAfter, subHours, isBefore, differenceInCalendarDays, addHours } from "date-fns"
 import prisma from "@/lib/prisma"
 import { getOrCreateUser } from "./user"
 import { PhaseType } from "@prisma/client"
@@ -10,16 +10,20 @@ import { PhaseType } from "@prisma/client"
  * Récupère les données nutritionnelles pour une date donnée.
  * Respecte la hiérarchie des menus et la règle de verrouillage J-48h.
  */
-export async function getNutritionData(dateInput?: Date) {
+export async function getNutritionData(dateInput?: string | Date) {
+    console.log(`[SERVER ENTRY] getNutritionData called. Raw dateInput:`, dateInput, `Type:`, typeof dateInput)
+
     const user = await getOrCreateUser()
     if (!user) {
         console.log("DEBUG: No user found in getNutritionData")
         return null
     }
 
-    console.log(`DEBUG: Fetching nutrition for user ${user.id} (${user.email})`)
+    // console.log(`DEBUG: Fetching nutrition for user ${user.id} (${user.email})`)
 
-    const targetDate = startOfDay(dateInput || new Date())
+    // Parse date if it's a string, otherwise use as-is
+    const inputDate = typeof dateInput === 'string' ? new Date(dateInput) : dateInput
+    const targetDate = startOfDay(inputDate || new Date())
     const activePhase = user.phases[0] // La phase actuelle active
 
     if (!activePhase) {
@@ -81,14 +85,39 @@ export async function getNutritionData(dateInput?: Date) {
         // Vérification que la date est bien dans la semaine du plan
         if (weeklyPlan && isBefore(targetDate, addDays(weeklyPlan.weekStart, 7))) {
             const content = weeklyPlan.content as any
-            const dayIndex = Math.floor((targetDate.getTime() - weeklyPlan.weekStart.getTime()) / (1000 * 60 * 60 * 24))
 
-            // On récupère le menu spécifique au jour dans le JSON du WeeklyPlan
-            // Structure attendue : { "days": [ { "breakfast": "...", ... }, ... ] }
-            if (content.days && content.days[dayIndex]) {
-                finalMenu = content.days[dayIndex]
-                sourcePhase = weeklyPlan.phase as PhaseType
+            // Fix: Add 4 hours to both dates to push "23:00" timestamps (due to timezone) into the correct calendar day
+            // This ensures safe diffing even if DB stores dates as UTC-1 (23:00 prev day)
+            const safeTarget = addHours(targetDate, 4)
+            const safeStart = addHours(weeklyPlan.weekStart, 4)
+            const dayIndex = differenceInCalendarDays(safeTarget, safeStart)
+
+            console.log(`[DEBUG] Target: ${targetDate.toISOString()}, SafeTarget: ${safeTarget.toISOString()}`)
+            console.log(`[DEBUG] WeekStart: ${weeklyPlan.weekStart.toISOString()}, SafeStart: ${safeStart.toISOString()}`)
+            console.log(`[DEBUG] Calculated DayIndex: ${dayIndex}`)
+
+            // Find day in content.days array using dayIndex property if available, or fallback to array index
+            // We search robustly to handle potential unsorted arrays or sparse data
+            let dayData = null
+            if (content.days && Array.isArray(content.days)) {
+                dayData = content.days.find((d: any) => d.dayIndex === dayIndex)
+                console.log(`[DEBUG] Found by dayIndex prop: ${!!dayData}`)
+                // Fallback to direct index if dayIndex property is missing but array exists
+                if (!dayData && content.days[dayIndex]) {
+                    dayData = content.days[dayIndex]
+                    console.log(`[DEBUG] Found by array index: ${!!dayData}`)
+                }
             }
+
+            if (dayData) {
+                console.log(`[DEBUG] DayData found:`, dayData)
+                finalMenu = dayData
+                sourcePhase = weeklyPlan.phase as PhaseType
+            } else {
+                console.log(`[DEBUG] NO DayData found for index ${dayIndex}`)
+            }
+        } else {
+            console.log(`[DEBUG] WeeklyPlan check failed. Plan exists: ${!!weeklyPlan}, isBefore check: ${weeklyPlan ? isBefore(targetDate, addDays(weeklyPlan.weekStart, 7)) : 'N/A'}`)
         }
     }
 
@@ -205,6 +234,11 @@ export async function getPhaseDays() {
 /**
  * Récupère les données de menu pour une semaine complète.
  */
+import { NutritionEngine } from "../engines/nutrition-engine"
+
+/**
+ * Récupère les données de menu pour une semaine complète.
+ */
 export async function getWeekData(weekNumber: number = 1) {
     const user = await getOrCreateUser()
     if (!user) return null
@@ -215,13 +249,78 @@ export async function getWeekData(weekNumber: number = 1) {
     const phaseStartDate = startOfDay(activePhase.startDate)
     const weekStartDate = addDays(phaseStartDate, (weekNumber - 1) * 7)
 
+    // Check if WeeklyPlan exists
+    let weeklyPlan = await prisma.weeklyPlan.findFirst({
+        where: {
+            userId: user.id,
+            weekStart: weekStartDate
+        }
+    })
+
+    // If NO plan exists, GENERATE one automatically
+    if (!weeklyPlan) {
+        console.log(`Generating new WeeklyPlan for User ${user.id} - Week ${weekNumber}`)
+        const generatedContent = await NutritionEngine.generateWeeklyPlan(user.id, activePhase.type, weekStartDate)
+
+        weeklyPlan = await prisma.weeklyPlan.create({
+            data: {
+                userId: user.id,
+                weekStart: weekStartDate,
+                phase: activePhase.type,
+                content: generatedContent
+            }
+        })
+    }
+
     const daysData = []
     for (let i = 0; i < 7; i++) {
         const currentDate = addDays(weekStartDate, i)
-        const dayNumber = Math.floor((currentDate.getTime() - phaseStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        // Check if override exists (UserCustomMenu)
+        const customMenu = await prisma.userCustomMenu.findUnique({
+            where: { userId_date: { userId: user.id, date: currentDate } }
+        })
 
-        // Fetch menu for this day
+        let menuForDay = null
+
+        if (customMenu) {
+            menuForDay = customMenu.content
+        } else if (weeklyPlan && weeklyPlan.content) {
+            const content = weeklyPlan.content as any
+            // Find day in generated content (assuming it's an array or indexed by dayIndex 0-6)
+            const dayIndex = i
+            if (content.days && Array.isArray(content.days)) {
+                const dayData = content.days.find((d: any) => d.dayIndex === dayIndex)
+                if (dayData) {
+                    menuForDay = {
+                        breakfast: dayData.breakfast,
+                        lunch: dayData.lunch,
+                        snack: dayData.snack,
+                        dinner: dayData.dinner
+                    }
+                }
+            }
+        }
+
+        // Enrich with Recipe Details (calling existing logic helper if needed, or largely duplicating the enrichment logic for now for speed)
+        // Actually, getNutritionData already does this enrichment. 
+        // OPTIMIZATION: We could just return the raw names here and let the frontend fetch details or enrich here.
+        // Existing helper `getNutritionData` calls DB for each recipe.
+        // Let's keep it simple: we reconstruct expected return format.
+        // For efficiency, we should probably batch fetch recipes here if we wanted to be perfect.
+        // But `getWeekData` in the original file called `getNutritionData` 7 times.
+        // That logic was:
+        /*
+          const menuData = await getNutritionData(currentDate)
+          daysData.push({ ... menu: menuData?.menu ... })
+        */
+        // Since `getNutritionData` ALSO falls back to WeeklyPlan, we can just ensure the WeeklyPlan EXISTS (which we did above) and then let `getNutritionData` do its job!
+        // So actually, I don't need to manually parse the plan here if `getNutritionData` handles it.
+        // I just need to make sure the plan exists.
+
+        // Let's revert to calling getNutritionData, now that we know a plan exists!
         const menuData = await getNutritionData(currentDate)
+
+        const dayNumber = Math.floor((currentDate.getTime() - phaseStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
 
         daysData.push({
             dayNumber,

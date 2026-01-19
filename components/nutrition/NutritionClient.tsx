@@ -20,9 +20,11 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { getNutritionData, getWeekData, getPhaseData, getRecipes, getShoppingList } from "@/lib/actions/nutrition"
-import { getGlobalMenus } from "@/lib/actions/admin-menu" // Import action
+import { getGlobalMenus } from "@/lib/actions/admin-menu"
 import { format, addDays } from "date-fns"
 import { fr } from "date-fns/locale"
+import { LoadingOverlay } from "@/components/ui/LoadingOverlay"
+
 
 interface NutritionClientProps {
     initialData: any
@@ -31,10 +33,22 @@ interface NutritionClientProps {
 }
 
 export function NutritionClient({ initialData, subscriptionTier, phaseDays }: NutritionClientProps) {
+    // Convert serialized date strings to Date objects
+    const normalizedPhaseDays = phaseDays.map(day => ({
+        ...day,
+        date: new Date(day.date)
+    }))
+
+    console.log('[CLIENT DEBUG] normalizedPhaseDays:', normalizedPhaseDays.map(d => ({
+        dayNumber: d.dayNumber,
+        date: d.date.toISOString(),
+        label: d.label
+    })))
+
     const [selectedTab, setSelectedTab] = useState("day")
     const [selectedRecipe, setSelectedRecipe] = useState<any>(null)
     const [isMenuOpen, setIsMenuOpen] = useState(true)
-    const [selectedDay, setSelectedDay] = useState(phaseDays[0] || { dayNumber: 1, label: "Jour 1", date: new Date() }) // Fixed missing date prop
+    const [selectedDay, setSelectedDay] = useState(normalizedPhaseDays[0] || { dayNumber: 1, label: "Jour 1", date: new Date() })
     const [currentData, setCurrentData] = useState(initialData)
     const [weekData, setWeekData] = useState<any>(null)
     const [phaseData, setPhaseData] = useState<any>(null)
@@ -45,16 +59,21 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
     const [isPending, startTransition] = useTransition()
 
     // Calculate number of weeks in phase
-    const totalWeeks = Math.ceil(phaseDays.length / 7)
+    const totalWeeks = Math.ceil(normalizedPhaseDays.length / 7)
 
     const handleRecipeClick = (recipe: any) => {
         setSelectedRecipe(recipe)
     }
 
     const handleDayChange = (day: any) => {
+        console.log('[CLIENT DEBUG] handleDayChange called with:', day)
+        console.log('[CLIENT DEBUG] day.date type:', typeof day.date, 'value:', day.date)
         setSelectedDay(day)
         startTransition(async () => {
-            const data = await getNutritionData(day.date)
+            // Pass ISO string directly to avoid Next.js Date serialization bug
+            const dateString = day.date.toISOString()
+            console.log('[CLIENT DEBUG] Sending to server as ISO string:', dateString)
+            const data = await getNutritionData(dateString)
             if (data) {
                 setCurrentData(data)
             }
@@ -77,7 +96,7 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
 
     const handleWeekDayClick = (dayNum: number) => {
         setSelectedTab("day")
-        const targetDay = phaseDays.find(d => d.dayNumber === dayNum)
+        const targetDay = normalizedPhaseDays.find(d => d.dayNumber === dayNum)
         if (targetDay) {
             handleDayChange(targetDay)
         }
@@ -134,7 +153,8 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
 
     if (currentView === "home") {
         return (
-            <div className="max-w-full mx-auto space-y-8 animate-in fade-in duration-700 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-full mx-auto space-y-8 animate-in fade-in duration-700 px-4 sm:px-6 lg:px-8 relative min-h-[80vh]">
+                <LoadingOverlay isVisible={isPending} message="Chargement..." />
                 <NutritionHeader
                     subscriptionTier={subscriptionTier}
                     phase={currentData.phase}
@@ -219,7 +239,8 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
     }
 
     return (
-        <div className="max-w-full mx-auto space-y-6 animate-in fade-in duration-500 px-0 sm:px-6 lg:px-8">
+        <div className="max-w-full mx-auto space-y-6 animate-in fade-in duration-500 px-0 sm:px-6 lg:px-8 relative min-h-[80vh]">
+            <LoadingOverlay isVisible={isPending} message="Chargement en cours..." />
             {/* Header with Back Button */}
             <div className="flex items-center gap-4 px-4 sm:px-0">
                 <button
@@ -299,7 +320,7 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                                             </div>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-48">
-                                            {phaseDays.map((day) => (
+                                            {normalizedPhaseDays.map((day) => (
                                                 <DropdownMenuItem
                                                     key={day.dayNumber}
                                                     onClick={() => handleDayChange(day)}
@@ -314,11 +335,8 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
 
                                 {/* Meal Cards Grid */}
                                 <div className="space-y-4">
-                                    {isPending ? (
-                                        <div className="text-center py-10 text-slate-400">
-                                            <p className="text-sm italic">Chargement du menu...</p>
-                                        </div>
-                                    ) : (
+                                    {/* Removed local loader */}
+                                    {true && (
                                         <>
                                             <MealCard
                                                 category="PETIT-DÉJEUNER"

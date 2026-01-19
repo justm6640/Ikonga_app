@@ -107,37 +107,109 @@ export function WeeklyView({ weekData, availableWeeks, onWeekChange, onDayClick 
                 </div>
             </div>
 
-            {/* Days List */}
-            <div className="space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 px-2">
-                    SEMAINE {selectedWeek}
-                </h3>
-
+            <div className="grid grid-cols-1 gap-6">
                 {displayData.days.map((day) => (
                     <div
                         key={day.dayNumber}
-                        className="bg-white rounded-2xl border border-slate-100 p-6 hover:shadow-md transition-shadow"
+                        className="group relative bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:border-orange-100 transition-all duration-300 overflow-hidden"
                     >
-                        <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                                <div className="flex items-baseline gap-3 mb-2">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                        SEMAINE {selectedWeek}
+                        {/* Decorative Background Element */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-[100px] -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                        <div className="relative z-10 flex flex-col md:flex-row gap-6 md:items-start">
+                            {/* Left: Day & Date */}
+                            <div className="md:w-32 shrink-0 flex md:flex-col items-center md:items-start justify-between md:justify-start gap-2 border-b md:border-b-0 md:border-r border-slate-100 pb-4 md:pb-0 md:pr-6">
+                                <div>
+                                    <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block mb-1">
+                                        JOUR {day.dayNumber}
                                     </span>
+                                    <h4 className="text-3xl font-serif font-black text-slate-900 leading-none">
+                                        {format(day.date, "EEEE", { locale: fr }).charAt(0).toUpperCase() + format(day.date, "EEEE", { locale: fr }).slice(1)}
+                                    </h4>
                                 </div>
-                                <h4 className="text-xl font-serif font-black text-slate-900 mb-1">
-                                    Jour {day.dayNumber}
-                                </h4>
-                                <p className="text-sm text-slate-600 font-medium">
-                                    {getMealsSummary(day.menu)}
-                                </p>
+                                <span className="text-xs font-medium text-slate-400 bg-slate-50 px-3 py-1 rounded-full">
+                                    {format(day.date, "d MMMM", { locale: fr })}
+                                </span>
                             </div>
-                            <Button
-                                onClick={() => onDayClick(day.dayNumber)}
-                                className="h-10 px-6 rounded-full bg-[#FF7F50] hover:bg-[#FF6347] text-white font-bold text-xs uppercase tracking-wider"
-                            >
-                                Voir détail
-                            </Button>
+
+                            {/* Middle: Menu List */}
+                            <div className="flex-1 min-w-0">
+                                {day.menu ? (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                                        {/* Breakfast */}
+                                        <div className="flex items-start gap-3 group/item">
+                                            <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center shrink-0 group-hover/item:bg-orange-100 transition-colors">
+                                                <span className="text-sm">🌅</span>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Matin</span>
+                                                <p className="text-sm font-bold text-slate-800 truncate leading-snug">
+                                                    {typeof day.menu.breakfast === 'object' ? day.menu.breakfast?.name : (day.menu.breakfast || "-")}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Lunch */}
+                                        <div className="flex items-start gap-3 group/item">
+                                            <div className="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center shrink-0 group-hover/item:bg-yellow-100 transition-colors">
+                                                <span className="text-sm">☀️</span>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Midi</span>
+                                                <p className="text-sm font-bold text-slate-800 truncate leading-snug">
+                                                    {typeof day.menu.lunch === 'object' ? day.menu.lunch?.name : (day.menu.lunch || "-")}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Snack */}
+                                        {day.menu.snack && (
+                                            <div className="flex items-start gap-3 group/item">
+                                                <div className="w-8 h-8 rounded-full bg-pink-50 flex items-center justify-center shrink-0 group-hover/item:bg-pink-100 transition-colors">
+                                                    <span className="text-sm">🍎</span>
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Snack</span>
+                                                    <p className="text-sm font-bold text-slate-800 truncate leading-snug">
+                                                        {typeof day.menu.snack === 'object' ? day.menu.snack?.name : day.menu.snack}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Dinner */}
+                                        <div className="flex items-start gap-3 group/item">
+                                            <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center shrink-0 group-hover/item:bg-indigo-100 transition-colors">
+                                                <span className="text-sm">🌙</span>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Soir</span>
+                                                <p className="text-sm font-bold text-slate-800 truncate leading-snug">
+                                                    {typeof day.menu.dinner === 'object' ? day.menu.dinner?.name : (day.menu.dinner || "-")}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="h-full flex items-center justify-center py-4 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                        <p className="text-sm text-slate-400 italic font-medium flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-slate-300 animate-pulse" />
+                                            Menu en cours de préparation...
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Right: Action */}
+                            <div className="flex items-center justify-end md:self-center pl-4 border-l border-slate-100 md:border-none md:pl-0">
+                                <Button
+                                    onClick={() => onDayClick(day.dayNumber)}
+                                    variant="ghost"
+                                    className="h-12 w-12 rounded-full bg-slate-50 text-slate-400 hover:bg-orange-500 hover:text-white transition-all duration-300 shadow-sm"
+                                >
+                                    <ChevronDown size={20} className="-rotate-90 ml-0.5" />
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 ))}
