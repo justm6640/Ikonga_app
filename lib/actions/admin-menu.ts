@@ -1,5 +1,6 @@
 "use server"
 
+import { startOfDay } from "date-fns"
 import { createClient } from "@/lib/supabase/server"
 import prisma from "@/lib/prisma"
 import { PhaseType } from "@prisma/client"
@@ -141,7 +142,7 @@ export async function deleteMenu(menuId: string) {
  * Assigne un menu (contenu brut) à un utilisateur spécifique pour une date donnée.
  * Écrase tout UserCustomMenu existant pour ce jour.
  */
-export async function assignMenuToUser(userId: string, date: Date, content: any) {
+export async function assignMenuToUser(userIdentifier: string, date: Date, content: any) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -150,17 +151,34 @@ export async function assignMenuToUser(userId: string, date: Date, content: any)
     const dbUser = await prisma.user.findUnique({ where: { email: user.email! }, select: { role: true } })
     if (dbUser?.role !== 'ADMIN') return { error: "Accès refusé" }
 
+    let targetUserId = userIdentifier
+
+    // Check if it looks like an email
+    if (userIdentifier.includes('@')) {
+        const targetUser = await prisma.user.findUnique({
+            where: { email: userIdentifier },
+            select: { id: true }
+        })
+
+        if (!targetUser) {
+            return { error: `Utilisateur introuvable avec l'email : ${userIdentifier}` }
+        }
+        targetUserId = targetUser.id
+    }
+
+    const targetDate = startOfDay(date)
+
     try {
         await prisma.userCustomMenu.upsert({
             where: {
                 userId_date: {
-                    userId,
-                    date: date
+                    userId: targetUserId,
+                    date: targetDate
                 }
             },
             create: {
-                userId,
-                date,
+                userId: targetUserId,
+                date: targetDate,
                 content
             },
             update: {
@@ -169,6 +187,7 @@ export async function assignMenuToUser(userId: string, date: Date, content: any)
         })
 
         revalidatePath("/admin/menus")
+        revalidatePath("/nutrition") // Force users to see it
         return { success: true }
     } catch (error) {
         console.error("Assign User Menu Error:", error)
@@ -187,6 +206,8 @@ export async function assignMenuToGroup(phase: PhaseType, date: Date, content: a
     const dbUser = await prisma.user.findUnique({ where: { email: user.email! }, select: { role: true } })
     if (dbUser?.role !== 'ADMIN') return { error: "Accès refusé" }
 
+    const targetDate = startOfDay(date)
+
     try {
         // 1. Find all users currently in this phase
         const usersInPhase = await prisma.userPhase.findMany({
@@ -201,22 +222,19 @@ export async function assignMenuToGroup(phase: PhaseType, date: Date, content: a
             return { success: true, message: "Aucun utilisateur trouvé dans cette phase" }
         }
 
-        // 2. Batch Upsert (Prisma doesn't support batch upsert natively easily, so we loop or use raw query)
-        // For safety and logic, we'll use a transaction with individual upserts or a delete+create strategy if acceptable.
-        // Given we want to OVERRIDE, delete+create is cleaner but risky if creating fails. 
-        // Let's use Promise.all with individual upserts for now (safer for data integrity).
-
-        // Note: For large datasets, this should be optimized.
+        // 2. Batch Upsert
         await prisma.$transaction(
             usersInPhase.map(u =>
                 prisma.userCustomMenu.upsert({
-                    where: { userId_date: { userId: u.userId, date } },
-                    create: { userId: u.userId, date, content },
+                    where: { userId_date: { userId: u.userId, date: targetDate } },
+                    create: { userId: u.userId, date: targetDate, content },
                     update: { content }
                 })
             )
         )
 
+        revalidatePath("/admin/menus")
+        revalidatePath("/nutrition") // Force users to see it
         return { success: true, count: usersInPhase.length }
     } catch (error) {
         console.error("Assign Group Menu Error:", error)

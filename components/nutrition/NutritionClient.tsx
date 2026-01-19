@@ -41,7 +41,7 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
     const [recipes, setRecipes] = useState<any[]>([])
     const [globalMenus, setGlobalMenus] = useState<any[]>([]) // New state
     const [shoppingData, setShoppingData] = useState<any>(null)
-    const [currentView, setCurrentView] = useState<"menus" | "recipes" | "alternatives" | "shopping" | "composer" | "templates">("menus")
+    const [currentView, setCurrentView] = useState<"home" | "menus" | "recipes" | "alternatives" | "shopping" | "composer" | "templates">("home")
     const [isPending, startTransition] = useTransition()
 
     // Calculate number of weeks in phase
@@ -101,126 +101,153 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
         handleWeekChange(weekNum)
     }
 
+    const handleBack = () => {
+        setCurrentView("home")
+    }
+
+    const BentoCard = ({ title, icon: Icon, onClick, colorClass, description, size = "standard" }: any) => (
+        <button
+            onClick={onClick}
+            className={cn(
+                "relative overflow-hidden rounded-3xl p-6 text-left transition-all hover:scale-[1.02] hover:shadow-lg border border-slate-100",
+                colorClass,
+                size === "large" ? "col-span-2 row-span-2 min-h-[240px]" : "col-span-1 min-h-[160px]"
+            )}
+        >
+            <div className="relative z-10 flex flex-col h-full justify-between">
+                <div className="bg-white/90 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm">
+                    <Icon size={24} className="text-slate-800" />
+                </div>
+                <div>
+                    <h3 className="font-serif font-black text-xl text-slate-900 leading-tight mb-1">
+                        {title}
+                    </h3>
+                    <p className="text-xs font-medium text-slate-600/90 line-clamp-2">
+                        {description}
+                    </p>
+                </div>
+            </div>
+            {/* Decoratiive background element */}
+            <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-white/20 blur-2xl" />
+        </button>
+    )
+
+    if (currentView === "home") {
+        return (
+            <div className="max-w-full mx-auto space-y-8 animate-in fade-in duration-700 px-4 sm:px-6 lg:px-8">
+                <NutritionHeader
+                    subscriptionTier={subscriptionTier}
+                    phase={currentData.phase}
+                />
+
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* 1. Main Card: Mes Menus */}
+                    <BentoCard
+                        title="Mes Menus"
+                        description="Accède à ton plan alimentaire de la semaine et suis tes progrès."
+                        icon={BookOpen}
+                        colorClass="bg-[#F2F0E9]" // Light beige/warm
+                        size="large"
+                        onClick={() => setCurrentView("menus")}
+                    />
+
+                    {/* 2. Recettes */}
+                    <BentoCard
+                        title="Recettes"
+                        description="Explore la base de recettes Ikonga."
+                        icon={(props: any) => <span {...props} className="text-2xl">🍽️</span>}
+                        colorClass="bg-blue-50"
+                        onClick={() => {
+                            setCurrentView("recipes")
+                            startTransition(async () => {
+                                const allRecipes = await getRecipes()
+                                setRecipes(allRecipes)
+                            })
+                        }}
+                    />
+
+                    {/* 3. Bibliothèque */}
+                    <BentoCard
+                        title="Bibliothèque"
+                        description="Menus types par phase."
+                        icon={(props: any) => <span {...props} className="text-2xl">📚</span>}
+                        colorClass="bg-purple-50"
+                        onClick={() => {
+                            setCurrentView("templates")
+                            startTransition(async () => {
+                                const menus = await getGlobalMenus(currentData.phase as any)
+                                setGlobalMenus(menus)
+                            })
+                        }}
+                    />
+
+                    {/* 4. Liste Courses */}
+                    <BentoCard
+                        title="Mes Courses"
+                        description="Ta liste d'achats générée."
+                        icon={(props: any) => <span {...props} className="text-2xl">🛒</span>}
+                        colorClass="bg-green-50"
+                        onClick={() => {
+                            setCurrentView("shopping")
+                            startTransition(async () => {
+                                const data = await getShoppingList(1)
+                                setShoppingData(data)
+                            })
+                        }}
+                    />
+
+                    {/* 5. Alternatives */}
+                    <BentoCard
+                        title="Alternatives"
+                        description="Par quoi remplacer..."
+                        icon={(props: any) => <span {...props} className="text-2xl">🔄</span>}
+                        colorClass="bg-orange-50"
+                        onClick={() => setCurrentView("alternatives")}
+                    />
+
+                    {/* 6. Composer */}
+                    <BentoCard
+                        title="Composer"
+                        description="Crée ton propre menu."
+                        icon={(props: any) => <span {...props} className="text-2xl">✏️</span>}
+                        colorClass="bg-pink-50"
+                        onClick={() => setCurrentView("composer")}
+                    />
+                </div>
+            </div>
+        )
+    }
+
     return (
-        <div className="max-w-full mx-auto space-y-8 animate-in fade-in duration-700 px-0 sm:px-6 lg:px-8">
-            <NutritionHeader
-                subscriptionTier={subscriptionTier}
-                phase={currentData.phase}
-            />
+        <div className="max-w-full mx-auto space-y-6 animate-in fade-in duration-500 px-0 sm:px-6 lg:px-8">
+            {/* Header with Back Button */}
+            <div className="flex items-center gap-4 px-4 sm:px-0">
+                <button
+                    onClick={handleBack}
+                    className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm"
+                >
+                    <ChevronDown className="rotate-90 text-slate-600" size={20} />
+                </button>
+                <h2 className="text-xl font-serif font-black text-slate-900">
+                    {currentView === "menus" && "Mes Menus"}
+                    {currentView === "recipes" && "Recettes"}
+                    {currentView === "alternatives" && "Alternatives"}
+                    {currentView === "shopping" && "Liste de Courses"}
+                    {currentView === "composer" && "Compositeur de Menu"}
+                    {currentView === "templates" && "Bibliothèque de Menus"}
+                </h2>
+            </div>
 
-            {/* Menu Dropdown */}
-            <div className="w-full bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <button className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                            <div className="flex items-center gap-3">
-                                {currentView === "menus" && <BookOpen size={20} className="text-slate-400" />}
-                                {currentView === "recipes" && <span className="text-lg">🍽️</span>}
-                                {currentView === "alternatives" && <span className="text-lg">🔄</span>}
-                                {currentView === "shopping" && <span className="text-lg">🛒</span>}
-                                {currentView === "composer" && <span className="text-lg">✏️</span>}
-                                {currentView === "templates" && <span className="text-lg">📚</span>}
-                                <span className="font-serif font-black text-slate-900">
-                                    {currentView === "menus" && "Menus"}
-                                    {currentView === "recipes" && "Recettes"}
-                                    {currentView === "alternatives" && "Alternatives"}
-                                    {currentView === "shopping" && "Liste courses"}
-                                    {currentView === "composer" && "Composer"}
-                                    {currentView === "templates" && "Bibliothèque"}
-                                </span>
-                            </div>
-                            <ChevronDown size={20} className="text-slate-400" />
-                        </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[250px]">
-                        <DropdownMenuItem onClick={() => setCurrentView("menus")} className="cursor-pointer py-3 px-4 bg-blue-50">
-                            <BookOpen size={18} className="mr-3 text-purple-500" />
-                            <span className="font-bold">Menus</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onClick={() => {
-                                setCurrentView("recipes")
-                                startTransition(async () => {
-                                    const allRecipes = await getRecipes()
-                                    setRecipes(allRecipes)
-                                })
-                            }}
-                            className="cursor-pointer py-3 px-4"
-                        >
-                            <span className="mr-3 text-lg">🍽️</span>
-                            <span className="font-bold">Recettes</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onClick={() => {
-                                setCurrentView("templates")
-                                startTransition(async () => {
-                                    const menus = await getGlobalMenus(currentData.phase as any)
-                                    setGlobalMenus(menus)
-                                })
-                            }}
-                            className="cursor-pointer py-3 px-4"
-                        >
-                            <span className="mr-3 text-lg">📚</span>
-                            <span className="font-bold">Bibliothèque</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setCurrentView("alternatives")} className="cursor-pointer py-3 px-4">
-                            <span className="mr-3 text-lg">🔄</span>
-                            <span className="font-bold">Alternatives</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onClick={() => {
-                                setCurrentView("shopping")
-                                startTransition(async () => {
-                                    const data = await getShoppingList(1)
-                                    setShoppingData(data)
-                                })
-                            }}
-                            className="cursor-pointer py-3 px-4"
-                        >
-                            <span className="mr-3 text-lg">🛒</span>
-                            <span className="font-bold">Liste courses</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setCurrentView("composer")} className="cursor-pointer py-3 px-4">
-                            <span className="mr-3 text-lg">✏️</span>
-                            <span className="font-bold">Composer</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+            {/* Content Area */}
+            {currentView === "menus" && (
+                <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
+                    <NutritionHeader
+                        subscriptionTier={subscriptionTier}
+                        phase={currentData.phase}
+                    />
 
-                {currentView === "recipes" ? (
-                    <div className="p-4 border-t border-slate-50">
-                        <RecipesView
-                            initialRecipes={recipes}
-                            currentPhase={currentData.phase}
-                            onRecipeClick={handleRecipeClick}
-                        />
-                    </div>
-                ) : currentView === "shopping" ? (
-                    <div className="p-4 border-t border-slate-50">
-                        <ShoppingListView
-                            shoppingData={shoppingData}
-                            availableWeeks={totalWeeks}
-                            onWeekChange={handleShoppingWeekChange}
-                        />
-                    </div>
-                ) : currentView === "composer" ? (
-                    <div className="p-4 border-t border-slate-50">
-                        <ComposerView
-                            phaseDays={phaseDays}
-                            currentPhase={currentData.phase}
-                            initialData={currentData}
-                        />
-                    </div>
-                ) : currentView === "templates" ? (
-                    <div className="p-4 border-t border-slate-50">
-                        <GlobalMenusView
-                            menus={globalMenus}
-                            currentPhase={currentData.phase}
-                        />
-                    </div>
-                ) : isMenuOpen && (
-                    <div className="p-4 pt-0 border-t border-slate-50 animate-in slide-in-from-top-2">
-                        {/* Segmented Control / Tabs */}
+                    {/* Existing Tabs Logic */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
                         <Tabs defaultValue="day" onValueChange={handleTabChange} className="w-full">
                             <TabsList className="w-full bg-slate-100/50 p-1 rounded-xl h-auto flex mb-8">
                                 <TabsTrigger
@@ -334,8 +361,46 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                             </TabsContent>
                         </Tabs>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
+
+            {currentView === "recipes" && (
+                <RecipesView
+                    initialRecipes={recipes}
+                    currentPhase={currentData.phase}
+                    onRecipeClick={handleRecipeClick}
+                />
+            )}
+
+            {currentView === "shopping" && (
+                <ShoppingListView
+                    shoppingData={shoppingData}
+                    availableWeeks={totalWeeks}
+                    onWeekChange={handleShoppingWeekChange}
+                />
+            )}
+
+            {currentView === "composer" && (
+                <ComposerView
+                    phaseDays={phaseDays}
+                    currentPhase={currentData.phase}
+                    initialData={currentData}
+                />
+            )}
+
+            {currentView === "templates" && (
+                <GlobalMenusView
+                    menus={globalMenus}
+                    currentPhase={currentData.phase}
+                />
+            )}
+
+            {/* Alternatives Placeholder */}
+            {currentView === "alternatives" && (
+                <div className="p-8 text-center bg-white rounded-3xl border border-slate-100">
+                    <p className="text-slate-500 italic">Section Alternatives en construction 🚧</p>
+                </div>
+            )}
 
             <RecipeModal
                 isOpen={!!selectedRecipe}
