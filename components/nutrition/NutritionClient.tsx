@@ -39,12 +39,6 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
         date: new Date(day.date)
     }))
 
-    console.log('[CLIENT DEBUG] normalizedPhaseDays:', normalizedPhaseDays.map(d => ({
-        dayNumber: d.dayNumber,
-        date: d.date.toISOString(),
-        label: d.label
-    })))
-
     const [selectedTab, setSelectedTab] = useState("day")
     const [selectedRecipe, setSelectedRecipe] = useState<any>(null)
     const [isMenuOpen, setIsMenuOpen] = useState(true)
@@ -66,13 +60,10 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
     }
 
     const handleDayChange = (day: any) => {
-        console.log('[CLIENT DEBUG] handleDayChange called with:', day)
-        console.log('[CLIENT DEBUG] day.date type:', typeof day.date, 'value:', day.date)
         setSelectedDay(day)
         startTransition(async () => {
             // Pass ISO string directly to avoid Next.js Date serialization bug
             const dateString = day.date.toISOString()
-            console.log('[CLIENT DEBUG] Sending to server as ISO string:', dateString)
             const data = await getNutritionData(dateString)
             if (data) {
                 setCurrentData(data)
