@@ -189,7 +189,13 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                         icon={BookOpen}
                         colorClass="bg-[#F2F0E9]" // Light beige/warm
                         size="large"
-                        onClick={() => setCurrentView("menus")}
+                        onClick={() => {
+                            setCurrentView("menus")
+                            // Trigger initial load/generation if not already loaded or if menu is null
+                            if (!currentData.menu) {
+                                handleDayChange(selectedDay)
+                            }
+                        }}
                     />
 
                     {/* 2. Recettes */}

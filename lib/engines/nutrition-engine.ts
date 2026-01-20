@@ -122,53 +122,71 @@ export class NutritionEngine {
             return true
         })
 
+        // 3. Fetch Existing Custom Menus for this week (Safeguard)
+        const existingCustomMenus = await prisma.userCustomMenu.findMany({
+            where: {
+                userId: userId,
+                date: {
+                    gte: weekStart,
+                    lte: addDays(weekStart, 6)
+                }
+            }
+        })
+
+        const customMenusMap = new Map(
+            existingCustomMenus.map(cm => [startOfDay(cm.date).getTime(), cm.content])
+        )
+
         // 4. Generate Days
         const days = []
         for (let i = 0; i < 7; i++) {
             const date = addDays(weekStart, i)
-            const dayMenu = this.generateDayMenu(validRecipes, dailyCalories, profile)
+            const dateTime = startOfDay(date).getTime()
+
+            let dayMenu: any
+
+            if (customMenusMap.has(dateTime)) {
+                // Safeguard: Use existing user customization
+                console.log(`[NutritionEngine] Using existing custom menu for ${date.toISOString().split('T')[0]}`)
+                dayMenu = customMenusMap.get(dateTime)
+            } else {
+                // Generate new if missing
+                dayMenu = this.generateDayMenu(validRecipes, dailyCalories, profile)
+
+                // AUTO-SAVE TO LIBRARY (Only for newly generated)
+                try {
+                    const dateStr = date.toISOString().split('T')[0]
+                    const mainDish = dayMenu.lunch || "Déjeuner"
+                    const cleanMainDish = typeof mainDish === 'string' ? mainDish : "Recette"
+                    const shortDish = cleanMainDish.length > 20 ? cleanMainDish.substring(0, 20) + "..." : cleanMainDish
+                    const title = `Généré ${dateStr} - ${shortDish}`
+
+                    const existing = await prisma.menu.findUnique({ where: { title } })
+                    if (!existing) {
+                        await prisma.menu.create({
+                            data: {
+                                title: title,
+                                isPremium: false,
+                                phaseCompat: [phase],
+                                content: {
+                                    breakfast: dayMenu.breakfast,
+                                    lunch: dayMenu.lunch,
+                                    snack: dayMenu.snack,
+                                    dinner: dayMenu.dinner
+                                } as any
+                            }
+                        })
+                    }
+                } catch (err) {
+                    console.error("[NutritionEngine] Failed to auto-save menu:", err)
+                }
+            }
+
             days.push({
                 dayIndex: i,
                 date: date,
                 ...dayMenu
             })
-
-            // AUTO-SAVE TO LIBRARY (User Request)
-            try {
-                // Generate a unique descriptive title
-                // Format: "Menu [Phase] Auto - [Main Dish] - [DateString]"
-                // We use a short date string to keep it readable but unique enough per day/user run
-                const dateStr = date.toISOString().split('T')[0]
-                const mainDish = dayMenu.lunch || "Déjeuner"
-                const cleanMainDish = typeof mainDish === 'string' ? mainDish : "Recette"
-
-                // Truncate if too long
-                const shortDish = cleanMainDish.length > 20 ? cleanMainDish.substring(0, 20) + "..." : cleanMainDish
-                const title = `Généré ${dateStr} - ${shortDish}`
-
-                // Check existence to avoid spamming duplicates if re-running
-                const existing = await prisma.menu.findUnique({ where: { title } })
-
-                if (!existing) {
-                    await prisma.menu.create({
-                        data: {
-                            title: title,
-                            isPremium: false,
-                            phaseCompat: [phase], // Use the phase from params
-                            content: {
-                                breakfast: dayMenu.breakfast,
-                                lunch: dayMenu.lunch,
-                                snack: dayMenu.snack,
-                                dinner: dayMenu.dinner
-                            } as any
-                        }
-                    })
-                    // console.log(`[NutritionEngine] Saved menu to library: ${title}`)
-                }
-            } catch (err) {
-                console.error("[NutritionEngine] Failed to auto-save menu to library:", err)
-                // Non-blocking error
-            }
         }
 
         // 5. Structure for DB

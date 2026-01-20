@@ -98,13 +98,41 @@ export async function getNutritionData(dateInput?: string | Date) {
             // B2. Level 1 (Automatic AI) - Fallback
             if (!finalMenu) {
                 const content = weeklyPlan.content as any
+                const dayNames = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+                const targetDayName = dayNames[dayIndex]
+
                 if (content.days && Array.isArray(content.days)) {
-                    const dayData = content.days.find((d: any) => d.dayIndex === dayIndex)
-                    if (dayData) {
-                        finalMenu = dayData
-                        console.log(`[DEBUG] Resolved Level 1 Menu (AI Auto)`)
-                    }
+                    finalMenu = content.days.find((d: any) => d.dayIndex === dayIndex) || content.days[dayIndex]
+                } else if (content[targetDayName]) {
+                    finalMenu = content[targetDayName]
                 }
+
+                if (finalMenu) console.log(`[DEBUG] Resolved Level 1 Menu (AI Auto)`)
+            }
+        } else if (!weeklyPlan) {
+            // B3. FALLBACK: Trigger Automatic AI Generation if missing
+            console.log(`[DEBUG] No WeeklyPlan found. Triggering GPT generation fallback for ${targetDate.toISOString()}`)
+
+            const { generateUserWeeklyPlan } = await import("../ai/menu-generator")
+            const result = await generateUserWeeklyPlan(user.id, false, targetDate)
+
+            if (result.success && result.plan) {
+                const generatedPlan = result.plan
+                sourcePhase = generatedPlan.phase as PhaseType
+                const content = generatedPlan.content as any
+                const weekStart = new Date(generatedPlan.weekStart)
+                const dayIndex = differenceInCalendarDays(targetDate, weekStart)
+
+                const dayNames = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+                const targetDayName = dayNames[dayIndex]
+
+                if (content.days && Array.isArray(content.days)) {
+                    finalMenu = content.days.find((d: any) => d.dayIndex === dayIndex) || content.days[dayIndex]
+                } else if (content[targetDayName]) {
+                    finalMenu = content[targetDayName]
+                }
+
+                if (finalMenu) console.log(`[DEBUG] Resolved Level 1 Menu (Newly GPT-Generated)`)
             }
         }
     }
@@ -261,17 +289,15 @@ export async function getWeekData(weekNumber: number = 1) {
 
     // If NO plan exists, GENERATE one automatically
     if (!weeklyPlan) {
-        console.log(`Generating new WeeklyPlan for User ${user.id} - Week ${weekNumber}`)
-        const generatedContent = await NutritionEngine.generateWeeklyPlan(user.id, activePhase.type, weekStartDate)
+        console.log(`Generating new AI WeeklyPlan for User ${user.id} - Week ${weekNumber}`)
+        const { generateUserWeeklyPlan } = await import("../ai/menu-generator")
+        const result = await generateUserWeeklyPlan(user.id, false, weekStartDate)
 
-        weeklyPlan = await prisma.weeklyPlan.create({
-            data: {
-                userId: user.id,
-                weekStart: weekStartDate,
-                phase: activePhase.type,
-                content: generatedContent
-            }
-        })
+        if (result.success && result.plan) {
+            weeklyPlan = result.plan
+        } else {
+            return null // Fail gracefully
+        }
     }
 
     const daysData = []
