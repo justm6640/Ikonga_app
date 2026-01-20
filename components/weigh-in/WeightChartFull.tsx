@@ -29,7 +29,7 @@ interface WeightChartFullProps {
     targetWeight?: number;
 }
 
-type RangeType = "ALL" | "7D" | "1M" | "CUSTOM"
+type RangeType = "ALL" | "3D" | "7D" | "1M" | "CUSTOM"
 
 // Composant Tooltip séparé pour plus de propreté et typage
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
@@ -72,6 +72,14 @@ export function WeightChartFull({ data, targetWeight }: WeightChartFullProps) {
         if (range === "ALL") return sorted;
 
         const today = startOfDay(new Date())
+
+        if (range === "3D") {
+            const cutoff = subDays(today, 2); // 2 jours avant + aujourd'hui = 3 jours
+            return sorted.filter(log => {
+                const logDate = startOfDay(new Date(log.date));
+                return isAfter(logDate, cutoff) || isSameDay(logDate, cutoff);
+            });
+        }
 
         if (range === "7D") {
             const cutoff = subDays(today, 6); // 6 jours avant + aujourd'hui = 7 jours
@@ -171,7 +179,7 @@ export function WeightChartFull({ data, targetWeight }: WeightChartFullProps) {
 
                 <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     <div className="flex p-1 bg-slate-100 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
-                        {(["ALL", "7D", "1M"] as const).map((r) => (
+                        {(["3D", "7D", "1M", "ALL"] as const).map((r) => (
                             <button
                                 key={r}
                                 onClick={() => { setRange(r); setShowCustomDates(false); }}
@@ -180,7 +188,7 @@ export function WeightChartFull({ data, targetWeight }: WeightChartFullProps) {
                                     range === r ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
                                 )}
                             >
-                                {r === "ALL" ? "Tout" : r === "7D" ? "7 jours" : "1 mois"}
+                                {r === "3D" ? "3 jours" : r === "7D" ? "7 jours" : r === "1M" ? "1 mois" : "Tout"}
                             </button>
                         ))}
 
