@@ -56,10 +56,9 @@ export function WeeklyView({ weekData, availableWeeks, onWeekChange, onDayClick 
         if (menu.breakfast) meals.push("Petit-déjeuner")
         if (menu.lunch) meals.push("déjeuner")
         if (menu.dinner) meals.push("dîner")
-        if (menu.snack) meals.push("snacks")
+        if (menu.snack || menu.snack_afternoon) meals.push("snacks")
         return meals.join(", ") + "."
     }
-
     return (
         <div className="space-y-6">
             {/* Week Selector and Actions */}
@@ -172,6 +171,21 @@ export function WeeklyView({ weekData, availableWeeks, onWeekChange, onDayClick 
                                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Snack</span>
                                                     <p className="text-sm font-bold text-slate-800 truncate leading-snug">
                                                         {typeof day.menu.snack === 'object' ? day.menu.snack?.name : day.menu.snack}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Snack Après-midi */}
+                                        {day.menu.snack_afternoon && (
+                                            <div className="flex items-start gap-3 group/item">
+                                                <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center shrink-0 group-hover/item:bg-orange-100 transition-colors">
+                                                    <span className="text-sm">🍪</span>
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Snack AM</span>
+                                                    <p className="text-sm font-bold text-slate-800 truncate leading-snug">
+                                                        {typeof day.menu.snack_afternoon === 'object' ? day.menu.snack_afternoon?.name : day.menu.snack_afternoon}
                                                     </p>
                                                 </div>
                                             </div>

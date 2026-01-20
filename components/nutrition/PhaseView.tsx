@@ -19,6 +19,7 @@ interface PhaseViewProps {
             weekEnd: Date
             completedDays: number
             totalDays: number
+            isLocked?: boolean
         }>
         progressPercentage: number
     } | null
@@ -39,7 +40,8 @@ export function PhaseView({ phaseData, onWeekClick }: PhaseViewProps) {
             weekStart: new Date(),
             weekEnd: new Date(),
             completedDays: 0,
-            totalDays: 7
+            totalDays: 7,
+            isLocked: false
         })),
         progressPercentage: 0
     }
@@ -90,41 +92,48 @@ export function PhaseView({ phaseData, onWeekClick }: PhaseViewProps) {
                 {displayData.weeks.map((week) => (
                     <div
                         key={week.weekNumber}
-                        onClick={() => onWeekClick(week.weekNumber)}
-                        className="group relative bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:border-orange-100 transition-all duration-300 cursor-pointer overflow-hidden"
+                        onClick={() => !week.isLocked && onWeekClick(week.weekNumber)}
+                        className={`group relative bg-white rounded-3xl p-6 border border-slate-100 shadow-sm transition-all duration-300 overflow-hidden ${week.isLocked ? 'cursor-not-allowed opacity-60' : 'hover:shadow-xl hover:border-orange-100 cursor-pointer'}`}
                     >
                         {/* Decorative Background Element */}
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-orange-50 rounded-bl-[80px] -mr-8 -mt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                        {!week.isLocked && (
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-orange-50 rounded-bl-[80px] -mr-8 -mt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                        )}
 
                         <div className="relative z-10 flex items-center justify-between">
                             <div className="flex items-center gap-5">
-                                <div className="w-16 h-16 rounded-2xl bg-orange-50 flex flex-col items-center justify-center border border-orange-100 shadow-sm group-hover:scale-105 transition-transform">
-                                    <span className="text-[10px] font-black uppercase text-orange-400 tracking-widest mb-0.5">Semaine</span>
-                                    <span className="text-2xl font-black text-orange-600 leading-none">
+                                <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center border shadow-sm transition-transform ${week.isLocked ? 'bg-slate-100 border-slate-200' : 'bg-orange-50 border-orange-100 group-hover:scale-105'}`}>
+                                    <span className={`text-[10px] font-black uppercase tracking-widest mb-0.5 ${week.isLocked ? 'text-slate-400' : 'text-orange-400'}`}>Semaine</span>
+                                    <span className={`text-2xl font-black leading-none ${week.isLocked ? 'text-slate-500' : 'text-orange-600'}`}>
                                         {week.weekNumber}
                                     </span>
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-serif font-black text-slate-900 mb-1 group-hover:text-orange-600 transition-colors">
+                                    <h3 className={`text-xl font-serif font-black mb-1 transition-colors ${week.isLocked ? 'text-slate-500' : 'text-slate-900 group-hover:text-orange-600'}`}>
                                         Semaine {week.weekNumber}
                                     </h3>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                                             {format(week.weekStart, "d MMM", { locale: fr })} - {format(week.weekEnd, "d MMM", { locale: fr })}
                                         </span>
-                                        <div className="h-1 w-1 rounded-full bg-slate-300" />
-                                        <span className="text-xs font-medium text-slate-500">
-                                            {week.completedDays}/{week.totalDays} jours
-                                        </span>
+                                        {!week.isLocked && (
+                                            <>
+                                                <div className="h-1 w-1 rounded-full bg-slate-300" />
+                                                <span className="text-xs font-medium text-slate-500">
+                                                    {week.completedDays}/{week.totalDays} jours
+                                                </span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all shadow-sm">
-                                <ChevronRight
-                                    size={20}
-                                    className="text-slate-400 group-hover:text-white"
-                                />
+                            <div className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm ${week.isLocked ? 'bg-slate-50 text-slate-300' : 'bg-slate-50 text-slate-400 group-hover:bg-orange-500 group-hover:text-white'}`}>
+                                {week.isLocked ? (
+                                    <span className="text-sm">🔒</span>
+                                ) : (
+                                    <ChevronRight size={20} />
+                                )}
                             </div>
                         </div>
                     </div>

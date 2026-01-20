@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { AlertTriangle, ChevronDown, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -29,7 +29,39 @@ export function ComposerView({ phaseDays, currentPhase, initialData }: ComposerV
         snack_afternoon: "", // New field not in standard menu but requested in UI
         dinner: initialData?.menu?.dinner?.name || ""
     })
+    const [availableRecipes, setAvailableRecipes] = useState<any[]>([])
     const [isPending, startTransition] = useTransition()
+
+    // 1. Fetch Recipes for calculation
+    useEffect(() => {
+        const fetchRecipes = async () => {
+            const { getRecipes } = await import("@/lib/actions/nutrition")
+            const data = await getRecipes({ phase: currentPhase as any })
+            setAvailableRecipes(data)
+        }
+        fetchRecipes()
+    }, [currentPhase])
+
+    // 2. Real-time Calorie Calculation
+    const [totalCalories, setTotalCalories] = useState(0)
+
+    useEffect(() => {
+        const calculateTotal = () => {
+            const mealNames = [formData.breakfast, formData.snack, formData.lunch, formData.snack_afternoon, formData.dinner]
+                .map(n => n.trim().toLowerCase())
+
+            let sum = 0
+            mealNames.forEach(name => {
+                if (!name) return
+                const match = availableRecipes.find(r => r.name.toLowerCase() === name)
+                if (match && match.calories) {
+                    sum += match.calories
+                }
+            })
+            setTotalCalories(sum)
+        }
+        calculateTotal()
+    }, [formData, availableRecipes])
 
     const handleDayChange = (day: any) => {
         setSelectedDay(day)
@@ -65,6 +97,19 @@ export function ComposerView({ phaseDays, currentPhase, initialData }: ComposerV
             })
         })
     }
+
+    // --- Calorie Threshold Logic (Alerte Douce) ---
+    const getThreshold = (phase: string) => {
+        switch (phase) {
+            case "DETOX": return 1500
+            case "EQUILIBRE": return 1800
+            case "CONSOLIDATION": return 2000
+            case "ENTRETIEN": return 2200
+            default: return 1800
+        }
+    }
+
+    const threshold = getThreshold(currentPhase)
 
     return (
         <div className="space-y-6">
@@ -114,15 +159,29 @@ export function ComposerView({ phaseDays, currentPhase, initialData }: ComposerV
                 </div>
             </div>
 
-            {/* Warning Banner */}
-            <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 flex items-start gap-3">
-                <AlertTriangle className="text-orange-500 shrink-0 mt-0.5" size={18} />
+            {/* Alerte Douce (Calorie Logic) */}
+            {totalCalories > threshold && (
+                <div className="bg-orange-50 border border-orange-200 rounded-3xl p-6 flex flex-col items-center text-center gap-3 animate-in zoom-in-95 duration-300">
+                    <span className="text-3xl">🌸</span>
+                    <p className="text-slate-700 text-sm font-medium leading-relaxed">
+                        "Pour ta phase actuelle, on recommande des repas autour de <b>{threshold} kcal</b>.
+                        Tu dépasses un peu, veux-tu ajuster ?"
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">
+                        — Ton Coach Ikonga
+                    </p>
+                </div>
+            )}
+
+            {/* Phase Context Banner */}
+            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-start gap-3">
+                <Sparkles className="text-slate-400 shrink-0 mt-0.5" size={18} />
                 <div>
-                    <h4 className="text-xs font-black uppercase tracking-wider text-orange-800 mb-1">
-                        PHASE {currentPhase}
+                    <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-1">
+                        Conseils Phase {currentPhase}
                     </h4>
-                    <p className="text-orange-700 text-xs leading-relaxed">
-                        L'IA respectera les contraintes de ta phase (ne pas de féculents le soir en détox).
+                    <p className="text-slate-600 text-xs leading-relaxed">
+                        L'IA respectera les contraintes de ta phase (ex: pas de féculents le soir en détox).
                     </p>
                 </div>
             </div>

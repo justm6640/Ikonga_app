@@ -140,7 +140,7 @@ export async function deleteMenu(menuId: string) {
 
 /**
  * Assigne un menu (contenu brut) à un utilisateur spécifique pour une date donnée.
- * Écrase tout UserCustomMenu existant pour ce jour.
+ * Ces modifications vont dans Level 2 (Overrides Admin) de WeeklyPlan.
  */
 export async function assignMenuToUser(userIdentifier: string, date: Date, content: any) {
     const supabase = await createClient()
@@ -169,25 +169,39 @@ export async function assignMenuToUser(userIdentifier: string, date: Date, conte
     const targetDate = startOfDay(date)
 
     try {
-        await prisma.userCustomMenu.upsert({
-            where: {
-                userId_date: {
-                    userId: targetUserId,
-                    date: targetDate
-                }
-            },
-            create: {
-                userId: targetUserId,
-                date: targetDate,
-                content
-            },
-            update: {
-                content
-            }
+        const weekStart = startOfWeek(targetDate, { weekStartsOn: 1 })
+        const dayIndex = differenceInCalendarDays(targetDate, weekStart)
+
+        let plan = await prisma.weeklyPlan.findUnique({
+            where: { userId_weekStart: { userId: targetUserId, weekStart } }
         })
 
+        const newDayOverride = { dayIndex, ...content }
+
+        if (plan) {
+            let overrides = (plan.overrides as any) || { days: [] }
+            if (!overrides.days) overrides.days = []
+            overrides.days = overrides.days.filter((d: any) => d.dayIndex !== dayIndex)
+            overrides.days.push(newDayOverride)
+
+            await prisma.weeklyPlan.update({
+                where: { id: plan.id },
+                data: { overrides }
+            })
+        } else {
+            await prisma.weeklyPlan.create({
+                data: {
+                    userId: targetUserId,
+                    weekStart,
+                    phase: "DETOX",
+                    content: { days: [] },
+                    overrides: { days: [newDayOverride] }
+                }
+            })
+        }
+
         revalidatePath("/admin/menus")
-        revalidatePath("/nutrition") // Force users to see it
+        revalidatePath("/nutrition")
         return { success: true }
     } catch (error) {
         console.error("Assign User Menu Error:", error)
@@ -197,6 +211,7 @@ export async function assignMenuToUser(userIdentifier: string, date: Date, conte
 
 /**
  * Assigne un menu à TOUS les utilisateurs d'une phase active donnée pour une date.
+ * Écrase les Overrides Admin (Level 2) existants pour ces utilisateurs.
  */
 export async function assignMenuToGroup(phase: PhaseType, date: Date, content: any) {
     const supabase = await createClient()
@@ -207,14 +222,12 @@ export async function assignMenuToGroup(phase: PhaseType, date: Date, content: a
     if (dbUser?.role !== 'ADMIN') return { error: "Accès refusé" }
 
     const targetDate = startOfDay(date)
+    const weekStart = startOfWeek(targetDate, { weekStartsOn: 1 })
+    const dayIndex = differenceInCalendarDays(targetDate, weekStart)
 
     try {
-        // 1. Find all users currently in this phase
         const usersInPhase = await prisma.userPhase.findMany({
-            where: {
-                type: phase,
-                isActive: true
-            },
+            where: { type: phase, isActive: true },
             select: { userId: true }
         })
 
@@ -222,22 +235,44 @@ export async function assignMenuToGroup(phase: PhaseType, date: Date, content: a
             return { success: true, message: "Aucun utilisateur trouvé dans cette phase" }
         }
 
-        // 2. Batch Upsert
-        await prisma.$transaction(
-            usersInPhase.map(u =>
-                prisma.userCustomMenu.upsert({
-                    where: { userId_date: { userId: u.userId, date: targetDate } },
-                    create: { userId: u.userId, date: targetDate, content },
-                    update: { content }
+        // Processing each user to update their WeeklyPlan overrides
+        for (const u of usersInPhase) {
+            let plan = await prisma.weeklyPlan.findUnique({
+                where: { userId_weekStart: { userId: u.userId, weekStart } }
+            })
+
+            const newDayOverride = { dayIndex, ...content }
+
+            if (plan) {
+                let overrides = (plan.overrides as any) || { days: [] }
+                if (!overrides.days) overrides.days = []
+                overrides.days = overrides.days.filter((d: any) => d.dayIndex !== dayIndex)
+                overrides.days.push(newDayOverride)
+
+                await prisma.weeklyPlan.update({
+                    where: { id: plan.id },
+                    data: { overrides }
                 })
-            )
-        )
+            } else {
+                await prisma.weeklyPlan.create({
+                    data: {
+                        userId: u.userId,
+                        weekStart,
+                        phase: phase,
+                        content: { days: [] },
+                        overrides: { days: [newDayOverride] }
+                    }
+                })
+            }
+        }
 
         revalidatePath("/admin/menus")
-        revalidatePath("/nutrition") // Force users to see it
+        revalidatePath("/nutrition")
         return { success: true, count: usersInPhase.length }
     } catch (error) {
         console.error("Assign Group Menu Error:", error)
         return { error: "Erreur lors de l'assignation de groupe" }
     }
 }
+
+import { startOfWeek, differenceInCalendarDays } from "date-fns"

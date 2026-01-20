@@ -19,32 +19,39 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { getNutritionData, getWeekData, getPhaseData, getRecipes, getShoppingList } from "@/lib/actions/nutrition"
+import { getNutritionData, getWeekData, getPhaseData, getRecipes, getShoppingList, getPhaseDays } from "@/lib/actions/nutrition"
 import { getGlobalMenus } from "@/lib/actions/admin-menu"
-import { format, addDays } from "date-fns"
+import { format, addDays, startOfDay } from "date-fns"
 import { fr } from "date-fns/locale"
 import { LoadingOverlay } from "@/components/ui/LoadingOverlay"
 import { DailyMenuModal } from "./DailyMenuModal"
 import { WeekMenuModal } from "./WeekMenuModal"
+import { DaySelectorStrip } from "./DaySelectorStrip"
 
 
 interface NutritionClientProps {
     initialData: any
     subscriptionTier: string
-    phaseDays: Array<{ dayNumber: number; date: Date; label: string }>
+    phaseDays: Array<{ dayNumber: number; date: Date; label: string; isCompleted?: boolean }>
 }
 
 export function NutritionClient({ initialData, subscriptionTier, phaseDays }: NutritionClientProps) {
-    // Convert serialized date strings to Date objects
-    const normalizedPhaseDays = phaseDays.map(day => ({
-        ...day,
-        date: new Date(day.date)
-    }))
+    // Convert serialized date strings to Date objects and make stateful
+    const [normalizedPhaseDays, setNormalizedPhaseDays] = useState(
+        phaseDays.map(day => ({
+            ...day,
+            date: new Date(day.date)
+        }))
+    )
 
     const [selectedTab, setSelectedTab] = useState("day")
     const [selectedRecipe, setSelectedRecipe] = useState<any>(null)
     const [isMenuOpen, setIsMenuOpen] = useState(true)
-    const [selectedDay, setSelectedDay] = useState(normalizedPhaseDays[0] || { dayNumber: 1, label: "Jour 1", date: new Date() })
+    const [selectedDay, setSelectedDay] = useState(() => {
+        const today = startOfDay(new Date()).getTime()
+        const foundToday = normalizedPhaseDays.find(d => startOfDay(d.date).getTime() === today)
+        return foundToday || normalizedPhaseDays[0] || { dayNumber: 1, label: "Jour 1", date: new Date() }
+    })
     const [currentData, setCurrentData] = useState(initialData)
     const [weekData, setWeekData] = useState<any>(null)
     const [phaseData, setPhaseData] = useState<any>(null)
@@ -64,13 +71,18 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
         setSelectedRecipe(recipe)
     }
 
+    const [lockedState, setLockedState] = useState<{ locked: boolean; unlockDate?: any; reason?: string } | null>(null)
+
     const handleDayChange = (day: any) => {
         setSelectedDay(day)
         startTransition(async () => {
-            // Pass ISO string directly to avoid Next.js Date serialization bug
             const dateString = day.date.toISOString()
             const data = await getNutritionData(dateString)
-            if (data) {
+            if (data && data.locked) {
+                setLockedState(data)
+                setCurrentData({ ...currentData, menu: null })
+            } else if (data) {
+                setLockedState(null)
                 setCurrentData(data)
             }
         })
@@ -302,9 +314,9 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                             </TabsList>
 
                             <TabsContent value="day" className="space-y-6 mt-0">
-                                {/* Day Selection Row */}
-                                <div className="flex items-center justify-between">
-                                    <div className="flex flex-col">
+                                {/* Day Selection Strip */}
+                                <div className="space-y-4">
+                                    <div className="flex flex-col px-4 sm:px-0">
                                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                             PHASE {currentData.phase}
                                         </span>
@@ -318,34 +330,35 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                                         )}
                                     </div>
 
-                                    {/* Jour Selector Dropdown */}
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <div className="bg-orange-50 border border-orange-100 px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-orange-100 transition-colors">
-                                                <span className="text-orange-600 font-bold text-xs uppercase">
-                                                    {selectedDay.label}
-                                                </span>
-                                                <ChevronDown size={14} className="text-orange-400" />
-                                            </div>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-48">
-                                            {normalizedPhaseDays.map((day) => (
-                                                <DropdownMenuItem
-                                                    key={day.dayNumber}
-                                                    onClick={() => handleDayChange(day)}
-                                                    className="cursor-pointer font-bold text-xs uppercase tracking-wider"
-                                                >
-                                                    {day.label}
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                    <DaySelectorStrip
+                                        days={normalizedPhaseDays}
+                                        selectedDayNumber={selectedDay.dayNumber}
+                                        onDaySelect={handleDayChange}
+                                    />
                                 </div>
 
                                 {/* Meal Cards Grid */}
                                 <div className="space-y-4">
-                                    {/* Removed local loader */}
-                                    {true && (
+                                    {lockedState?.locked ? (
+                                        <div className="bg-slate-50 border border-dashed border-slate-200 rounded-3xl p-12 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
+                                            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-sm">
+                                                <span className="text-2xl">🔒</span>
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-serif font-black text-slate-900 mb-1">
+                                                    Bientôt disponible !
+                                                </h3>
+                                                <p className="text-slate-500 text-sm max-w-[280px] leading-relaxed">
+                                                    Tes futurs menus seront débloqués <b>48h avant</b> le début de ta prochaine phase.
+                                                </p>
+                                            </div>
+                                            {lockedState.unlockDate && (
+                                                <div className="bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                                    Déblocage le {format(new Date(lockedState.unlockDate), "d MMMM à HH:mm", { locale: fr })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
                                         <>
                                             <MealCard
                                                 category="PETIT-DÉJEUNER"
@@ -362,12 +375,63 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                                                 recipe={currentData.menu?.lunch}
                                                 onClick={() => handleRecipeClick(currentData.menu?.lunch)}
                                             />
+                                            {/* Support for 5th meal slot if available */}
+                                            {currentData.menu?.snack_afternoon && (
+                                                <MealCard
+                                                    category="SNACK APRÈS-MIDI"
+                                                    recipe={currentData.menu?.snack_afternoon}
+                                                    onClick={() => handleRecipeClick(currentData.menu?.snack_afternoon)}
+                                                />
+                                            )}
                                             <MealCard
                                                 category="DÎNER"
                                                 recipe={currentData.menu?.dinner}
                                                 onClick={() => handleRecipeClick(currentData.menu?.dinner)}
                                             />
                                         </>
+                                    )}
+
+                                    {/* Validation Button */}
+                                    {!lockedState?.locked && (
+                                        <div className="pt-6 border-t border-slate-100 flex flex-col items-center gap-4">
+                                            <button
+                                                onClick={async () => {
+                                                    const { validateDailyNutrition } = await import("@/lib/actions/nutrition")
+                                                    startTransition(async () => {
+                                                        const res = await validateDailyNutrition(selectedDay.date)
+                                                        if (res.success) {
+                                                            const updatedDays = await getPhaseDays()
+                                                            setNormalizedPhaseDays(updatedDays.map(d => ({
+                                                                ...d,
+                                                                date: new Date(d.date)
+                                                            })))
+                                                            setCurrentData({ ...currentData, isCompleted: true })
+                                                        }
+                                                    })
+                                                }}
+                                                disabled={currentData.isCompleted || isPending}
+                                                className={cn(
+                                                    "w-full sm:w-64 h-14 rounded-2xl font-serif font-black text-lg transition-all shadow-md active:scale-95 flex items-center justify-center gap-2",
+                                                    currentData.isCompleted
+                                                        ? "bg-green-50 text-green-600 border border-green-100 cursor-default"
+                                                        : "bg-[#241919] text-white hover:bg-black shadow-black/10"
+                                                )}
+                                            >
+                                                {currentData.isCompleted ? (
+                                                    <>
+                                                        <span className="text-xl">✅</span>
+                                                        C'est mangé !
+                                                    </>
+                                                ) : (
+                                                    "J'ai fini mes repas"
+                                                )}
+                                            </button>
+                                            {!currentData.isCompleted && (
+                                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">
+                                                    Clique ici pour valider ta journée
+                                                </p>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             </TabsContent>

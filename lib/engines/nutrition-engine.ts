@@ -172,15 +172,27 @@ export class NutritionEngine {
         }
 
         // 5. Structure for DB
-        // WeeklyPlan.content is Json. We'll store: { "days": [...] }
-        return {
+        const result = {
             days: days,
             meta: {
                 targetCalories: dailyCalories,
                 generatedAt: new Date(),
-                profileSnapshot: { ...profile }
+                profileSnapshot: { ...profile },
+                isAiGenerated: true
             }
         }
+
+        // 6. AUTO-GENERATE MISSING RECIPES (Batch)
+        try {
+            const allMealNames = days.flatMap(d => [d.breakfast, d.lunch, d.snack, d.dinner])
+            const { batchGenerateRecipes } = await import("../ai/recipe-generator")
+            await batchGenerateRecipes(allMealNames, phase.toString())
+            console.log(`[NutritionEngine] Batch generated recipes for phase ${phase}`)
+        } catch (err) {
+            console.error("[NutritionEngine] Failed to batch generate recipes:", err)
+        }
+
+        return result
     }
 
     private static generateDayMenu(recipes: Recipe[], targetCalories: number, profile: UserProfile) {

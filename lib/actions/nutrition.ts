@@ -55,25 +55,20 @@ export async function getNutritionData(dateInput?: string | Date) {
         // Par simplicité, on va chercher s'il y a un plan hebdomadaire qui définit la phase pour cette date.
     }
 
-    // --- 2. Hiérarchie des Menus ---
-    // A. UserCustomMenu (Niveau 3 - Priorité absolue)
-    let menuContent = await prisma.userCustomMenu.findUnique({
-        where: {
-            userId_date: {
-                userId: user.id,
-                date: targetDate
-            }
-        }
-    })
-
+    // --- 2. Hiérarchy des Menus (Level 3 > Level 2 > Level 1) ---
     let finalMenu: any = null
     let sourcePhase: PhaseType = activePhase.type
 
-    if (menuContent) {
-        finalMenu = menuContent.content
+    // A. UserCustomMenu (Niveau 3 - Priorité absolue: Abonné)
+    const customMenu = await prisma.userCustomMenu.findUnique({
+        where: { userId_date: { userId: user.id, date: targetDate } }
+    })
+
+    if (customMenu) {
+        finalMenu = customMenu.content
+        console.log(`[DEBUG] Resolved Level 3 Menu (User)`)
     } else {
-        // B. WeeklyPlan (Niveau 1/2 - Menu généré)
-        // On cherche le plan qui englobe la targetDate
+        // B. WeeklyPlan (Check Level 2 & 1)
         const weeklyPlan = await prisma.weeklyPlan.findFirst({
             where: {
                 userId: user.id,
@@ -82,49 +77,41 @@ export async function getNutritionData(dateInput?: string | Date) {
             orderBy: { weekStart: 'desc' }
         })
 
-        // Vérification que la date est bien dans la semaine du plan
         if (weeklyPlan && isBefore(targetDate, addDays(weeklyPlan.weekStart, 7))) {
-            const content = weeklyPlan.content as any
-
-            // Fix: Add 4 hours to both dates to push "23:00" timestamps (due to timezone) into the correct calendar day
-            // This ensures safe diffing even if DB stores dates as UTC-1 (23:00 prev day)
             const safeTarget = addHours(targetDate, 4)
             const safeStart = addHours(weeklyPlan.weekStart, 4)
             const dayIndex = differenceInCalendarDays(safeTarget, safeStart)
+            sourcePhase = weeklyPlan.phase as PhaseType
 
-            console.log(`[DEBUG] Target: ${targetDate.toISOString()}, SafeTarget: ${safeTarget.toISOString()}`)
-            console.log(`[DEBUG] WeekStart: ${weeklyPlan.weekStart.toISOString()}, SafeStart: ${safeStart.toISOString()}`)
-            console.log(`[DEBUG] Calculated DayIndex: ${dayIndex}`)
-
-            // Find day in content.days array using dayIndex property if available, or fallback to array index
-            // We search robustly to handle potential unsorted arrays or sparse data
-            let dayData = null
-            if (content.days && Array.isArray(content.days)) {
-                dayData = content.days.find((d: any) => d.dayIndex === dayIndex)
-                console.log(`[DEBUG] Found by dayIndex prop: ${!!dayData}`)
-                // Fallback to direct index if dayIndex property is missing but array exists
-                if (!dayData && content.days[dayIndex]) {
-                    dayData = content.days[dayIndex]
-                    console.log(`[DEBUG] Found by array index: ${!!dayData}`)
+            // B1. Level 2 (Overrides Coach/Admin)
+            if (weeklyPlan.overrides) {
+                const overrides = weeklyPlan.overrides as any
+                if (overrides.days && Array.isArray(overrides.days)) {
+                    const overrideData = overrides.days.find((d: any) => d.dayIndex === dayIndex)
+                    if (overrideData) {
+                        finalMenu = overrideData
+                        console.log(`[DEBUG] Resolved Level 2 Menu (Admin Override)`)
+                    }
                 }
             }
 
-            if (dayData) {
-                console.log(`[DEBUG] DayData found:`, dayData)
-                finalMenu = dayData
-                sourcePhase = weeklyPlan.phase as PhaseType
-            } else {
-                console.log(`[DEBUG] NO DayData found for index ${dayIndex}`)
+            // B2. Level 1 (Automatic AI) - Fallback
+            if (!finalMenu) {
+                const content = weeklyPlan.content as any
+                if (content.days && Array.isArray(content.days)) {
+                    const dayData = content.days.find((d: any) => d.dayIndex === dayIndex)
+                    if (dayData) {
+                        finalMenu = dayData
+                        console.log(`[DEBUG] Resolved Level 1 Menu (AI Auto)`)
+                    }
+                }
             }
-        } else {
-            console.log(`[DEBUG] WeeklyPlan check failed. Plan exists: ${!!weeklyPlan}, isBefore check: ${weeklyPlan ? isBefore(targetDate, addDays(weeklyPlan.weekStart, 7)) : 'N/A'}`)
         }
     }
 
     if (!finalMenu) return { menu: null, phase: activePhase.type }
 
     // --- 3. Récupération des Recettes ---
-    // finalMenu est supposé être { breakfast: "NomRecette", lunch: "...", ... }
     const meals = ['breakfast', 'lunch', 'dinner', 'snack']
     const enrichedMenu: any = {}
 
@@ -218,11 +205,26 @@ export async function getPhaseDays() {
     let currentDate = startDate
     let dayNumber = 1
 
+    // Fetch completion status for all days in the range
+    const logs = await prisma.dailyLog.findMany({
+        where: {
+            userId: user.id,
+            date: {
+                gte: startDate,
+                lte: endDate || startDate // Fallback
+            }
+        }
+    })
+
+    const completedDates = new Set(logs.filter(l => l.nutritionDone).map(l => startOfDay(l.date).getTime()))
+
     while (isBefore(currentDate, endDate) || currentDate.getTime() === endDate.getTime()) {
+        const time = startOfDay(currentDate).getTime()
         days.push({
             dayNumber,
             date: currentDate,
-            label: `Jour ${dayNumber}`
+            label: `Jour ${dayNumber}`,
+            isCompleted: completedDates.has(time)
         })
         currentDate = addDays(currentDate, 1)
         dayNumber++
@@ -381,12 +383,22 @@ export async function getPhaseData() {
             }
         }
 
+        // Check for J-48h lock: if week starts after active phase and we are > 48h away
+        let isLocked = false
+        if (activePhase.plannedEndDate && isAfter(weekStart, activePhase.plannedEndDate)) {
+            const unlockTime = subHours(activePhase.plannedEndDate, 48)
+            if (isBefore(new Date(), unlockTime)) {
+                isLocked = true
+            }
+        }
+
         weeksData.push({
             weekNumber: weekNum,
             weekStart,
             weekEnd,
             completedDays,
-            totalDays: 7
+            totalDays: 7,
+            isLocked
         })
     }
 

@@ -7,63 +7,77 @@ const openai = new OpenAI({
 });
 
 /**
- * Fetches a recipe from the database or generates it using AI.
- * Caches the results to avoid duplicate costs.
+ * Generates an AI recipe for a specific dish and phase if it doesn't exist.
+ * Saves it to the database.
  */
-export async function getOrGenerateRecipe(mealName: string, phase: string) {
-    // 1. Check Database Cache
+export async function generateAndSaveRecipe(name: string, phase: string) {
+    if (!name || name === "Repas Libre") return null;
+
     try {
-        const existingRecipe = await prisma.recipe.findFirst({
+        // 1. Check if already exists
+        const existing = await prisma.recipe.findUnique({
             where: {
-                name: mealName,
-                phase: phase
+                name_phase: { name, phase }
             }
         });
 
-        if (existingRecipe) return existingRecipe;
-    } catch (dbError: any) {
-        console.error("Erreur Database Cache (Recette):", dbError);
-        // On continue quand même vers l'IA si c'est juste un souci de cache
-    }
+        if (existing) return existing;
 
-    // 2. Generate with AI if not found
-    try {
+        console.log(`[AI Recipe] Generating: ${name} (${phase})`);
+
+        // 2. IA Call
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
                 { role: "system", content: SYSTEM_PROMPT_RECIPE },
                 {
                     role: "user",
-                    content: `Génère la recette de : ${mealName} (Phase: ${phase}).`
+                    content: `Plat: ${name}\nPhase: ${phase}\nObjectif: Santé et Perte de poids.`
                 }
             ],
             response_format: { type: "json_object" },
         });
 
         const content = completion.choices[0].message.content;
-        if (!content) throw new Error("Erreur génération IA");
+        if (!content) throw new Error("Réponse IA vide");
 
-        const recipeData = JSON.parse(content);
+        const recipeJson = JSON.parse(content);
 
-        // 3. Save to Database
+        // 3. Save to DB
         const newRecipe = await prisma.recipe.create({
             data: {
-                name: mealName,
+                name: name,
                 phase: phase,
-                ingredients: recipeData.ingredients,
-                instructions: recipeData.instructions,
-                calories: recipeData.macros.calories,
-                protein: recipeData.macros.protein,
-                carbs: recipeData.macros.carbs,
-                fat: recipeData.macros.fat,
-                prepTime: recipeData.prepTime
+                ingredients: recipeJson.ingredients || [],
+                instructions: recipeJson.instructions || [],
+                calories: recipeJson.macros?.calories || 0,
+                protein: recipeJson.macros?.protein || 0,
+                carbs: recipeJson.macros?.carbs || 0,
+                fat: recipeJson.macros?.fat || 0,
+                prepTime: recipeJson.prepTime || 20,
+                isPremium: false
             }
         });
 
         return newRecipe;
 
     } catch (error) {
-        console.error(`Erreur Génération Recette (${mealName}):`, error);
-        throw new Error("Impossible de générer la recette.");
+        console.error(`[AI Recipe Error] ${name}:`, error);
+        return null;
     }
+}
+
+/**
+ * Batch generate recipes for a list of names.
+ */
+export async function batchGenerateRecipes(names: string[], phase: string) {
+    const uniqueNames = Array.from(new Set(names)).filter(n => n && n !== "Repas Libre");
+    const results = [];
+
+    for (const name of uniqueNames) {
+        const recipe = await generateAndSaveRecipe(name, phase);
+        results.push(recipe);
+    }
+
+    return results;
 }
