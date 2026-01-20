@@ -16,33 +16,33 @@ export const NAV_ITEMS: NavItem[] = [
         requiredFeature: 'DASHBOARD_VIEW'
     },
     {
-        label: "IKOWELLNESS",
-        href: "/wellness",
-        icon: Map, // Keeping Map or switching to something else if needed
-        requiredFeature: 'JOURNAL'
-    },
-    {
-        label: "IKOBEAUTY",
-        href: "/beauty",
-        icon: Sparkles,
+        label: "Pesée",
+        href: "/weigh-in",
+        icon: Scale,
         requiredFeature: 'DASHBOARD_VIEW'
     },
     {
-        label: "Fitness",
-        href: "/fitness",
-        icon: Dumbbell,
-        requiredFeature: 'FITNESS'
-    },
-    {
-        label: "Nutrition",
+        label: "IKO-NUTRITION",
         href: "/nutrition",
         icon: Utensils,
         requiredFeature: 'MENUS'
     },
     {
-        label: "Pesée",
-        href: "/weigh-in",
-        icon: Scale,
+        label: "IKO-WELLNESS",
+        href: "/wellness",
+        icon: Map,
+        requiredFeature: 'JOURNAL'
+    },
+    {
+        label: "IKO-FITNESS",
+        href: "/fitness",
+        icon: Dumbbell,
+        requiredFeature: 'FITNESS'
+    },
+    {
+        label: "IKO-BEAUTY",
+        href: "/beauty",
+        icon: Sparkles,
         requiredFeature: 'DASHBOARD_VIEW'
     },
     {

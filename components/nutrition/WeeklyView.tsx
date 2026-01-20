@@ -118,12 +118,12 @@ export function WeeklyView({ weekData, availableWeeks, onWeekChange, onDayClick 
 
                         <div className="relative z-10 flex flex-col md:flex-row gap-6 md:items-start">
                             {/* Left: Day & Date */}
-                            <div className="md:w-32 shrink-0 flex md:flex-col items-center md:items-start justify-between md:justify-start gap-2 border-b md:border-b-0 md:border-r border-slate-100 pb-4 md:pb-0 md:pr-6">
+                            <div className="md:w-32 shrink-0 flex md:flex-col items-center md:items-start justify-start gap-2 border-b md:border-b-0 md:border-r border-slate-100 pb-4 md:pb-0 md:pr-6 mr-12 md:mr-0">
                                 <div>
                                     <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block mb-1">
                                         JOUR {day.dayNumber}
                                     </span>
-                                    <h4 className="text-3xl font-serif font-black text-slate-900 leading-none">
+                                    <h4 className="text-2xl md:text-3xl font-serif font-black text-slate-900 leading-none">
                                         {format(day.date, "EEEE", { locale: fr }).charAt(0).toUpperCase() + format(day.date, "EEEE", { locale: fr }).slice(1)}
                                     </h4>
                                 </div>
@@ -201,7 +201,7 @@ export function WeeklyView({ weekData, availableWeeks, onWeekChange, onDayClick 
                             </div>
 
                             {/* Right: Action */}
-                            <div className="flex items-center justify-end md:self-center pl-4 border-l border-slate-100 md:border-none md:pl-0">
+                            <div className="absolute top-0 right-0 md:static flex items-center justify-end md:self-center">
                                 <Button
                                     onClick={() => onDayClick(day.dayNumber)}
                                     variant="ghost"

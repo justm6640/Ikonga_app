@@ -15,6 +15,39 @@ export function Sidebar() {
         !item.requiredFeature || hasAccess(item.requiredFeature)
     );
 
+    const mainItems = filteredNavItems.filter(item => item.href !== '/profile' && item.href !== '/admin');
+    const bottomItems = filteredNavItems.filter(item => item.href === '/profile' || item.href === '/admin');
+
+    const NavLink = ({ item }: { item: any }) => {
+        const isActive = item.href === "/dashboard"
+            ? pathname === "/dashboard"
+            : pathname.startsWith(item.href);
+        const Icon = item.icon;
+
+        return (
+            <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                    "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group",
+                    isActive
+                        ? "bg-ikonga-pink text-white shadow-lg shadow-pink-500/20 font-bold"
+                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                )}
+            >
+                <div className={cn(
+                    "p-2 rounded-xl transition-colors",
+                    isActive ? "bg-white/20 text-white" : "text-slate-400 group-hover:text-slate-900"
+                )}>
+                    <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                </div>
+                <span className="text-sm">
+                    {item.label}
+                </span>
+            </Link>
+        )
+    }
+
     return (
         <div className="hidden md:flex flex-col w-64 h-full bg-card border-r border-border">
             {/* Logo Area */}
@@ -26,35 +59,15 @@ export function Sidebar() {
 
             {/* Navigation Links */}
             <nav className="flex-1 flex flex-col gap-1 p-4 overflow-y-auto mt-4">
-                {filteredNavItems.map((item) => {
-                    const isActive = item.href === "/dashboard"
-                        ? pathname === "/dashboard"
-                        : pathname.startsWith(item.href);
-                    const Icon = item.icon;
+                {mainItems.map((item) => (
+                    <NavLink key={item.href} item={item} />
+                ))}
 
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={cn(
-                                "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group",
-                                isActive
-                                    ? "bg-ikonga-pink text-white shadow-lg shadow-pink-500/20 font-bold"
-                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                            )}
-                        >
-                            <div className={cn(
-                                "p-2 rounded-xl transition-colors",
-                                isActive ? "bg-white/20 text-white" : "text-slate-400 group-hover:text-slate-900"
-                            )}>
-                                <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                            </div>
-                            <span className="text-sm">
-                                {item.label}
-                            </span>
-                        </Link>
-                    );
-                })}
+                <div className="mt-auto pt-4 flex flex-col gap-1 border-t border-border/50">
+                    {bottomItems.map((item) => (
+                        <NavLink key={item.href} item={item} />
+                    ))}
+                </div>
             </nav>
 
             {/* User Section (Optional - Bottom Sidebar) */}

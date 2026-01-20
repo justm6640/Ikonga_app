@@ -24,6 +24,8 @@ import { getGlobalMenus } from "@/lib/actions/admin-menu"
 import { format, addDays } from "date-fns"
 import { fr } from "date-fns/locale"
 import { LoadingOverlay } from "@/components/ui/LoadingOverlay"
+import { DailyMenuModal } from "./DailyMenuModal"
+import { WeekMenuModal } from "./WeekMenuModal"
 
 
 interface NutritionClientProps {
@@ -51,6 +53,9 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
     const [shoppingData, setShoppingData] = useState<any>(null)
     const [currentView, setCurrentView] = useState<"home" | "menus" | "recipes" | "alternatives" | "shopping" | "composer" | "templates">("home")
     const [isPending, startTransition] = useTransition()
+    const [selectedDailyMenu, setSelectedDailyMenu] = useState<any>(null)
+    const [isDailyMenuModalOpen, setIsDailyMenuModalOpen] = useState(false)
+    const [isWeekModalOpen, setIsWeekModalOpen] = useState(false)
 
     // Calculate number of weeks in phase
     const totalWeeks = Math.ceil(normalizedPhaseDays.length / 7)
@@ -86,10 +91,23 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
     }
 
     const handleWeekDayClick = (dayNum: number) => {
-        setSelectedTab("day")
-        const targetDay = normalizedPhaseDays.find(d => d.dayNumber === dayNum)
-        if (targetDay) {
-            handleDayChange(targetDay)
+        // Find day data in the current weekData
+        if (weekData && weekData.days) {
+            const dayData = weekData.days.find((d: any) => d.dayNumber === dayNum)
+            if (dayData) {
+                setSelectedDailyMenu(dayData)
+                setIsDailyMenuModalOpen(true)
+            }
+        } else {
+            // Fallback if weekData not fully loaded but we have phaseDays (might not have menu data though)
+            const targetDay = normalizedPhaseDays.find(d => d.dayNumber === dayNum)
+            if (targetDay) {
+                // If we don't have menu details, better to just switch view or fetch
+                // But user asked for floating window.
+                // For now, let's assume weekData is present as we are in WeeklyView
+                setSelectedTab("day")
+                handleDayChange(targetDay)
+            }
         }
     }
 
@@ -230,7 +248,7 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
     }
 
     return (
-        <div className="max-w-full mx-auto space-y-6 animate-in fade-in duration-500 px-0 sm:px-6 lg:px-8 relative min-h-[80vh]">
+        <div className="max-w-full mx-auto space-y-6 animate-in fade-in duration-500 px-4 sm:px-6 lg:px-8 relative min-h-[80vh]">
             <LoadingOverlay isVisible={isPending} message="Chargement en cours..." />
             {/* Header with Back Button */}
             <div className="flex items-center gap-4 px-4 sm:px-0">
@@ -366,7 +384,10 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                             <TabsContent value="phase">
                                 <PhaseView
                                     phaseData={phaseData}
-                                    onWeekClick={handlePhaseWeekClick}
+                                    onWeekClick={(weekNum) => {
+                                        handleWeekChange(weekNum)
+                                        setIsWeekModalOpen(true)
+                                    }}
                                 />
                             </TabsContent>
                         </Tabs>
@@ -416,6 +437,21 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                 isOpen={!!selectedRecipe}
                 onClose={() => setSelectedRecipe(null)}
                 recipe={selectedRecipe}
+            />
+
+            <DailyMenuModal
+                isOpen={isDailyMenuModalOpen}
+                onClose={() => setIsDailyMenuModalOpen(false)}
+                dayData={selectedDailyMenu}
+            />
+
+            <WeekMenuModal
+                isOpen={isWeekModalOpen}
+                onClose={() => setIsWeekModalOpen(false)}
+                weekData={weekData}
+                availableWeeks={totalWeeks}
+                onWeekChange={handleWeekChange}
+                onDayClick={handleWeekDayClick}
             />
         </div>
     )
