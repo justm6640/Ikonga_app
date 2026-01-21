@@ -40,9 +40,9 @@ const TRACKING_ITEMS = [
     {
         id: "community",
         title: "Groupes",
-        description: "Coach & Commu",
+        description: "Coach & Communauté",
         icon: MessageSquare,
-        href: "/dashboard/community",
+        href: "/groupes",
         color: "bg-pink-50",
         iconColor: "text-pink-600",
         gradient: "from-pink-50 to-rose-50"
