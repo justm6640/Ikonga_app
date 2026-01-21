@@ -1,25 +1,19 @@
-import { motion } from "framer-motion";
 import { redirect } from "next/navigation";
+import prisma from "@/lib/prisma";
+import { getOrCreateUser } from "@/lib/actions/user";
+import { differenceInCalendarDays, startOfDay } from "date-fns";
+import { AnalysisWidget } from "@/components/dashboard/AnalysisWidget";
+import { AnalysisResult } from "@/lib/ai/generator";
+
+// New Components
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { PhaseCard } from "@/components/dashboard/PhaseCard";
 import { WeightMiniChart } from "@/components/dashboard/WeightMiniChart";
 import { PillarsGrid } from "@/components/dashboard/PillarsGrid";
 import { DailyJournalCard } from "@/components/dashboard/DailyJournalCard";
-import { AnalysisWidget } from "@/components/dashboard/AnalysisWidget";
-import { createClient } from "@/lib/supabase/server";
-import prisma from "@/lib/prisma";
-import { AnalysisResult } from "@/lib/ai/generator";
-import { BadgeGrid } from "@/components/gamification/BadgeGrid";
-import { getUserBadges } from "@/lib/actions/gamification";
-import { AnalyticsWidget } from "@/components/dashboard/AnalyticsWidget";
-import { WellnessChart } from "@/components/dashboard/WellnessChart";
-import { getRecentWellnessLogs } from "@/lib/actions/journal";
-import { analyzeTrend } from "@/lib/engines/wellness";
-import { format, startOfDay, startOfWeek, isAfter, differenceInCalendarDays } from "date-fns";
-import { MetricsGrid } from "@/components/dashboard/MetricsGrid";
-import { getOrCreateUser } from "@/lib/actions/user";
-import Link from "next/link";
+import { TrackingGrid } from "@/components/dashboard/TrackingGrid";
+import { ComingSoonGrid } from "@/components/dashboard/ComingSoonGrid";
 import { CountdownHero } from "@/components/dashboard/CountdownHero";
-import { FitnessEngine } from "@/lib/engines/fitness-engine";
 
 export default async function DashboardPage() {
     // 1. Fetch User (Self-healing)
@@ -43,199 +37,111 @@ export default async function DashboardPage() {
 
     // 2. Temporal Logic - Check if program has started
     if (!dbUser.startDate) {
-        redirect("/onboarding"); // Security: No start date = incomplete onboarding
+        redirect("/onboarding");
     }
 
     const today = startOfDay(new Date());
     const programStart = startOfDay(new Date(dbUser.startDate));
-    const hasStarted = !isAfter(programStart, today); // Program starts if startDate <= today
+    const isProgramActive = differenceInCalendarDays(today, programStart) >= 0;
 
     // 3. If not started yet, show Countdown Hero
-    if (!hasStarted) {
-        const userName = dbUser.firstName || "Champion";
+    if (!isProgramActive) {
+        const userName = dbUser.firstName || "Championne";
         const daysRemaining = differenceInCalendarDays(programStart, today);
         return (
-            <div className="flex flex-col gap-6 max-w-4xl mx-auto p-6">
+            <div className="flex flex-col gap-6 max-w-xl mx-auto p-6">
                 <CountdownHero daysRemaining={daysRemaining} userName={userName} />
-                {/* Optional: Add some educational content or blog articles here */}
             </div>
         );
     }
 
-    // 4. Program has started - Show full dashboard
+    // 4. Data for Blocks
 
-    // Fetch 7 most recent weight logs for the mini chart (chronological for graph)
-    const recentWeightLogs = await prisma.dailyLog.findMany({
+    // Weight Chart (last 7 points)
+    const weightHistory = await prisma.dailyLog.findMany({
         where: { userId: dbUser.id, weight: { not: null } },
         orderBy: { date: 'asc' },
         take: 7
     });
 
-    let analysisData: AnalysisResult | null = null;
-    let pillarsData = {
-        nutrition: null as any,
-        fitness: null as any,
-        wellness: null as any,
-        beauty: null as any
-    };
+    const recentWeightLogs = weightHistory.map(log => ({
+        date: log.date.toISOString(),
+        weight: log.weight || 0
+    }));
 
-    // A. Analysis
+    const lastLog = dbUser.dailyLogs.find(l => l.weight !== null);
+    const currentWeight = lastLog?.weight || dbUser.startWeight || 0;
+
+    // Phase Info
+    const activePhase = dbUser.phases[0];
+    const activePhaseType = activePhase?.type || "DETOX";
+    const phaseStartDate = activePhase?.startDate || dbUser.startDate;
+    const isCoachOverridden = activePhase?.adminNote ? true : false;
+
+    // AI Analysis
+    let analysisData: AnalysisResult | null = null;
     if (dbUser.analysis?.content) {
         analysisData = dbUser.analysis.content as unknown as AnalysisResult;
     }
 
-    // B. Pillars Data (Contextual to Phase)
-    const activePhase = dbUser.phases[0];
-    const activePhaseType = activePhase?.type || "DETOX";
-
-    // Parallel Fetch for Pillars
-    const [menu, workout, wellness, beauty] = await Promise.all([
-        prisma.menu.findFirst({
-            where: { phaseCompat: { has: activePhaseType } }
-        }),
-        FitnessEngine.getDailyWorkoutRecommendation(dbUser),
-        prisma.contentLibrary.findFirst({
-            where: { category: "WELLNESS", targetPhases: { has: activePhaseType } }
-        }),
-        prisma.contentLibrary.findFirst({
-            where: { category: "BEAUTY", targetPhases: { has: activePhaseType } }
-        })
-    ]);
-
-    // C. AI Weekly Plan Fetching
-    const now = new Date();
-
-    // Logic: Look for the most recent plan that has started (weekStart <= today)
-    const weeklyPlan = await prisma.weeklyPlan.findFirst({
-        where: {
-            userId: dbUser.id,
-            weekStart: {
-                lte: now
-            }
-        },
-        orderBy: {
-            weekStart: 'desc'
-        }
-    });
-
-    // Special case: If it's the weekend and we only have a plan for NEXT week, 
-    // it means onboarding happened during the weekend. Let's look for any plan.
-    let activePlan = weeklyPlan;
-    if (!activePlan) {
-        activePlan = await prisma.weeklyPlan.findFirst({
-            where: { userId: dbUser.id },
-            orderBy: { weekStart: 'asc' }
-        });
-    }
-
-    // Helper to get day key (monday, tuesday...)
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const currentDayKey = days[now.getDay()];
-    const todaysMenu = (activePlan?.content as any)?.[currentDayKey] || null;
-
-    pillarsData = {
-        nutrition: todaysMenu ? { title: "Mon Menu IA", content: todaysMenu, phase: activePhaseType } : (menu ? { title: menu.title, content: menu.content, phase: activePhaseType } : null),
-        fitness: workout ? { title: workout.title } : { title: "Accéder au Hub" },
-        wellness: wellness ? { title: wellness.title } : null,
-        beauty: beauty ? { title: beauty.title } : null
-    };
-
-    const lastWeightLog = dbUser.dailyLogs.find(l => l.weight !== null);
-    const currentWeight = lastWeightLog?.weight || dbUser.startWeight || 0;
-
     return (
-        <div className="flex flex-col gap-6 max-w-xl mx-auto md:max-w-4xl">
-            {/* Analysis Widget (AI) */}
-            <AnalysisWidget analysis={analysisData} />
+        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+            <div className="max-w-xl mx-auto pb-32 px-4 sm:px-6 space-y-6 sm:space-y-8 relative">
+                {/* Decorative background blurs */}
+                <div className="fixed top-20 right-0 w-72 h-72 bg-ikonga-pink/5 rounded-full blur-3xl -z-10" />
+                <div className="fixed bottom-40 left-0 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl -z-10" />
 
-            {/* Motivational Quote */}
-            <div className="mb-2">
-                <p className="text-lg font-hand text-muted-foreground italic">
-                    "Petit pas + Petit pas = Grande Victoire"
-                </p>
-            </div>
-
-            {/* Hero Section: Phase & Analytics */}
-            <div className="flex flex-col gap-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Phase Card (Main) */}
-                    <PhaseCard
-                        phase={activePhaseType}
-                        startDate={activePhase?.startDate || (dbUser as any).startDate || new Date()}
-                    />
-                    <div className="h-full">
-                        <DailyJournalCard />
+                {/* AI Analysis (Stays on top but discrete) */}
+                {analysisData && (
+                    <div className="mb-6 animate-fade-in-up">
+                        <AnalysisWidget analysis={analysisData} />
                     </div>
-                </div>
+                )}
 
-                {/* Health Gauges (IMC, Body Fat, Battery) */}
-                <MetricsGrid
-                    user={dbUser as any}
-                    currentWeight={currentWeight}
-                    lastLog={dbUser.dailyLogs[0] || null}
+                {/* BLOCK 1: Header */}
+                <DashboardHeader
+                    firstName={dbUser.firstName || undefined}
+                    notificationsCount={0}
                 />
 
-                {/* Performance Analytics (Ma Progression) */}
-                <AnalyticsWidget />
+                {/* BLOCK 2: Phase Card */}
+                <PhaseCard
+                    phase={activePhaseType}
+                    startDate={phaseStartDate}
+                    currentWeight={currentWeight}
+                    startWeight={dbUser.startWeight || currentWeight}
+                    pisi={dbUser.pisi || 0}
+                    dayTotal={21}
+                    plan="Standard 12"
+                    isCoachOverridden={isCoachOverridden}
+                />
 
+                {/* BLOCK 3: Weight Chart */}
+                <WeightMiniChart
+                    data={recentWeightLogs}
+                    currentWeight={currentWeight}
+                    startWeight={dbUser.startWeight || 0}
+                    pisi={dbUser.pisi || 0}
+                />
 
-                {/* Mes Piliers - Moved above Wellness */}
-                <div className="mt-2">
-                    <h3 className="text-lg font-serif font-medium mb-4 ml-1">Mes Piliers</h3>
-                    <PillarsGrid
-                        nutrition={pillarsData.nutrition}
-                        fitness={pillarsData.fitness}
-                        wellness={pillarsData.wellness}
-                        beauty={pillarsData.beauty}
-                    />
+                {/* BLOCK 4: 4 Pillars */}
+                <section className="space-y-4">
+                    <h2 className="text-xl font-serif font-black text-slate-900 ml-1">Tes Piliers</h2>
+                    <PillarsGrid />
+                </section>
+
+                {/* BLOCK 5: Journal CTA */}
+                <div className="mt-8">
+                    <DailyJournalCard />
                 </div>
 
-                {/* Wellness Analytics (Full Width) */}
-                <WellnessWrapper />
-            </div>
+                {/* BLOCK 6: Tracking Grid */}
+                <TrackingGrid />
 
-            {/* Badges Section */}
-            <div className="mt-4 pb-12">
-                <h3 className="text-lg font-serif font-medium mb-4 ml-1">Mes Badges</h3>
-                <BadgeGridWrapper userId={dbUser.id} />
+                {/* BLOCK 7: Coming Soon */}
+                <ComingSoonGrid />
+
             </div>
         </div>
     );
-}
-
-// Small server component wrapper to fetch badges
-async function BadgeGridWrapper({ userId }: { userId: string }) {
-    if (!userId) return null;
-    const badges = await getUserBadges(userId);
-    return <BadgeGrid badges={badges as any} />;
-}
-
-async function WellnessWrapper() {
-    const logs = await getRecentWellnessLogs(7);
-    const analysis = analyzeTrend(logs as any);
-    const chartData = logs.map(l => ({
-        date: format(l.date, "dd/MM"),
-        score: (l as any).wellnessScore || 0
-    }));
-
-    return <WellnessChart data={chartData} analysis={analysis} />;
-}
-
-async function MetricsWrapper({ user }: { user: any }) {
-    if (!user) return null;
-
-    // Fetch current weight (most recent log with weight)
-    const lastWeightLog = await prisma.dailyLog.findFirst({
-        where: { userId: user.id, weight: { not: null } },
-        orderBy: { date: 'desc' }
-    });
-
-    // Fetch today's log for body battery
-    const todayLog = await prisma.dailyLog.findUnique({
-        where: { userId_date: { userId: user.id, date: startOfDay(new Date()) } }
-    });
-
-    const currentWeight = lastWeightLog?.weight || user.startWeight || 0;
-
-    return <MetricsGrid user={user} currentWeight={currentWeight} lastLog={todayLog as any} />;
 }

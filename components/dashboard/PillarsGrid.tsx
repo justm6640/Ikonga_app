@@ -1,91 +1,106 @@
-import { Leaf, Activity, Moon, Sparkles } from "lucide-react";
+"use client"
+
+import { Activity, Moon, Sparkles, Utensils } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { DailyMenuCard } from "./DailyMenuCard";
 import Link from "next/link";
-
-interface PillarItem {
-    title: string;
-    content: any;
-    phase?: string;
-}
+import { motion } from "framer-motion";
 
 interface PillarsGridProps {
-    nutrition: PillarItem | null;
-    fitness: PillarItem | null;
-    wellness: PillarItem | null;
-    beauty: PillarItem | null;
+    nutritionLabel?: string;
+    fitnessLabel?: string;
+    wellnessLabel?: string;
+    beautyLabel?: string;
 }
 
-export function PillarsGrid({ nutrition, fitness, wellness, beauty }: PillarsGridProps) {
-    const mainPillars = [
+export function PillarsGrid({
+    nutritionLabel = "Menus & Courses",
+    fitnessLabel = "Séance du jour",
+    wellnessLabel = "Mon Équilibre",
+    beautyLabel = "Ma Routine"
+}: PillarsGridProps) {
+    const pillars = [
         {
-            key: "fitness",
+            id: "nutrition",
+            label: "Nutrition",
+            sub: nutritionLabel,
+            icon: Utensils,
+            gradient: "from-orange-400 to-amber-500",
+            bgGradient: "from-orange-50 to-amber-50",
+            iconColor: "text-orange-500",
+            href: "/nutrition"
+        },
+        {
+            id: "fitness",
             label: "Fitness",
+            sub: fitnessLabel,
             icon: Activity,
-            color: "bg-pillar-fitness",
-            textColor: "text-[#EF6C00]",
-            data: fitness,
+            gradient: "from-blue-400 to-cyan-500",
+            bgGradient: "from-blue-50 to-cyan-50",
+            iconColor: "text-blue-500",
             href: "/fitness"
         },
         {
-            key: "wellness",
+            id: "wellness",
             label: "Wellness",
+            sub: wellnessLabel,
             icon: Moon,
-            color: "bg-pillar-wellness",
-            textColor: "text-[#7B1FA2]",
-            data: wellness,
+            gradient: "from-purple-400 to-pink-500",
+            bgGradient: "from-purple-50 to-pink-50",
+            iconColor: "text-purple-500",
             href: "/wellness"
         },
         {
-            key: "beauty",
-            label: "Beauty",
+            id: "beauty",
+            label: "Beauté",
+            sub: beautyLabel,
             icon: Sparkles,
-            color: "bg-pillar-beauty",
-            textColor: "text-[#C2185B]",
-            data: beauty,
+            gradient: "from-pink-400 to-rose-500",
+            bgGradient: "from-pink-50 to-rose-50",
+            iconColor: "text-pink-500",
             href: "/beauty"
-        },
+        }
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Nutrition Pillar (Full Width or Special Render) */}
-            <div className="md:col-span-1">
-                <DailyMenuCard nutrition={nutrition} />
-            </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {pillars.map((pillar, index) => (
+                <Link key={pillar.id} href={pillar.href} className="group">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                    >
+                        <Card className={cn(
+                            "relative border-none shadow-sm overflow-hidden flex flex-col items-center justify-center p-4 sm:p-5 rounded-[1.75rem] transition-all hover:shadow-xl hover:-translate-y-1 active:scale-95 text-center min-h-[140px] sm:min-h-[160px]",
+                            `bg-gradient-to-br ${pillar.bgGradient}`
+                        )}>
+                            {/* Decorative blur */}
+                            <div className={cn(
+                                "absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-0 group-hover:opacity-30 transition-opacity",
+                                `bg-gradient-to-br ${pillar.gradient}`
+                            )} />
 
-            {/* Other Pillars Sidebar/Grid */}
-            <div className="grid grid-cols-2 gap-4 h-fit">
-                {mainPillars.map((pillar) => (
-                    <Link key={pillar.key} href={pillar.href} className="w-full">
-                        <Card
-                            className={cn(
-                                "border-none shadow-sm flex flex-col items-center justify-center p-4 py-6 rounded-3xl cursor-pointer transition-transform hover:scale-105 active:scale-95 text-center min-h-[140px] w-full",
-                                pillar.color
-                            )}
-                        >
-                            <div className={cn("p-3 rounded-full bg-white/60 mb-3", pillar.textColor)}>
-                                <pillar.icon size={24} />
+                            <div className={cn(
+                                "relative z-10 p-3 sm:p-4 rounded-2xl mb-3 sm:mb-4 transition-all group-hover:scale-110 group-hover:rotate-3 shadow-md",
+                                "bg-white",
+                                pillar.iconColor
+                            )}>
+                                <pillar.icon size={24} className="sm:w-7 sm:h-7" strokeWidth={2.5} />
                             </div>
 
-                            <span className={cn("font-bold text-xs mb-1 leading-tight line-clamp-2", pillar.textColor)}>
-                                {pillar.data?.title || pillar.label}
-                            </span>
-
-                            {pillar.data ? (
-                                <span className="text-[10px] text-muted-foreground/80 font-medium uppercase tracking-wider">
-                                    Séance du jour
-                                </span>
-                            ) : (
-                                <span className="text-[10px] text-muted-foreground/60 italic uppercase tracking-wider">
-                                    À venir
-                                </span>
-                            )}
+                            <div className="relative z-10 space-y-1">
+                                <h4 className="font-black text-xs sm:text-sm text-slate-900 uppercase tracking-tight leading-tight">
+                                    {pillar.label}
+                                </h4>
+                                <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold truncate w-full px-1 opacity-80">
+                                    {pillar.sub}
+                                </p>
+                            </div>
                         </Card>
-                    </Link>
-                ))}
-            </div>
+                    </motion.div>
+                </Link>
+            ))}
         </div>
     );
 }

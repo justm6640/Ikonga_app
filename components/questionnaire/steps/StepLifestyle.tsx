@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { step7BeautySchema } from "@/lib/validators/questionnaire"
+import { step6LifestyleSchema } from "@/lib/validators/questionnaire"
 import { useQuestionnaireStore } from "@/hooks/use-questionnaire-store"
 import { z } from "zod"
 
@@ -15,46 +15,52 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { Textarea } from "@/components/ui/textarea"
 import { SelectionGrid } from "@/components/questionnaire/SelectionGrid"
-import { ChevronLeft, Sparkles, Heart, Search } from "lucide-react"
+import { ChevronLeft, Coffee, Users, Target } from "lucide-react"
 
-type Step7Data = z.infer<typeof step7BeautySchema>
+type Step6Data = z.infer<typeof step6LifestyleSchema>
 
-interface StepBeautyProps {
+interface StepLifestyleProps {
     onNext: () => void
     onBack: () => void
 }
 
-const RELATION_OPTIONS = [
-    { id: "POSITIVE", label: "Je m'aime telle que je suis" },
-    { id: "GROWING", label: "En cours d'acceptation" },
-    { id: "DIFFICULT", label: "Difficile (besoin d'un déclic)" },
-    { id: "DISCONNECTED", label: "Je me sens déconnectée de mon corps" }
+const TIME_SELF_OPTIONS = [
+    { id: "NONE", label: "Aucun temps pour moi" },
+    { id: "LITTLE", label: "Peu (moins de 30 min/jour)" },
+    { id: "ENOUGH", label: "Assez (1h/jour)" },
+    { id: "PLENTY", label: "Beaucoup (plus d'1h/jour)" }
 ]
 
-const CONCERN_OPTIONS = [
-    { id: "CELLULITE", label: "Cellulite / Fermeté" },
-    { id: "STRETCH_MARKS", label: "Vergetures" },
-    { id: "SKIN_FACE", label: "Éclat du visage / Imperfections" },
-    { id: "HAIR", label: "Santé des cheveux" },
-    { id: "WEIGHT_DISTRIBUTION", label: "Répartition des graisses" },
-    { id: "NONE", label: "Aucun complexe particulier" }
+const FAMILY_OPTIONS = [
+    { id: "SOLO", label: "Je vis seule" },
+    { id: "COUPLE", label: "En couple" },
+    { id: "KIDS", label: "Avec enfants (organisation intense)" },
+    { id: "MULTIGEN", label: "Famille nombreuse / multigénérationnelle" }
 ]
 
-export function StepBeauty({ onNext, onBack }: StepBeautyProps) {
+const CHALLENGE_OPTIONS = [
+    { id: "TIME", label: "Manque de temps" },
+    { id: "MOTIVATION", label: "Manque de motivation" },
+    { id: "SOCIAL", label: "Vie sociale très chargée" },
+    { id: "WORK", label: "Travail stressant / Horaires décalés" },
+    { id: "EMOTIONS", label: "Gestion des émotions" },
+    { id: "ORGANIZATION", label: "Manque d'organisation" }
+]
+
+export function StepLifestyle({ onNext, onBack }: StepLifestyleProps) {
     const { data, setData } = useQuestionnaireStore()
 
-    const form = useForm<Step7Data>({
-        resolver: zodResolver(step7BeautySchema),
+    const form = useForm<Step6Data>({
+        resolver: zodResolver(step6LifestyleSchema),
         defaultValues: {
-            bodyRelation: data.bodyRelation || "GROWING",
-            aestheticConcerns: Array.isArray(data.aestheticConcerns) ? data.aestheticConcerns : [],
-            currentBeautyRoutine: data.currentBeautyRoutine || ""
+            timeForSelf: data.timeForSelf || "LITTLE",
+            familyOrganization: data.familyOrganization || "COUPLE",
+            mainChallenges: Array.isArray(data.mainChallenges) ? data.mainChallenges : []
         },
     })
 
-    function onSubmit(values: Step7Data) {
+    function onSubmit(values: Step6Data) {
         setData(values)
         onNext()
     }
@@ -63,19 +69,19 @@ export function StepBeauty({ onNext, onBack }: StepBeautyProps) {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
 
-                {/* Relation corps */}
+                {/* Temps pour soi */}
                 <FormField
                     control={form.control}
-                    name="bodyRelation"
+                    name="timeForSelf"
                     render={({ field }) => (
                         <FormItem className="space-y-4">
                             <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
-                                <Heart className="text-rose-500" size={20} />
-                                A. Quelle est ta relation actuelle avec ton corps ?
+                                <Coffee className="text-amber-500" size={20} />
+                                A. Temps accordé à ton bien-être personnel
                             </FormLabel>
                             <FormControl>
                                 <SelectionGrid
-                                    options={RELATION_OPTIONS}
+                                    options={TIME_SELF_OPTIONS}
                                     selected={[field.value]}
                                     onChange={(val) => field.onChange(val[0])}
                                     multi={false}
@@ -86,21 +92,22 @@ export function StepBeauty({ onNext, onBack }: StepBeautyProps) {
                     )}
                 />
 
-                {/* Complexes */}
+                {/* Organisation familiale */}
                 <FormField
                     control={form.control}
-                    name="aestheticConcerns"
+                    name="familyOrganization"
                     render={({ field }) => (
                         <FormItem className="space-y-4">
                             <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
-                                <Search className="text-indigo-500" size={20} />
-                                B. Tes zones de préoccupation esthétique
+                                <Users className="text-indigo-500" size={20} />
+                                B. Ton environnement familial / de vie
                             </FormLabel>
                             <FormControl>
                                 <SelectionGrid
-                                    options={CONCERN_OPTIONS}
-                                    selected={field.value}
-                                    onChange={field.onChange}
+                                    options={FAMILY_OPTIONS}
+                                    selected={[field.value]}
+                                    onChange={(val) => field.onChange(val[0])}
+                                    multi={false}
                                 />
                             </FormControl>
                             <FormMessage />
@@ -108,21 +115,21 @@ export function StepBeauty({ onNext, onBack }: StepBeautyProps) {
                     )}
                 />
 
-                {/* Routine actuelle */}
+                {/* Défis */}
                 <FormField
                     control={form.control}
-                    name="currentBeautyRoutine"
+                    name="mainChallenges"
                     render={({ field }) => (
                         <FormItem className="space-y-4">
                             <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
-                                <Sparkles className="text-amber-500" size={20} />
-                                C. Ta routine beauté / soin actuelle
+                                <Target className="text-rose-500" size={20} />
+                                C. Tes plus grands défis au quotidien
                             </FormLabel>
                             <FormControl>
-                                <Textarea
-                                    placeholder="Ex: Nettoyage matin/soir, hydratation, gommage hebdomadaire..."
-                                    className="min-h-[120px] rounded-3xl bg-slate-50 border-none p-6 focus-visible:ring-ikonga-pink/20"
-                                    {...field}
+                                <SelectionGrid
+                                    options={CHALLENGE_OPTIONS}
+                                    selected={field.value}
+                                    onChange={field.onChange}
                                 />
                             </FormControl>
                             <FormMessage />

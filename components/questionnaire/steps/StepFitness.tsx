@@ -2,10 +2,9 @@
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { stepFitnessSchema } from "@/lib/validators/questionnaire"
+import { step3FitnessSchema } from "@/lib/validators/questionnaire"
 import { useQuestionnaireStore } from "@/hooks/use-questionnaire-store"
 import { z } from "zod"
-import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,143 +15,204 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Activity, Armchair, Dumbbell, Zap } from "lucide-react"
+import { SelectionGrid } from "@/components/questionnaire/SelectionGrid"
+import { ChevronLeft, Dumbbell, Clock, Zap, Target, AlertTriangle } from "lucide-react"
 
-type StepFitnessData = z.infer<typeof stepFitnessSchema>
+type Step3Data = z.infer<typeof step3FitnessSchema>
 
-interface StepProps {
+interface StepFitnessProps {
     onNext: () => void
     onBack: () => void
 }
 
-const ACTIVITY_LEVELS = [
-    { value: "SEDENTARY", label: "Sédentaire", desc: "Peu ou pas d'exercice", icon: Armchair },
-    { value: "MODERATE", label: "Modéré", desc: "1-3 fois par semaine", icon: Activity },
-    { value: "ACTIVE", label: "Actif", desc: "3-5 fois par semaine", icon: Dumbbell },
-    { value: "VERY_ACTIVE", label: "Très Actif", desc: "Sport quotidien ou intense", icon: Zap },
+const ACTIVITY_OPTIONS = [
+    { id: "NONE", label: "Aucune activité (Sédentaire)" },
+    { id: "WALKING", label: "Marche quotidienne (Active)" },
+    { id: "GYM", label: "Salle de sport / Musculation" },
+    { id: "CARDIO", label: "Running / Vélo / Natation" },
+    { id: "YOGA", label: "Yoga / Pilates / Stretching" },
+    { id: "HOME_WORKOUT", label: "Fitness à la maison" }
 ]
 
-const INJURIES_OPTIONS = ["Dos", "Genoux", "Épaules", "Chevilles", "Aucune"]
+const TIME_OPTIONS = [
+    { id: "15", label: "15 - 30 minutes" },
+    { id: "30", label: "30 - 45 minutes" },
+    { id: "60", label: "1 heure et +" },
+    { id: "VARIABLE", label: "C'est variable" }
+]
 
-export function StepFitness({ onNext, onBack }: StepProps) {
+const LEVEL_OPTIONS = [
+    { id: "BEGINNER", label: "Débutante (Je commence)" },
+    { id: "INTERMEDIATE", label: "Intermédiaire (Régulière)" },
+    { id: "ADVANCED", label: "Avancée (Sportive confirmée)" }
+]
+
+const EXERCISE_OPTIONS = [
+    { id: "ABS", label: "Abdos / Taille" },
+    { id: "GLUTES", label: "Fessiers / Jambes" },
+    { id: "ARMS", label: "Bras / Dos" },
+    { id: "HIIT", label: "Cardio intense (HIIT)" },
+    { id: "STRETCH", label: "Souplesse / Mobilité" }
+]
+
+const LIMITATION_OPTIONS = [
+    { id: "BACK", label: "Douleurs au dos" },
+    { id: "KNEES", label: "Douleurs aux genoux" },
+    { id: "SHOULDERS", label: "Douleurs aux épaules" },
+    { id: "HEART", label: "Problèmes cardiaques" },
+    { id: "PREGNANT", label: "Enceinte / Post-partum" },
+    { id: "NONE", label: "Aucune limitation" }
+]
+
+export function StepFitness({ onNext, onBack }: StepFitnessProps) {
     const { data, setData } = useQuestionnaireStore()
 
-    const form = useForm<StepFitnessData>({
-        resolver: zodResolver(stepFitnessSchema),
+    const form = useForm<Step3Data>({
+        resolver: zodResolver(step3FitnessSchema),
         defaultValues: {
-            activityLevel: data.activityLevel || "MODERATE",
-            injuries: data.injuries || [],
+            currentActivity: Array.isArray(data.currentActivity) ? data.currentActivity : [],
+            availableTimePerDay: data.availableTimePerDay || "15",
+            fitnessLevel: data.fitnessLevel || "BEGINNER",
+            preferredExercises: Array.isArray(data.preferredExercises) ? data.preferredExercises : [],
+            physicalLimitations: Array.isArray(data.physicalLimitations) ? data.physicalLimitations : []
         },
     })
 
-    function onSubmit(values: StepFitnessData) {
+    function onSubmit(values: Step3Data) {
         setData(values)
         onNext()
     }
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
 
-                {/* Niveau d'activité */}
+                {/* Activité actuelle */}
                 <FormField
                     control={form.control}
-                    name="activityLevel"
+                    name="currentActivity"
                     render={({ field }) => (
-                        <FormItem className="space-y-3">
-                            <FormLabel className="text-lg">Ton niveau d'activité physique</FormLabel>
+                        <FormItem className="space-y-4">
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <Dumbbell className="text-ikonga-pink" size={20} />
+                                A. Ton activité physique actuelle
+                            </FormLabel>
                             <FormControl>
-                                <RadioGroup
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                    className="grid grid-cols-1 gap-4"
-                                >
-                                    {ACTIVITY_LEVELS.map((level) => (
-                                        <FormItem key={level.value}>
-                                            <FormControl>
-                                                <RadioGroupItem value={level.value} className="peer sr-only" />
-                                            </FormControl>
-                                            <FormLabel className="flex items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-ikonga-pink peer-data-[state=checked]:bg-pink-50 cursor-pointer transition-all">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="bg-secondary p-2 rounded-full">
-                                                        <level.icon className="h-5 w-5 text-foreground" />
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-semibold text-lg">{level.label}</div>
-                                                        <div className="text-sm text-muted-foreground">{level.desc}</div>
-                                                    </div>
-                                                </div>
-                                            </FormLabel>
-                                        </FormItem>
-                                    ))}
-                                </RadioGroup>
+                                <SelectionGrid
+                                    options={ACTIVITY_OPTIONS}
+                                    selected={field.value}
+                                    onChange={field.onChange}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
 
-                {/* Blessures */}
+                {/* Temps disponible */}
                 <FormField
                     control={form.control}
-                    name="injuries"
-                    render={() => (
-                        <FormItem>
-                            <FormLabel className="text-lg mb-4 block">As-tu des blessures ou douleurs ?</FormLabel>
-                            <div className="flex flex-wrap gap-3">
-                                {INJURIES_OPTIONS.map((item) => (
-                                    <FormField
-                                        key={item}
-                                        control={form.control}
-                                        name="injuries"
-                                        render={({ field }) => {
-                                            return (
-                                                <FormItem
-                                                    key={item}
-                                                    className="flex flex-row items-center space-x-2 space-y-0"
-                                                >
-                                                    <FormControl>
-                                                        <Checkbox
-                                                            checked={field.value?.includes(item)}
-                                                            onCheckedChange={(checked) => {
-                                                                return checked
-                                                                    ? field.onChange([...field.value, item])
-                                                                    : field.onChange(
-                                                                        field.value?.filter(
-                                                                            (value) => value !== item
-                                                                        )
-                                                                    )
-                                                            }}
-                                                            className="sr-only"
-                                                        />
-                                                    </FormControl>
-                                                    <FormLabel className={cn(
-                                                        "cursor-pointer px-4 py-2 rounded-full border transition-colors",
-                                                        field.value?.includes(item)
-                                                            ? "bg-foreground text-background border-foreground"
-                                                            : "bg-background text-foreground border-border hover:bg-secondary"
-                                                    )}>
-                                                        {item}
-                                                    </FormLabel>
-                                                </FormItem>
-                                            )
-                                        }}
-                                    />
-                                ))}
-                            </div>
+                    name="availableTimePerDay"
+                    render={({ field }) => (
+                        <FormItem className="space-y-4">
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <Clock className="text-indigo-500" size={20} />
+                                B. Temps moyen disponible par jour
+                            </FormLabel>
+                            <FormControl>
+                                <SelectionGrid
+                                    options={TIME_OPTIONS}
+                                    selected={[field.value]}
+                                    onChange={(val) => field.onChange(val[0])}
+                                    multi={false}
+                                />
+                            </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
 
-                <div className="flex gap-4 pt-4">
-                    <Button type="button" variant="outline" onClick={onBack} className="w-1/3 h-12 rounded-xl">
-                        Retour
+                {/* Niveau */}
+                <FormField
+                    control={form.control}
+                    name="fitnessLevel"
+                    render={({ field }) => (
+                        <FormItem className="space-y-4">
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <Zap className="text-amber-500" size={20} />
+                                C. Ton niveau de forme
+                            </FormLabel>
+                            <FormControl>
+                                <SelectionGrid
+                                    options={LEVEL_OPTIONS}
+                                    selected={[field.value]}
+                                    onChange={(val) => field.onChange(val[0])}
+                                    multi={false}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {/* Exercices préférés */}
+                <FormField
+                    control={form.control}
+                    name="preferredExercises"
+                    render={({ field }) => (
+                        <FormItem className="space-y-4">
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <Target className="text-emerald-500" size={20} />
+                                D. Ce que tu préfères travailler
+                            </FormLabel>
+                            <FormControl>
+                                <SelectionGrid
+                                    options={EXERCISE_OPTIONS}
+                                    selected={field.value}
+                                    onChange={field.onChange}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {/* Limitations */}
+                <FormField
+                    control={form.control}
+                    name="physicalLimitations"
+                    render={({ field }) => (
+                        <FormItem className="space-y-4">
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <AlertTriangle className="text-rose-500" size={20} />
+                                E. Éventuelles douleurs ou contre-indications
+                            </FormLabel>
+                            <FormControl>
+                                <SelectionGrid
+                                    options={LIMITATION_OPTIONS}
+                                    selected={field.value}
+                                    onChange={field.onChange}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <div className="flex gap-4 pt-6">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={onBack}
+                        className="h-16 px-8 rounded-3xl text-slate-400 hover:text-slate-600 font-bold"
+                    >
+                        <ChevronLeft size={24} />
                     </Button>
-                    <Button type="submit" className="w-2/3 h-12 rounded-xl bg-ikonga-gradient hover:opacity-90">
-                        Suivant
+                    <Button
+                        type="submit"
+                        className="flex-1 h-16 text-lg font-black uppercase tracking-widest rounded-3xl bg-ikonga-gradient shadow-xl shadow-pink-200"
+                    >
+                        Continuer
                     </Button>
                 </div>
             </form>

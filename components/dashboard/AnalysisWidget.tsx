@@ -1,14 +1,21 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion"
+import { Card, CardContent } from "@/components/ui/card"
 import { AnalysisResult } from "@/lib/ai/generator"
-import { Sparkles, Salad, Dumbbell, Heart, Quote } from "lucide-react"
+import {
+    Sparkles,
+    Salad,
+    Dumbbell,
+    Heart,
+    Zap,
+    Coffee,
+    User,
+    Star,
+    ArrowRight,
+    Quote
+} from "lucide-react"
+import { motion } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 interface AnalysisWidgetProps {
     analysis: AnalysisResult | null
@@ -17,119 +24,188 @@ interface AnalysisWidgetProps {
 export function AnalysisWidget({ analysis }: AnalysisWidgetProps) {
     if (!analysis) {
         return (
-            <Card className="border-ikonga-pink/20 bg-background/50 backdrop-blur-sm shadow-sm mb-6">
-                <CardContent className="py-8 text-center text-muted-foreground">
-                    <Sparkles className="h-8 w-8 text-ikonga-pink mx-auto mb-2 opacity-50 animate-pulse" />
-                    <p>Ton coach prépare ton bilan personnalisé...</p>
+            <Card className="border-none bg-gradient-to-br from-pink-50 to-purple-50 backdrop-blur-sm shadow-xl mb-6 rounded-[2.5rem] overflow-hidden">
+                <CardContent className="py-16 text-center relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-ikonga-pink/5 to-purple-500/5" />
+                    <motion.div
+                        animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="relative z-10"
+                    >
+                        <Sparkles className="h-12 w-12 text-ikonga-pink mx-auto mb-4 animate-glow" />
+                    </motion.div>
+                    <p className="text-lg font-serif italic text-slate-600 relative z-10">
+                        Rosy analyse ton profil avec attention...
+                    </p>
                 </CardContent>
             </Card>
         )
     }
 
+    const sections = [
+        {
+            key: 'nutrition',
+            title: 'IKONUTRITION',
+            icon: Salad,
+            gradient: 'from-emerald-400 to-teal-500',
+            bg: 'bg-emerald-50'
+        },
+        {
+            key: 'fitness',
+            title: 'IKOFITNESS',
+            icon: Dumbbell,
+            gradient: 'from-orange-400 to-red-500',
+            bg: 'bg-orange-50'
+        },
+        {
+            key: 'wellness',
+            title: 'IKOWELLNESS',
+            icon: Heart,
+            gradient: 'from-purple-400 to-pink-500',
+            bg: 'bg-purple-50'
+        },
+        {
+            key: 'nutrition_plus',
+            title: 'IKONUTRITION+',
+            icon: Zap,
+            gradient: 'from-yellow-400 to-orange-500',
+            bg: 'bg-yellow-50'
+        },
+        {
+            key: 'lifestyle',
+            title: 'IKOLIFESTYLE',
+            icon: Coffee,
+            gradient: 'from-cyan-400 to-blue-500',
+            bg: 'bg-cyan-50'
+        },
+        {
+            key: 'beauty',
+            title: 'IKOBEAUTY',
+            icon: User,
+            gradient: 'from-pink-400 to-rose-500',
+            bg: 'bg-pink-50'
+        }
+    ]
+
     return (
-        <Card className="border-ikonga-pink/20 bg-gradient-to-b from-white to-pink-50/30 overflow-hidden shadow-md mb-8">
-            <CardHeader className="bg-ikonga-pink/5 border-b border-ikonga-pink/10 pb-4">
-                <div className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-ikonga-pink" />
-                    <CardTitle className="text-xl font-serif text-ikonga-pink">Ton Bilan Personnalisé</CardTitle>
+        <div className="space-y-6 mb-8">
+            {/* Hero Introduction Card */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-ikonga-pink to-orange-400 p-[3px] shadow-2xl shadow-pink-200/50"
+            >
+                <div className="bg-white rounded-[2.4rem] p-8 md:p-10 relative overflow-hidden">
+                    {/* Decorative elements */}
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-ikonga-pink/5 rounded-full -mr-24 -mt-24 blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-400/5 rounded-full -ml-16 -mb-16 blur-2xl" />
+
+                    <Quote className="absolute top-6 left-6 h-8 w-8 text-ikonga-pink/20 fill-ikonga-pink/20" />
+
+                    <div className="relative z-10 space-y-3">
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="bg-ikonga-gradient p-2 rounded-xl">
+                                <Sparkles size={18} className="text-white" />
+                            </div>
+                            <span className="text-xs font-black uppercase tracking-[0.2em] text-ikonga-pink">Analyse Rosy</span>
+                        </div>
+                        <p className="text-xl md:text-2xl font-serif text-slate-800 leading-relaxed italic">
+                            {analysis.introduction}
+                        </p>
+                    </div>
                 </div>
-            </CardHeader>
-            <CardContent className="pt-6">
-                {/* Introduction Quote style */}
-                <div className="relative pl-6 mb-6">
-                    <Quote className="absolute top-0 left-0 h-4 w-4 text-ikonga-pink/40 -scale-x-100" />
-                    <p className="text-muted-foreground italic font-medium leading-relaxed">
-                        {analysis.introduction}
-                    </p>
-                </div>
+            </motion.div>
 
-                {/* Content Accordion */}
-                <Accordion type="single" collapsible className="w-full space-y-2">
+            {/* Core Sections - Magazine Grid */}
+            <div className="grid grid-cols-1 gap-5">
+                {sections.map((section, index) => {
+                    const rawContent = (analysis as any)[section.key]
+                    if (!rawContent) return null
 
-                    {/* Nutrition */}
-                    {analysis.nutrition && (
-                        <AccordionItem value="nutrition" className="border rounded-xl px-4 bg-white/60">
-                            <AccordionTrigger className="hover:no-underline hover:text-ikonga-pink transition-colors py-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-full bg-green-100 text-green-600">
-                                        <Salad className="h-4 w-4" />
-                                    </div>
-                                    <span className="font-semibold">Nutrition</span>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="pt-2 pb-4 space-y-3">
-                                <p className="text-sm text-foreground/80">{analysis.nutrition.analysis}</p>
-                                <div className="space-y-1">
-                                    {analysis.nutrition.tips?.map((tip, i) => (
-                                        <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground bg-green-50/50 p-2 rounded-lg">
-                                            <span className="text-green-500 font-bold">•</span>
-                                            {tip}
+                    const content = typeof rawContent === 'string'
+                        ? rawContent
+                        : typeof rawContent === 'object' && rawContent.analysis
+                            ? rawContent.analysis
+                            : JSON.stringify(rawContent)
+
+                    const Icon = section.icon
+
+                    return (
+                        <motion.div
+                            key={section.key}
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.1 }}
+                        >
+                            <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-300 rounded-[2rem] overflow-hidden group bg-white">
+                                <div className={cn("h-2 bg-gradient-to-r", section.gradient)} />
+                                <CardContent className="p-6 md:p-8">
+                                    <div className="flex items-start gap-4 mb-4">
+                                        <div className={cn(
+                                            "p-3 rounded-2xl shrink-0 shadow-sm transition-transform group-hover:scale-110 duration-300",
+                                            section.bg
+                                        )}>
+                                            <Icon size={24} className={cn("bg-gradient-to-br bg-clip-text text-transparent", section.gradient)} strokeWidth={2.5} />
                                         </div>
-                                    ))}
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    )}
-
-                    {/* Fitness */}
-                    {analysis.fitness && (
-                        <AccordionItem value="fitness" className="border rounded-xl px-4 bg-white/60">
-                            <AccordionTrigger className="hover:no-underline hover:text-ikonga-pink transition-colors py-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-full bg-orange-100 text-orange-600">
-                                        <Dumbbell className="h-4 w-4" />
-                                    </div>
-                                    <span className="font-semibold">Fitness</span>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="pt-2 pb-4 space-y-3">
-                                <p className="text-sm text-foreground/80">{analysis.fitness.analysis}</p>
-                                <div className="space-y-1">
-                                    {analysis.fitness.tips?.map((tip, i) => (
-                                        <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground bg-orange-50/50 p-2 rounded-lg">
-                                            <span className="text-orange-500 font-bold">•</span>
-                                            {tip}
+                                        <div className="flex-1">
+                                            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider mb-1">
+                                                {section.title}
+                                            </h3>
+                                            <div className={cn("h-1 w-12 rounded-full bg-gradient-to-r", section.gradient)} />
                                         </div>
-                                    ))}
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    )}
-
-                    {/* Wellness */}
-                    {analysis.wellness && (
-                        <AccordionItem value="wellness" className="border rounded-xl px-4 bg-white/60">
-                            <AccordionTrigger className="hover:no-underline hover:text-ikonga-pink transition-colors py-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-full bg-purple-100 text-purple-600">
-                                        <Heart className="h-4 w-4" />
                                     </div>
-                                    <span className="font-semibold">Bien-être</span>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="pt-2 pb-4 space-y-3">
-                                <p className="text-sm text-foreground/80">{analysis.wellness.analysis}</p>
-                                <div className="space-y-1">
-                                    {analysis.wellness.tips?.map((tip, i) => (
-                                        <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground bg-purple-50/50 p-2 rounded-lg">
-                                            <span className="text-purple-500 font-bold">•</span>
-                                            {tip}
-                                        </div>
-                                    ))}
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    )}
+                                    <div className="prose prose-sm max-w-none">
+                                        <p className="text-slate-600 leading-relaxed whitespace-pre-line text-sm">
+                                            {content}
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    )
+                })}
+            </div>
 
-                </Accordion>
+            {/* Summary & Next Steps */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                >
+                    <Card className="border-none bg-gradient-to-br from-purple-50 to-pink-50 rounded-[2rem] shadow-lg h-full">
+                        <CardContent className="p-8">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Star size={20} className="text-ikonga-pink fill-ikonga-pink" />
+                                <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">Résumé</h3>
+                            </div>
+                            <p className="text-slate-600 leading-relaxed text-sm">
+                                {analysis.summary}
+                            </p>
+                        </CardContent>
+                    </Card>
+                </motion.div>
 
-                {/* Conclusion */}
-                <div className="mt-6 p-4 rounded-xl bg-ikonga-gradient/10 border border-ikonga-pink/10 text-center">
-                    <p className="text-sm font-medium text-ikonga-pink-dark">
-                        ✨ {analysis.conclusion}
-                    </p>
-                </div>
-            </CardContent>
-        </Card>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.1 }}
+                >
+                    <Card className="border-none bg-ikonga-gradient rounded-[2rem] shadow-lg h-full text-white">
+                        <CardContent className="p-8">
+                            <div className="flex items-center gap-2 mb-4">
+                                <ArrowRight size={20} className="text-white" />
+                                <h3 className="text-sm font-black uppercase tracking-wider">Prochaines Étapes</h3>
+                            </div>
+                            <p className="text-white/90 leading-relaxed text-sm">
+                                {analysis.next_steps}
+                            </p>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            </div>
+        </div>
     )
 }

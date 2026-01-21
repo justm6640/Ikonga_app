@@ -9,67 +9,103 @@ const DayStatusEnum = z.enum(["FRAGILE", "STABLE", "STRONG"]);
 // --- SCHEMA COMPLET DU QUESTIONNAIRE ---
 export const questionnaireSchema = z.object({
     // 1. GENERAL
-    firstName: z.string().min(2, "Ton prénom doit contenir au moins 2 caractères."),
-    lastName: z.string().min(2, "Ton nom doit contenir au moins 2 caractères."),
-    birthDate: z.date({ message: "Format de date invalide." }).max(new Date(), "Tu ne peux pas être né(e) dans le futur !"),
-    gender: GenderEnum,
-    heightCm: z.number({ message: "Indique ta taille en cm." }).min(100, "La taille doit être supérieure à 100 cm.").max(250, "La taille doit être inférieure à 250 cm."),
-    startWeight: z.number({ message: "Indique ton poids actuel." }).min(30, "Le poids doit être supérieur à 30 kg."),
+    firstName: z.string().min(2, "Prénom requis."),
+    lastName: z.string().min(2, "Nom requis."),
+    email: z.string().email("Email invalide."),
+    birthDate: z.date({ message: "Date requise." }),
+    gender: z.string().min(1, "Sexe requis."),
+    countryOrigin: z.string().min(1, "Pays d'origine requis."),
+    countryResidence: z.string().min(1, "Pays de résidence requis."),
+    city: z.string().min(1, "Ville requise."),
+    whatsapp: z.string().min(1, "WhatsApp requis."),
+    heightCm: z.number().min(100).max(250),
+    startWeight: z.number().min(30).max(300),
     targetWeight: z.number().optional(),
-    programStartDate: z.date({ message: "Choisissez une date valide." }).min(new Date(new Date().setHours(0, 0, 0, 0)), "La date ne peut pas être dans le passé."),
+    referralSource: z.string().min(1, "Source requise."),
 
     // 2. NUTRITION
-    allergies: z.array(z.string()).min(1, "Merci de sélectionner au moins une option (ou 'Aucune')"),
-    mealsPerDay: z.number().min(1).max(8).default(3),
-    habits: z.array(z.string()).min(1, "Merci de sélectionner au moins une option (ou 'Aucune')"), // ex: "SNACKING", "LATE_DINNER"
+    allergies: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    refusedFoods: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    eatingHabits: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    mealsPerDay: z.string().min(1, "Requis."),
+    kitchenEquipment: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    nutritionGoals: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    favoriteFoods: z.string().optional(),
 
     // 3. FITNESS
-    activityLevel: ActivityLevelEnum.default("MODERATE"),
-    injuries: z.array(z.string()).min(1, "Merci de sélectionner au moins une option (ou 'Aucune')"),
+    fitnessLevel: z.string().min(1, "Requis."),
+    currentActivity: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    availableWorkoutDays: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    availableTimePerDay: z.string().min(1, "Requis."),
+    preferredExercises: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    physicalLimitations: z.array(z.string()).min(1, "Sélectionne au moins une option."),
 
     // 4. WELLNESS
     stressLevel: z.number().min(1).max(10),
     sleepQuality: z.number().min(1).max(10),
+    energyLevel: z.number().min(1).max(10),
+    morningPosture: z.string().min(1, "Requis."),
+    dominantEmotions: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    preferredRelaxation: z.array(z.string()).min(1, "Sélectionne au moins une option."),
 
-    // 5. BEAUTY (Body Confidence)
-    bodyConfidence: BodyConfidenceEnum.default("MEDIUM"),
+    // 5. NUTRITION+ (Santé)
+    supplements: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    recentBloodTest: z.string().min(1, "Requis."),
+    healthIssues: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+
+    // 6. LIFESTYLE
+    timeForSelf: z.string().min(1, "Requis."),
+    familyOrganization: z.string().min(1, "Requis."),
+    mainChallenges: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+
+    // 7. BEAUTY
+    bodyRelation: z.string().min(1, "Requis."),
+    aestheticConcerns: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    currentBeautyRoutine: z.string().min(1, "Requis."),
+
+    // 8. MOTIVATION
+    whyJoin: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    engagementLevel: z.string().min(1, "Requis."),
+    additionalNotes: z.string().optional(),
+    programStartDate: z.date().optional(),
 });
 
-// Type inféré pour TypeScript
 export type QuestionnaireData = z.infer<typeof questionnaireSchema>;
 
-// Partial schema for Step 1 (General)
-export const stepGeneralSchema = questionnaireSchema.pick({
-    firstName: true,
-    lastName: true,
-    birthDate: true,
-    gender: true,
-    heightCm: true,
-    startWeight: true,
-    targetWeight: true,
-    programStartDate: true,
+// Step-specific schemas
+export const step1GeneralSchema = questionnaireSchema.pick({
+    firstName: true, lastName: true, email: true, birthDate: true, gender: true,
+    countryOrigin: true, countryResidence: true, city: true, whatsapp: true,
+    heightCm: true, startWeight: true, targetWeight: true, referralSource: true
 });
 
-// Partial schema for Step 2 (Nutrition)
-export const stepNutritionSchema = z.object({
-    allergies: z.array(z.string()).min(1, "Merci de sélectionner au moins une option (ou 'Aucune')"),
-    mealsPerDay: z.number().min(1).max(8),
-    habits: z.array(z.string()).min(1, "Merci de sélectionner au moins une option (ou 'Aucune')"),
+export const step2NutritionSchema = questionnaireSchema.pick({
+    allergies: true, refusedFoods: true, eatingHabits: true,
+    mealsPerDay: true, kitchenEquipment: true, nutritionGoals: true, favoriteFoods: true
 });
 
-// Partial schema for Step 3 (Fitness)
-export const stepFitnessSchema = questionnaireSchema.pick({
-    activityLevel: true,
-    injuries: true,
+export const step3FitnessSchema = questionnaireSchema.pick({
+    fitnessLevel: true, currentActivity: true, availableWorkoutDays: true,
+    availableTimePerDay: true, preferredExercises: true, physicalLimitations: true
 });
 
-// Partial schema for Step 4 (Wellness)
-export const stepWellnessSchema = questionnaireSchema.pick({
-    stressLevel: true,
-    sleepQuality: true,
+export const step4WellnessSchema = questionnaireSchema.pick({
+    stressLevel: true, sleepQuality: true, energyLevel: true,
+    morningPosture: true, dominantEmotions: true, preferredRelaxation: true
 });
 
-// Partial schema for Step 5 (Beauty)
-export const stepBeautySchema = questionnaireSchema.pick({
-    bodyConfidence: true,
+export const step5HealthSchema = questionnaireSchema.pick({
+    supplements: true, recentBloodTest: true, healthIssues: true
+});
+
+export const step6LifestyleSchema = questionnaireSchema.pick({
+    timeForSelf: true, familyOrganization: true, mainChallenges: true
+});
+
+export const step7BeautySchema = questionnaireSchema.pick({
+    bodyRelation: true, aestheticConcerns: true, currentBeautyRoutine: true
+});
+
+export const step8MotivationSchema = questionnaireSchema.pick({
+    whyJoin: true, engagementLevel: true, additionalNotes: true
 });

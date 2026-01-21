@@ -62,6 +62,8 @@ model User {
   targetedActions   AdminLog[]       @relation("TargetUser")
   adminAlerts       AdminAlert[]
   weighIns          WeighIn[]
+  onboardingState   OnboardingState?
+  onboardingActions OnboardingAction[]
 
   @@index([email])
 }
@@ -600,4 +602,52 @@ model WeighIn {
   updatedAt DateTime @updatedAt
 
   @@index([userId, date])
+}
+
+model OnboardingState {
+  id                    String   @id @default(uuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Progression
+  currentStep           String   @default("WELCOME")  // WELCOME, PROFILE, QUESTIONNAIRE, SCHEDULE, ANALYSIS, COMPLETE
+  completedSteps        String[] @default([])
+  isComplete            Boolean  @default(false)
+  
+  // Scénarios de démarrage
+  startScenario         String?  // IMMEDIATE, SCHEDULED, LATE, MANUAL
+  scheduledStartDate    DateTime?
+  actualStartDate       DateTime?
+  
+  // Questionnaire progressif
+  questionnaireProgress Float    @default(0.0)  // 0-100%
+  questionnaireData     Json?
+  canSkipQuestionnaire  Boolean  @default(true)
+  
+  // Messages Coach
+  welcomeMessage        String?
+  coachNote             String?
+  wasManuallyAdjusted   Boolean  @default(false)
+  adjustedBy            String?  // Admin ID
+  
+  // Tracking & Notifications
+  lastReminderSent      DateTime?
+  countdownNotified     Boolean  @default(false)
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([userId, currentStep])
+}
+
+model OnboardingAction {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action      String   // "STEP_COMPLETED", "COACH_ADJUSTED", "DATE_CHANGED", etc.
+  triggeredBy String   // "USER", "SYSTEM", "COACH:adminId"
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  
+  @@index([userId, createdAt])
 }

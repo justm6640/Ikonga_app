@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { step7BeautySchema } from "@/lib/validators/questionnaire"
+import { step5HealthSchema } from "@/lib/validators/questionnaire"
 import { useQuestionnaireStore } from "@/hooks/use-questionnaire-store"
 import { z } from "zod"
 
@@ -15,46 +15,54 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { Textarea } from "@/components/ui/textarea"
 import { SelectionGrid } from "@/components/questionnaire/SelectionGrid"
-import { ChevronLeft, Sparkles, Heart, Search } from "lucide-react"
+import { ChevronLeft, FlaskConical, Pill, Activity } from "lucide-react"
 
-type Step7Data = z.infer<typeof step7BeautySchema>
+type Step5Data = z.infer<typeof step5HealthSchema>
 
-interface StepBeautyProps {
+interface StepHealthProps {
     onNext: () => void
     onBack: () => void
 }
 
-const RELATION_OPTIONS = [
-    { id: "POSITIVE", label: "Je m'aime telle que je suis" },
-    { id: "GROWING", label: "En cours d'acceptation" },
-    { id: "DIFFICULT", label: "Difficile (besoin d'un déclic)" },
-    { id: "DISCONNECTED", label: "Je me sens déconnectée de mon corps" }
+const SUPPLEMENT_OPTIONS = [
+    { id: "MULTIVITAMINS", label: "Multivitamines" },
+    { id: "MAGNESIUM", label: "Magnésium" },
+    { id: "OMEGA3", label: "Oméga 3" },
+    { id: "VITAMIN_D", label: "Vitamine D" },
+    { id: "IRON", label: "Fer" },
+    { id: "NONE", label: "Aucun" }
 ]
 
-const CONCERN_OPTIONS = [
-    { id: "CELLULITE", label: "Cellulite / Fermeté" },
-    { id: "STRETCH_MARKS", label: "Vergetures" },
-    { id: "SKIN_FACE", label: "Éclat du visage / Imperfections" },
-    { id: "HAIR", label: "Santé des cheveux" },
-    { id: "WEIGHT_DISTRIBUTION", label: "Répartition des graisses" },
-    { id: "NONE", label: "Aucun complexe particulier" }
+const BLOOD_TEST_OPTIONS = [
+    { id: "LESS_6_MONTHS", label: "Moins de 6 mois" },
+    { id: "6_TO_12_MONTHS", label: "6 à 12 mois" },
+    { id: "MORE_1_YEAR", label: "Plus d'un an" },
+    { id: "NEVER", label: "Jamais fait" }
 ]
 
-export function StepBeauty({ onNext, onBack }: StepBeautyProps) {
+const HEALTH_OPTIONS = [
+    { id: "DIGESTION", label: "Problèmes digestifs" },
+    { id: "THYROID", label: "Problèmes thyroïdiens" },
+    { id: "DIABETES", label: "Diabète / Insulinorésistance" },
+    { id: "PCOS", label: "SOPK / Hormonal" },
+    { id: "ANEMIA", label: "Anémie / Fatigue chronique" },
+    { id: "NONE", label: "Aucun problème majeur" }
+]
+
+export function StepHealth({ onNext, onBack }: StepHealthProps) {
     const { data, setData } = useQuestionnaireStore()
 
-    const form = useForm<Step7Data>({
-        resolver: zodResolver(step7BeautySchema),
+    const form = useForm<Step5Data>({
+        resolver: zodResolver(step5HealthSchema),
         defaultValues: {
-            bodyRelation: data.bodyRelation || "GROWING",
-            aestheticConcerns: Array.isArray(data.aestheticConcerns) ? data.aestheticConcerns : [],
-            currentBeautyRoutine: data.currentBeautyRoutine || ""
+            supplements: Array.isArray(data.supplements) ? data.supplements : [],
+            recentBloodTest: data.recentBloodTest || "NEVER",
+            healthIssues: Array.isArray(data.healthIssues) ? data.healthIssues : []
         },
     })
 
-    function onSubmit(values: Step7Data) {
+    function onSubmit(values: Step5Data) {
         setData(values)
         onNext()
     }
@@ -63,19 +71,41 @@ export function StepBeauty({ onNext, onBack }: StepBeautyProps) {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
 
-                {/* Relation corps */}
+                {/* Compléments */}
                 <FormField
                     control={form.control}
-                    name="bodyRelation"
+                    name="supplements"
                     render={({ field }) => (
                         <FormItem className="space-y-4">
                             <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
-                                <Heart className="text-rose-500" size={20} />
-                                A. Quelle est ta relation actuelle avec ton corps ?
+                                <Pill className="text-ikonga-pink" size={20} />
+                                A. Prends-tu des compléments alimentaires ?
                             </FormLabel>
                             <FormControl>
                                 <SelectionGrid
-                                    options={RELATION_OPTIONS}
+                                    options={SUPPLEMENT_OPTIONS}
+                                    selected={field.value}
+                                    onChange={field.onChange}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {/* Bilan sanguin */}
+                <FormField
+                    control={form.control}
+                    name="recentBloodTest"
+                    render={({ field }) => (
+                        <FormItem className="space-y-4">
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <FlaskConical className="text-indigo-500" size={20} />
+                                B. À quand remonte ton dernier bilan sanguin complet ?
+                            </FormLabel>
+                            <FormControl>
+                                <SelectionGrid
+                                    options={BLOOD_TEST_OPTIONS}
                                     selected={[field.value]}
                                     onChange={(val) => field.onChange(val[0])}
                                     multi={false}
@@ -86,43 +116,21 @@ export function StepBeauty({ onNext, onBack }: StepBeautyProps) {
                     )}
                 />
 
-                {/* Complexes */}
+                {/* Pathologies */}
                 <FormField
                     control={form.control}
-                    name="aestheticConcerns"
+                    name="healthIssues"
                     render={({ field }) => (
                         <FormItem className="space-y-4">
                             <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
-                                <Search className="text-indigo-500" size={20} />
-                                B. Tes zones de préoccupation esthétique
+                                <Activity className="text-rose-500" size={20} />
+                                C. Partage avec nous d'éventuels soucis de santé
                             </FormLabel>
                             <FormControl>
                                 <SelectionGrid
-                                    options={CONCERN_OPTIONS}
+                                    options={HEALTH_OPTIONS}
                                     selected={field.value}
                                     onChange={field.onChange}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                {/* Routine actuelle */}
-                <FormField
-                    control={form.control}
-                    name="currentBeautyRoutine"
-                    render={({ field }) => (
-                        <FormItem className="space-y-4">
-                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
-                                <Sparkles className="text-amber-500" size={20} />
-                                C. Ta routine beauté / soin actuelle
-                            </FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="Ex: Nettoyage matin/soir, hydratation, gommage hebdomadaire..."
-                                    className="min-h-[120px] rounded-3xl bg-slate-50 border-none p-6 focus-visible:ring-ikonga-pink/20"
-                                    {...field}
                                 />
                             </FormControl>
                             <FormMessage />

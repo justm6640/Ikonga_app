@@ -16,15 +16,26 @@ export const useQuestionnaireStore = create<QuestionnaireState>()(
     persist(
         (set) => ({
             data: {
-                // Default values
-                mealsPerDay: 3,
                 allergies: [],
-                habits: [],
-                injuries: [],
-                activityLevel: "MODERATE",
-                bodyConfidence: "MEDIUM",
+                refusedFoods: [],
+                eatingHabits: [],
+                kitchenEquipment: [],
+                nutritionGoals: [],
+                currentActivity: [],
+                availableWorkoutDays: [],
+                preferredExercises: [],
+                physicalLimitations: [],
+                dominantEmotions: [],
+                preferredRelaxation: [],
+                supplements: [],
+                healthIssues: [],
+                mainChallenges: [],
+                aestheticConcerns: [],
+                whyJoin: [],
                 stressLevel: 5,
                 sleepQuality: 7,
+                energyLevel: 6,
+                morningPosture: "MODERATE",
             },
             currentStep: 0,
 

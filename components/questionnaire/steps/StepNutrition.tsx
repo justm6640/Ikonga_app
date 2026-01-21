@@ -2,10 +2,9 @@
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { stepNutritionSchema } from "@/lib/validators/questionnaire"
+import { step2NutritionSchema } from "@/lib/validators/questionnaire"
 import { useQuestionnaireStore } from "@/hooks/use-questionnaire-store"
 import { z } from "zod"
-import { motion, AnimatePresence } from "framer-motion"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,163 +15,136 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Slider } from "@/components/ui/slider"
-import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { SelectionGrid } from "@/components/questionnaire/SelectionGrid"
+import { ChevronLeft, Soup, Ban, Zap, Utensils, Target, Heart, Clock } from "lucide-react"
 
-type StepNutritionData = z.infer<typeof stepNutritionSchema>
+type Step2Data = z.infer<typeof step2NutritionSchema>
 
-interface StepProps {
+interface StepNutritionProps {
     onNext: () => void
     onBack: () => void
 }
 
-const STANDARD_ALLERGIES = ["Gluten", "Lactose", "Arachides", "Fruits de mer", "Oeufs", "Soja", "Aucune"]
-const ALLERGIES_OPTIONS = [...STANDARD_ALLERGIES, "Autre"]
-const HABITS_OPTIONS = ["Grignotage", "Diner tardif", "Saut de repas", "Sucre addicitif", "Fast-food régulier", "Aucune"]
+const ALLERGY_OPTIONS = [
+    { id: "PEANUTS", label: "Arachides" },
+    { id: "GLUTEN", label: "Gluten" },
+    { id: "LACTOSE", label: "Lactose" },
+    { id: "SEAFOOD", label: "Fruits de mer / Poissons" },
+    { id: "EGGS", label: "Œufs" },
+    { id: "SOYA", label: "Soja" },
+    { id: "NONE", label: "Aucun" }
+]
 
-export function StepNutrition({ onNext, onBack }: StepProps) {
+const REFUSED_OPTIONS = [
+    { id: "RED_MEAT", label: "Viande rouge" },
+    { id: "POULTRY", label: "Volaille" },
+    { id: "FISH", label: "Poisson" },
+    { id: "LEGUMES", label: "Légumineuses" },
+    { id: "DAIRY", label: "Produits laitiers" },
+    { id: "CARBS_EVENING", label: "Féculents le soir" },
+    { id: "NONE", label: "Aucun" }
+]
+
+const HABIT_OPTIONS = [
+    { id: "SKIP_BREAKFAST", label: "Je saute le petit-déjeuner" },
+    { id: "SNACKING", label: "Je grignote entre les repas" },
+    { id: "LOW_WATER", label: "Je bois peu d'eau" },
+    { id: "SODA", label: "Je bois du soda" },
+    { id: "LARGE_DINNER", label: "Grosse quantité le soir" },
+    { id: "FAST_EATING", label: "Je mange très vite" },
+    { id: "NONE", label: "Aucun" }
+]
+
+const MEALS_OPTIONS = [
+    { id: "1", label: "1 repas" },
+    { id: "2", label: "2 repas" },
+    { id: "3", label: "3 repas" },
+    { id: "3_SNACK", label: "3 repas + collation" },
+    { id: "VARIABLE", label: "Variable" }
+]
+
+const EQUIPMENT_OPTIONS = [
+    { id: "FRIDGE", label: "Frigo", icon: Utensils },
+    { id: "FREEZER", label: "Congélateur", icon: Utensils },
+    { id: "MICROWAVE", label: "Micro-ondes", icon: Zap },
+    { id: "GAS", label: "Gazinière", icon: Utensils },
+    { id: "BLENDER", label: "Blender", icon: Target },
+    { id: "NONE", label: "Aucun" }
+]
+
+const GOAL_OPTIONS = [
+    { id: "LOSE_WEIGHT", label: "Perdre du poids" },
+    { id: "STABILIZE", label: "Stabiliser" },
+    { id: "EAT_BETTER", label: "Mieux manger" },
+    { id: "LESS_SUGAR", label: "Réduire le sucre" },
+    { id: "LESS_STRESS", label: "Gérer le stress alimentaire" }
+]
+
+export function StepNutrition({ onNext, onBack }: StepNutritionProps) {
     const { data, setData } = useQuestionnaireStore()
 
-    const form = useForm<StepNutritionData>({
-        resolver: zodResolver(stepNutritionSchema),
+    const form = useForm<Step2Data>({
+        resolver: zodResolver(step2NutritionSchema),
         defaultValues: {
             allergies: Array.isArray(data.allergies) ? data.allergies : [],
-            mealsPerDay: typeof data.mealsPerDay === 'number' ? data.mealsPerDay : 3,
-            habits: Array.isArray(data.habits) ? data.habits : [],
+            refusedFoods: Array.isArray(data.refusedFoods) ? data.refusedFoods : [],
+            eatingHabits: Array.isArray(data.eatingHabits) ? data.eatingHabits : [],
+            mealsPerDay: data.mealsPerDay || "3",
+            kitchenEquipment: Array.isArray(data.kitchenEquipment) ? data.kitchenEquipment : [],
+            nutritionGoals: Array.isArray(data.nutritionGoals) ? data.nutritionGoals : [],
+            favoriteFoods: data.favoriteFoods || ""
         },
     })
 
-    const watchAllergies = form.watch("allergies") || []
-    const isOtherSelected = watchAllergies.includes("Autre")
-
-    // Retrouver la valeur personnalisée (celle qui n'est pas dans STANDARD_ALLERGIES ni "Autre")
-    const customAllergyValue = watchAllergies.find(a => !ALLERGIES_OPTIONS.includes(a)) || ""
-
-    function onSubmit(values: StepNutritionData) {
-        // Nettoyage final : s'assurer que si "Autre" est décoché, on vire le custom
-        let finalAllergies = [...values.allergies]
-        if (!finalAllergies.includes("Autre")) {
-            finalAllergies = finalAllergies.filter(a => STANDARD_ALLERGIES.includes(a))
-        }
-
-        setData({ ...values, allergies: finalAllergies })
+    function onSubmit(values: Step2Data) {
+        setData(values)
         onNext()
-    }
-
-    const handleCustomAllergyChange = (val: string) => {
-        const currentAllergies = form.getValues("allergies") || []
-        // Filtrer pour garder les standards + "Autre"
-        const baseAllergies = currentAllergies.filter(a => ALLERGIES_OPTIONS.includes(a))
-
-        if (val.trim() === "") {
-            form.setValue("allergies", baseAllergies, { shouldValidate: true })
-        } else {
-            form.setValue("allergies", [...baseAllergies, val], { shouldValidate: true })
-        }
     }
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
 
-                {/* Repas par jour */}
+                {/* Allergies */}
                 <FormField
                     control={form.control}
-                    name="mealsPerDay"
+                    name="allergies"
                     render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-lg">Combien de repas prends-tu par jour ?</FormLabel>
+                        <FormItem className="space-y-4">
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <Soup className="text-ikonga-pink" size={20} />
+                                A. Allergies & Intolérances
+                            </FormLabel>
                             <FormControl>
-                                <div className="space-y-4 pt-4">
-                                    <Slider
-                                        min={1}
-                                        max={8}
-                                        step={1}
-                                        value={[field.value]}
-                                        onValueChange={(val) => field.onChange(val[0])}
-                                        className="py-4"
-                                    />
-                                    <div className="text-center font-bold text-3xl text-ikonga-pink">
-                                        {field.value}
-                                    </div>
-                                </div>
+                                <SelectionGrid
+                                    options={ALLERGY_OPTIONS}
+                                    selected={field.value}
+                                    onChange={field.onChange}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
 
-                {/* Allergies */}
+                {/* Refusés */}
                 <FormField
                     control={form.control}
-                    name="allergies"
-                    render={() => (
+                    name="refusedFoods"
+                    render={({ field }) => (
                         <FormItem className="space-y-4">
-                            <FormLabel className="text-lg block">As-tu des allergies ou intolérances ?</FormLabel>
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                                {ALLERGIES_OPTIONS.map((item) => (
-                                    <FormField
-                                        key={item}
-                                        control={form.control}
-                                        name="allergies"
-                                        render={({ field }) => {
-                                            const isChecked = field.value?.includes(item)
-                                            return (
-                                                <FormItem
-                                                    key={item}
-                                                    className={`flex flex-row items-start space-x-3 space-y-0 rounded-xl border p-3 hover:bg-secondary/50 cursor-pointer transition-colors ${isChecked ? 'border-ikonga-pink bg-ikonga-pink/5' : ''}`}
-                                                >
-                                                    <FormControl>
-                                                        <Checkbox
-                                                            checked={isChecked}
-                                                            onCheckedChange={(checked) => {
-                                                                const current = field.value || []
-                                                                if (checked) {
-                                                                    field.onChange([...current, item])
-                                                                } else {
-                                                                    // Si on décoche "Autre", on retire aussi la valeur custom
-                                                                    let newVal = current.filter((v) => v !== item)
-                                                                    if (item === "Autre") {
-                                                                        newVal = newVal.filter(v => STANDARD_ALLERGIES.includes(v))
-                                                                    }
-                                                                    field.onChange(newVal)
-                                                                }
-                                                            }}
-                                                        />
-                                                    </FormControl>
-                                                    <FormLabel className="font-normal cursor-pointer w-full">
-                                                        {item}
-                                                    </FormLabel>
-                                                </FormItem>
-                                            )
-                                        }}
-                                    />
-                                ))}
-                            </div>
-
-                            <AnimatePresence>
-                                {isOtherSelected && (
-                                    <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: "auto", opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        className="overflow-hidden"
-                                    >
-                                        <div className="pt-2">
-                                            <Input
-                                                placeholder="Ex: Arachides, Gluten, Fraises..."
-                                                defaultValue={customAllergyValue}
-                                                onChange={(e) => handleCustomAllergyChange(e.target.value)}
-                                                className="rounded-xl h-12 border-ikonga-pink/30 focus-visible:ring-ikonga-pink"
-                                            />
-                                            <p className="text-[10px] text-slate-400 mt-2 ml-1 italic">
-                                                Précise tes allergies pour un menu sur-mesure.
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <Ban className="text-rose-500" size={20} />
+                                B. Aliments strictement refusés
+                            </FormLabel>
+                            <FormControl>
+                                <SelectionGrid
+                                    options={REFUSED_OPTIONS}
+                                    selected={field.value}
+                                    onChange={field.onChange}
+                                />
+                            </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
@@ -181,58 +153,125 @@ export function StepNutrition({ onNext, onBack }: StepProps) {
                 {/* Habitudes */}
                 <FormField
                     control={form.control}
-                    name="habits"
-                    render={() => (
+                    name="eatingHabits"
+                    render={({ field }) => (
                         <FormItem className="space-y-4">
-                            <FormLabel className="text-lg block">Tes habitudes alimentaires actuelles</FormLabel>
-                            <div className="grid grid-cols-2 gap-3">
-                                {HABITS_OPTIONS.map((item) => (
-                                    <FormField
-                                        key={item}
-                                        control={form.control}
-                                        name="habits"
-                                        render={({ field }) => {
-                                            const isChecked = field.value?.includes(item)
-                                            return (
-                                                <FormItem
-                                                    key={item}
-                                                    className={`flex flex-row items-start space-x-3 space-y-0 rounded-xl border p-3 hover:bg-secondary/50 cursor-pointer transition-colors ${isChecked ? 'border-ikonga-pink bg-ikonga-pink/5' : ''}`}
-                                                >
-                                                    <FormControl>
-                                                        <Checkbox
-                                                            checked={isChecked}
-                                                            onCheckedChange={(checked) => {
-                                                                const current = field.value || []
-                                                                return checked
-                                                                    ? field.onChange([...current, item])
-                                                                    : field.onChange(
-                                                                        current.filter(
-                                                                            (value) => value !== item
-                                                                        )
-                                                                    )
-                                                            }}
-                                                        />
-                                                    </FormControl>
-                                                    <FormLabel className="font-normal cursor-pointer w-full">
-                                                        {item}
-                                                    </FormLabel>
-                                                </FormItem>
-                                            )
-                                        }}
-                                    />
-                                ))}
-                            </div>
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <Clock className="text-indigo-500" size={20} />
+                                C. Habitudes alimentaires
+                            </FormLabel>
+                            <FormControl>
+                                <SelectionGrid
+                                    options={HABIT_OPTIONS}
+                                    selected={field.value}
+                                    onChange={field.onChange}
+                                />
+                            </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
 
-                <div className="flex gap-4 pt-4">
-                    <Button type="button" variant="outline" onClick={onBack} className="w-1/3 h-12 rounded-xl">
-                        Retour
+                {/* Nombre de repas */}
+                <FormField
+                    control={form.control}
+                    name="mealsPerDay"
+                    render={({ field }) => (
+                        <FormItem className="space-y-4">
+                            <FormLabel className="text-slate-900 font-bold">D. Nombre de repas par jour</FormLabel>
+                            <FormControl>
+                                <SelectionGrid
+                                    options={MEALS_OPTIONS}
+                                    selected={[field.value]}
+                                    onChange={(val) => field.onChange(val[0])}
+                                    multi={false}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {/* Matériel */}
+                <FormField
+                    control={form.control}
+                    name="kitchenEquipment"
+                    render={({ field }) => (
+                        <FormItem className="space-y-4">
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <Utensils className="text-amber-500" size={20} />
+                                E. Accès cuisine / matériel
+                            </FormLabel>
+                            <FormControl>
+                                <SelectionGrid
+                                    options={EQUIPMENT_OPTIONS}
+                                    selected={field.value}
+                                    onChange={field.onChange}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {/* Objectifs */}
+                <FormField
+                    control={form.control}
+                    name="nutritionGoals"
+                    render={({ field }) => (
+                        <FormItem className="space-y-4">
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <Target className="text-emerald-500" size={20} />
+                                F. Objectifs nutritionnels
+                            </FormLabel>
+                            <FormControl>
+                                <SelectionGrid
+                                    options={GOAL_OPTIONS}
+                                    selected={field.value}
+                                    onChange={field.onChange}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {/* Préférés */}
+                <FormField
+                    control={form.control}
+                    name="favoriteFoods"
+                    render={({ field }) => (
+                        <FormItem className="space-y-4">
+                            <FormLabel className="text-slate-900 font-bold flex items-center gap-2">
+                                <Heart className="text-pink-500" size={20} />
+                                G. Aliments préférés
+                            </FormLabel>
+                            <FormControl>
+                                <Textarea
+                                    placeholder="Libre cours à tes envies (ex: avocat, poulet grillé, chocolat noir...)"
+                                    className="min-h-[120px] rounded-3xl bg-slate-50 border-none p-6 focus-visible:ring-ikonga-pink/20"
+                                    {...field}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <div className="flex gap-4 pt-6">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={onBack}
+                        className="h-16 px-8 rounded-3xl text-slate-400 hover:text-slate-600 font-bold"
+                    >
+                        <ChevronLeft size={24} />
                     </Button>
-                    <Button type="submit" className="w-2/3 h-12 rounded-xl bg-ikonga-gradient hover:opacity-90">
-                        Suivant
+                    <Button
+                        type="submit"
+                        className="flex-1 h-16 text-lg font-black uppercase tracking-widest rounded-3xl bg-ikonga-gradient shadow-xl shadow-pink-200"
+                    >
+                        Continuer
                     </Button>
                 </div>
             </form>

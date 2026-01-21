@@ -9,29 +9,26 @@ const openai = new OpenAI({
 
 export interface AnalysisResult {
     introduction: string;
-    nutrition: { analysis: string; tips: string[] };
-    fitness: { analysis: string; tips: string[] };
-    wellness: { analysis: string; tips: string[] };
-    // beauty: { analysis: string; tips: string[] }; // Optional if user strictly wanted 3 pillars, but let's keep it if possible or remove if strict.
-    // User request example didn't have it. I'll omit it to be safe and strictly follow the USER prompt structure request.
-    conclusion: string;
+    nutrition: string;
+    fitness: string;
+    wellness: string;
+    nutrition_plus: string;
+    lifestyle: string;
+    beauty: string;
+    summary: string;
+    next_steps: string;
 }
 
 const FALLBACK_ANALYSIS: AnalysisResult = {
-    introduction: "Coucou ! C'est Rosy. Ravie de te compter parmi nous ! Ton profil est très intéressant et j'ai hâte de t'aider.",
-    nutrition: {
-        analysis: "Je vois que tu as de bonnes bases, mais quelques ajustements feront la différence.",
-        tips: ["Mise sur l'hydratation", "Structure tes repas"]
-    },
-    fitness: {
-        analysis: "L'important est de bouger avec plaisir, sans te faire mal.",
-        tips: ["Marche 30min par jour", "Écoute ton corps"]
-    },
-    wellness: {
-        analysis: "Le stress peut bloquer la perte de poids, on va travailler là-dessus.",
-        tips: ["Respiration consciente le soir"]
-    },
-    conclusion: "Fais-moi confiance, on commence la DÉTOX ensemble dès maintenant ! 💪✨"
+    introduction: "Hello [Prénom], ravie de t'accompagner ! Ton profil est prometteur.",
+    nutrition: "Analyse nutritionnelle en cours...",
+    fitness: "Analyse fitness en cours...",
+    wellness: "Analyse bien-être en cours...",
+    nutrition_plus: "Analyse interne en cours...",
+    lifestyle: "Analyse lifestyle en cours...",
+    beauty: "Analyse beauté en cours...",
+    summary: "Tu as un potentiel immense. Ensemble, nous allons transformer ta vie.",
+    next_steps: "Je prépare ton programme personnalisé. Signature : Rosy – IKONGA Lifestyle"
 };
 
 export async function generateUserAnalysis(userProfile: any, answers: QuestionnaireData): Promise<AnalysisResult> {
@@ -42,17 +39,24 @@ export async function generateUserAnalysis(userProfile: any, answers: Questionna
 
     try {
         const userMessage = `
-      PROFIL UTILISATRICE :
+      DONNÉES UTILISATRICE :
+      - Nom: ${answers.lastName}
       - Prénom: ${answers.firstName}
       - Age: ${userProfile.age || 'N/A'}
-      - Objectif: ${answers.targetWeight ? `Perdre du poids (Cible: ${answers.targetWeight}kg)` : 'Remise en forme'}
-      - IMC: ${userProfile.imc || 'N/A'}
-      
-      REPONSES QUESTIONNAIRE :
-      - Nutrition: ${answers.mealsPerDay} repas/jour, Allergies: ${answers.allergies.join(', ') || 'Aucune'}, Habitudes: ${answers.habits.join(', ')}
-      - Fitness: Niveau ${answers.activityLevel}, Blessures: ${answers.injuries.join(', ') || 'Aucune'}
-      - Wellness: Stress ${answers.stressLevel}/10, Sommeil ${answers.sleepQuality}/10
-      - Confiance Corps: ${answers.bodyConfidence}
+      - Poids départ: ${answers.startWeight}kg
+      - Poids cible: ${answers.targetWeight || 'N/A'}kg
+      - Taille: ${answers.heightCm}cm
+      - Sexe: ${answers.gender}
+      - Allergies: ${answers.allergies.join(', ') || 'Aucune'}
+      - Aliments refusés: ${answers.refusedFoods.join(', ') || 'Aucun'}
+      - Repas/jour: ${answers.mealsPerDay}
+      - Stress: ${answers.stressLevel}/10
+      - Sommeil: ${answers.sleepQuality}/10
+      - Activité physique: ${answers.fitnessLevel}
+      - Douleurs: ${answers.physicalLimitations.join(', ') || 'Aucune'}
+      - Engagement: ${answers.engagementLevel}
+      - Pourquoi IKONGA: ${answers.whyJoin.join(', ')}
+      - Commentaire: ${answers.additionalNotes || 'N/A'}
     `;
 
         const completion = await openai.chat.completions.create({
@@ -60,7 +64,7 @@ export async function generateUserAnalysis(userProfile: any, answers: Questionna
                 { role: "system", content: SYSTEM_PROMPT_API },
                 { role: "user", content: userMessage }
             ],
-            model: "gpt-4o", // Or gpt-3.5-turbo if cost concern
+            model: "gpt-4o",
             response_format: { type: "json_object" },
             temperature: 0.7,
         });
