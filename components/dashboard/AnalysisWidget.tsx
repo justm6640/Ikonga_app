@@ -167,45 +167,6 @@ export function AnalysisWidget({ analysis }: AnalysisWidgetProps) {
                 })}
             </div>
 
-            {/* Summary & Next Steps */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                >
-                    <Card className="border-none bg-gradient-to-br from-purple-50 to-pink-50 rounded-[2rem] shadow-lg h-full">
-                        <CardContent className="p-8">
-                            <div className="flex items-center gap-2 mb-4">
-                                <Star size={20} className="text-ikonga-pink fill-ikonga-pink" />
-                                <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">Résumé</h3>
-                            </div>
-                            <p className="text-slate-600 leading-relaxed text-sm">
-                                {analysis.summary}
-                            </p>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.1 }}
-                >
-                    <Card className="border-none bg-ikonga-gradient rounded-[2rem] shadow-lg h-full text-white">
-                        <CardContent className="p-8">
-                            <div className="flex items-center gap-2 mb-4">
-                                <ArrowRight size={20} className="text-white" />
-                                <h3 className="text-sm font-black uppercase tracking-wider">Prochaines Étapes</h3>
-                            </div>
-                            <p className="text-white/90 leading-relaxed text-sm">
-                                {analysis.next_steps}
-                            </p>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            </div>
         </div>
     )
 }

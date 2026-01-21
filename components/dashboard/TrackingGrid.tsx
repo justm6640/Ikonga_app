@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils"
 
 const TRACKING_ITEMS = [
     {
-        id: "suivi",
-        title: "Suivi",
-        description: "Questionnaire & Analyse",
+        id: "analyse",
+        title: "Mon Analyse",
+        description: "Profil Rosy & Conseils",
         icon: ClipboardCheck,
-        href: "/onboarding/summary",
+        href: "/mon-analyse",
         color: "bg-blue-50",
         iconColor: "text-blue-600",
         gradient: "from-blue-50 to-indigo-50"
@@ -20,9 +20,9 @@ const TRACKING_ITEMS = [
     {
         id: "indicateurs",
         title: "Indicateurs",
-        description: "IMC, Métabolisme...",
+        description: "Bilan Métabolique Live",
         icon: Activity,
-        href: "/dashboard/metrics",
+        href: "/indicateurs",
         color: "bg-emerald-50",
         iconColor: "text-emerald-600",
         gradient: "from-emerald-50 to-teal-50"

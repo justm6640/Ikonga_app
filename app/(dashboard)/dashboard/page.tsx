@@ -2,11 +2,8 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getOrCreateUser } from "@/lib/actions/user";
 import { differenceInCalendarDays, startOfDay } from "date-fns";
-import { AnalysisWidget } from "@/components/dashboard/AnalysisWidget";
-import { AnalysisResult } from "@/lib/ai/generator";
 
-// New Components
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+// Dashboard Components
 import { PhaseCard } from "@/components/dashboard/PhaseCard";
 import { WeightMiniChart } from "@/components/dashboard/WeightMiniChart";
 import { PillarsGrid } from "@/components/dashboard/PillarsGrid";
@@ -28,8 +25,7 @@ export default async function DashboardPage() {
         where: { id: prismaUser.id },
         include: {
             dailyLogs: { orderBy: { date: 'desc' } },
-            phases: { orderBy: { startDate: 'desc' }, take: 1 },
-            analysis: true
+            phases: { orderBy: { startDate: 'desc' }, take: 1 }
         }
     });
 
@@ -78,12 +74,6 @@ export default async function DashboardPage() {
     const phaseStartDate = activePhase?.startDate || dbUser.startDate;
     const isCoachOverridden = activePhase?.adminNote ? true : false;
 
-    // AI Analysis
-    let analysisData: AnalysisResult | null = null;
-    if (dbUser.analysis?.content) {
-        analysisData = dbUser.analysis.content as unknown as AnalysisResult;
-    }
-
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
             <div className="max-w-xl mx-auto pb-32 px-4 sm:px-6 space-y-6 sm:space-y-8 relative">
@@ -91,20 +81,7 @@ export default async function DashboardPage() {
                 <div className="fixed top-20 right-0 w-72 h-72 bg-ikonga-pink/5 rounded-full blur-3xl -z-10" />
                 <div className="fixed bottom-40 left-0 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl -z-10" />
 
-                {/* AI Analysis (Stays on top but discrete) */}
-                {analysisData && (
-                    <div className="mb-6 animate-fade-in-up">
-                        <AnalysisWidget analysis={analysisData} />
-                    </div>
-                )}
-
-                {/* BLOCK 1: Header */}
-                <DashboardHeader
-                    firstName={dbUser.firstName || undefined}
-                    notificationsCount={0}
-                />
-
-                {/* BLOCK 2: Phase Card */}
+                {/* BLOCK 1: Phase Card */}
                 <PhaseCard
                     phase={activePhaseType}
                     startDate={phaseStartDate}
