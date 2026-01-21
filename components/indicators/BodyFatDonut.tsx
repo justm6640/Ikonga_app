@@ -7,19 +7,19 @@ interface BodyFatDonutProps {
 }
 
 export function BodyFatDonut({ percentage }: BodyFatDonutProps) {
-    const strokeWidth = 14;
-    const radius = 35;
+    const strokeWidth = 16;
+    const radius = 75;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (percentage / 100) * circumference;
 
     return (
         <div className="flex flex-col items-center">
-            <div className="relative h-48 w-48">
-                <svg className="h-full w-full rotate-[-90deg]">
+            <div className="relative h-64 w-64 md:h-72 md:w-72">
+                <svg className="h-full w-full rotate-[-90deg]" viewBox="0 0 200 200">
                     {/* Background Circle */}
                     <circle
-                        cx="50%"
-                        cy="50%"
+                        cx="100"
+                        cy="100"
                         r={radius}
                         fill="transparent"
                         stroke="#f1f5f9"
@@ -28,8 +28,8 @@ export function BodyFatDonut({ percentage }: BodyFatDonutProps) {
                     />
                     {/* Progress Circle */}
                     <motion.circle
-                        cx="50%"
-                        cy="50%"
+                        cx="100"
+                        cy="100"
                         r={radius}
                         fill="transparent"
                         stroke="url(#ikonga-gradient)"
@@ -50,15 +50,19 @@ export function BodyFatDonut({ percentage }: BodyFatDonutProps) {
                 </svg>
 
                 {/* Center Content */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <motion.h4
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <motion.div
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="text-4xl font-serif font-black text-slate-900 leading-none"
+                        className="text-center"
                     >
-                        {Math.round(percentage)}%
-                    </motion.h4>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Masse grasse</p>
+                        <h4 className="text-5xl md:text-6xl font-serif font-black text-slate-900 leading-tight">
+                            {Math.round(percentage)}%
+                        </h4>
+                        <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em] mt-2">
+                            Masse grasse
+                        </p>
+                    </motion.div>
                 </div>
             </div>
 
