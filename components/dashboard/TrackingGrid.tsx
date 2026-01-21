@@ -30,9 +30,9 @@ const TRACKING_ITEMS = [
     {
         id: "phases",
         title: "Phases",
-        description: "Calendrier & Résultats",
+        description: "Calendrier & Sessions",
         icon: CalendarDays,
-        href: "/dashboard/phases",
+        href: "/phases",
         color: "bg-violet-50",
         iconColor: "text-violet-600",
         gradient: "from-violet-50 to-purple-50"
