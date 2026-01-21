@@ -11,7 +11,8 @@ import { ComposerView } from "./ComposerView"
 import { GlobalMenusView } from "./GlobalMenusView"
 import { RecipeModal } from "@/components/dashboard/RecipeModal"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { ChevronDown, BookOpen } from "lucide-react"
+import { ChevronDown, BookOpen, CheckCircle2, ArrowLeft } from "lucide-react"
+import { DoDontView } from "./DoDontView"
 import { cn } from "@/lib/utils"
 import {
     DropdownMenu,
@@ -58,7 +59,7 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
     const [recipes, setRecipes] = useState<any[]>([])
     const [globalMenus, setGlobalMenus] = useState<any[]>([]) // New state
     const [shoppingData, setShoppingData] = useState<any>(null)
-    const [currentView, setCurrentView] = useState<"home" | "menus" | "recipes" | "alternatives" | "shopping" | "composer" | "templates">("home")
+    const [currentView, setCurrentView] = useState<"home" | "menus" | "recipes" | "alternatives" | "shopping" | "composer" | "templates" | "dodont">("home")
     const [isPending, startTransition] = useTransition()
     const [selectedDailyMenu, setSelectedDailyMenu] = useState<any>(null)
     const [isDailyMenuModalOpen, setIsDailyMenuModalOpen] = useState(false)
@@ -243,7 +244,16 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                         }}
                     />
 
-                    {/* 5. Alternatives */}
+                    {/* 5. À faire / À éviter */}
+                    <BentoCard
+                        title="À faire / À éviter"
+                        description="Les clés de la réussite."
+                        icon={CheckCircle2}
+                        colorClass="bg-emerald-50"
+                        onClick={() => setCurrentView("dodont")}
+                    />
+
+                    {/* 6. Alternatives */}
                     <BentoCard
                         title="Alternatives"
                         description="Par quoi remplacer..."
@@ -498,8 +508,30 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
 
             {/* Alternatives Placeholder */}
             {currentView === "alternatives" && (
-                <div className="p-8 text-center bg-white rounded-3xl border border-slate-100">
-                    <p className="text-slate-500 italic">Section Alternatives en construction 🚧</p>
+                <div className="space-y-6">
+                    <button
+                        onClick={() => setCurrentView("home")}
+                        className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors group mb-4"
+                    >
+                        <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-sm font-bold uppercase tracking-widest">Retour</span>
+                    </button>
+                    <div className="p-8 text-center bg-white rounded-3xl border border-slate-100">
+                        <p className="text-slate-500 italic">Section Alternatives en construction 🚧</p>
+                    </div>
+                </div>
+            )}
+
+            {currentView === "dodont" && (
+                <div className="space-y-6">
+                    <button
+                        onClick={() => setCurrentView("home")}
+                        className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors group mb-4"
+                    >
+                        <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-sm font-bold uppercase tracking-widest">Retour</span>
+                    </button>
+                    <DoDontView currentPhase={currentData.phase} />
                 </div>
             )}
 

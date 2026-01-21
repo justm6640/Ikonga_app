@@ -455,9 +455,7 @@ export async function getRecipes(filters?: {
 
     // Filter by phase
     if (filters?.phase) {
-        where.allowedPhases = {
-            has: filters.phase
-        }
+        where.phase = filters.phase
     }
 
     // Filter by meal type

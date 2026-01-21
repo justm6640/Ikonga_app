@@ -226,6 +226,7 @@ model Recipe {
   allergens   String[]
   dietaryTags String[] // e.g. "Vegetarian", "Halal"
   cuisineType String?  // e.g. "African", "European"
+  mealType    String?  // Ex: "BREAKFAST", "LUNCH", "DINNER", "SNACK"
   
   calories    Int?
   protein     Int?

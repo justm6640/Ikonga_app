@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Moon, Star, Clock } from "lucide-react"
+import { Moon, Star, Clock, Check } from "lucide-react"
 import { Slider } from "@/components/ui/slider"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 interface SleepViewProps {
@@ -14,15 +15,22 @@ interface SleepViewProps {
 export function SleepView({ date, initialData, onUpdate }: SleepViewProps) {
     const [quality, setQuality] = useState<string>(initialData?.sleepQuality || "")
     const [hours, setHours] = useState<number>(initialData?.sleepHours || 7)
+    const [isValidated, setIsValidated] = useState(false)
 
     const handleQuality = (q: string) => {
         setQuality(q)
-        onUpdate({ sleepQuality: q, sleepHours: hours })
+        setIsValidated(false)
     }
 
     const handleHours = (val: number[]) => {
         setHours(val[0])
-        onUpdate({ sleepQuality: quality, sleepHours: val[0] })
+        setIsValidated(false)
+    }
+
+    const handleValidate = () => {
+        onUpdate({ sleepQuality: quality, sleepHours: hours })
+        setIsValidated(true)
+        setTimeout(() => setIsValidated(false), 2000)
     }
 
     return (
@@ -87,6 +95,29 @@ export function SleepView({ date, initialData, onUpdate }: SleepViewProps) {
                         className="[&>.relative>.absolute]:bg-slate-900 [&>span]:border-slate-900 [&>span]:focus:ring-slate-200"
                     />
                 </div>
+            </div>
+
+            {/* Validation Button */}
+            <div className="flex justify-center mt-6">
+                <Button
+                    onClick={handleValidate}
+                    disabled={isValidated}
+                    className={cn(
+                        "px-8 py-6 rounded-full font-bold text-sm tracking-wider transition-all",
+                        isValidated
+                            ? "bg-green-500 hover:bg-green-500 text-white shadow-lg shadow-green-200"
+                            : "bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200"
+                    )}
+                >
+                    {isValidated ? (
+                        <div className="flex items-center gap-2">
+                            <Check size={20} />
+                            <span>Validé !</span>
+                        </div>
+                    ) : (
+                        <span>Valider mes données</span>
+                    )}
+                </Button>
             </div>
 
         </div>

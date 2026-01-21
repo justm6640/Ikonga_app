@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { AlertCircle, Check } from "lucide-react"
 import { Slider } from "@/components/ui/slider"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 interface StressViewProps {
@@ -21,10 +22,11 @@ export function StressView({ date, initialData, onUpdate }: StressViewProps) {
     const [triggers, setTriggers] = useState<string[]>(
         Array.isArray(initialData?.stressTags) ? initialData.stressTags : []
     )
+    const [isValidated, setIsValidated] = useState(false)
 
     const handleLevel = (val: number[]) => {
         setLevel(val[0])
-        onUpdate({ stressLevel: val[0], stressTags: triggers })
+        setIsValidated(false)
     }
 
     const toggleTrigger = (trigger: string) => {
@@ -35,7 +37,13 @@ export function StressView({ date, initialData, onUpdate }: StressViewProps) {
             newTriggers = [...triggers, trigger]
         }
         setTriggers(newTriggers)
-        onUpdate({ stressLevel: level, stressTags: newTriggers })
+        setIsValidated(false)
+    }
+
+    const handleValidate = () => {
+        onUpdate({ stressLevel: level, stressTags: triggers })
+        setIsValidated(true)
+        setTimeout(() => setIsValidated(false), 2000)
     }
 
     const getStressColor = (val: number) => {
@@ -112,6 +120,30 @@ export function StressView({ date, initialData, onUpdate }: StressViewProps) {
                     ))}
                 </div>
             </div>
+
+            {/* Validation Button */}
+            <div className="flex justify-center mt-6">
+                <Button
+                    onClick={handleValidate}
+                    disabled={isValidated}
+                    className={cn(
+                        "px-8 py-6 rounded-full font-bold text-sm tracking-wider transition-all",
+                        isValidated
+                            ? "bg-green-500 hover:bg-green-500 text-white shadow-lg shadow-green-200"
+                            : "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-200"
+                    )}
+                >
+                    {isValidated ? (
+                        <div className="flex items-center gap-2">
+                            <Check size={20} />
+                            <span>Validé !</span>
+                        </div>
+                    ) : (
+                        <span>Valider mes données</span>
+                    )}
+                </Button>
+            </div>
+
         </div>
     )
 }

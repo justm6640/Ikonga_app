@@ -10,7 +10,7 @@ const openai = new OpenAI({
  * Generates an AI recipe for a specific dish and phase if it doesn't exist.
  * Saves it to the database.
  */
-export async function generateAndSaveRecipe(name: string, phase: string) {
+export async function generateAndSaveRecipe(name: string, phase: string, mealType?: string) {
     if (!name || name === "Repas Libre") return null;
 
     try {
@@ -48,6 +48,7 @@ export async function generateAndSaveRecipe(name: string, phase: string) {
             data: {
                 name: name,
                 phase: phase,
+                mealType: mealType,
                 ingredients: recipeJson.ingredients || [],
                 instructions: recipeJson.instructions || [],
                 calories: recipeJson.macros?.calories || 0,
@@ -70,12 +71,18 @@ export async function generateAndSaveRecipe(name: string, phase: string) {
 /**
  * Batch generate recipes for a list of names.
  */
-export async function batchGenerateRecipes(names: string[], phase: string) {
-    const uniqueNames = Array.from(new Set(names)).filter(n => n && n !== "Repas Libre");
+export async function batchGenerateRecipes(mealItems: { name: string, mealType: string }[], phase: string) {
+    const uniqueItems = new Map<string, string>();
+    mealItems.forEach(item => {
+        if (item.name && item.name !== "Repas Libre" && !uniqueItems.has(item.name)) {
+            uniqueItems.set(item.name, item.mealType);
+        }
+    });
+
     const results = [];
 
-    for (const name of uniqueNames) {
-        const recipe = await generateAndSaveRecipe(name, phase);
+    for (const [name, mealType] of uniqueItems.entries()) {
+        const recipe = await generateAndSaveRecipe(name, phase, mealType);
         results.push(recipe);
     }
 

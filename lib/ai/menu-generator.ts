@@ -118,33 +118,35 @@ export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: b
 
         // 5. AUTO-GENERATE MISSING RECIPES (Batch)
         try {
-            const allMealNames: string[] = []
+            const mealItems: { name: string, mealType: string }[] = []
+
+            const addMeal = (name: string, type: string) => {
+                if (name && name !== "Repas Libre") {
+                    mealItems.push({ name, mealType: type })
+                }
+            }
+
+            const extractFromDay = (d: any) => {
+                if (d.breakfast) addMeal(d.breakfast, "BREAKFAST")
+                if (d.lunch) addMeal(d.lunch, "LUNCH")
+                if (d.snack) addMeal(d.snack, "SNACK")
+                if (d.dinner) addMeal(d.dinner, "DINNER")
+            }
 
             if (menuJson.days && Array.isArray(menuJson.days)) {
-                menuJson.days.forEach((d: any) => {
-                    if (d.breakfast) allMealNames.push(d.breakfast)
-                    if (d.lunch) allMealNames.push(d.lunch)
-                    if (d.snack) allMealNames.push(d.snack)
-                    if (d.dinner) allMealNames.push(d.dinner)
-                })
+                menuJson.days.forEach(extractFromDay)
             } else {
-                // Named days fallback
                 const dayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
                 dayKeys.forEach(k => {
                     const d = menuJson[k]
-                    if (d) {
-                        if (d.breakfast) allMealNames.push(d.breakfast)
-                        if (d.lunch) allMealNames.push(d.lunch)
-                        if (d.snack) allMealNames.push(d.snack)
-                        if (d.dinner) allMealNames.push(d.dinner)
-                    }
+                    if (d) extractFromDay(d)
                 })
             }
 
-            if (allMealNames.length > 0) {
+            if (mealItems.length > 0) {
                 const { batchGenerateRecipes } = await import("./recipe-generator")
-                await batchGenerateRecipes(allMealNames, currentPhase)
-                console.log(`[MenuGenerator] Batch generated ${allMealNames.length} recipes for phase ${currentPhase}`)
+                await batchGenerateRecipes(mealItems, currentPhase)
+                console.log(`[MenuGenerator] Batch generated ${mealItems.length} recipes for phase ${currentPhase}`)
             }
         } catch (err) {
             console.error("[MenuGenerator] Failed to batch generate recipes:", err)

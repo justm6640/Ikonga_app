@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Droplet, Plus, Minus, GlassWater } from "lucide-react"
+import { Droplet, Plus, Minus, GlassWater, Check } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -15,6 +15,7 @@ interface HydrationViewProps {
 export function HydrationView({ initialValue, goal, onUpdate }: HydrationViewProps) {
     const [intake, setIntake] = useState(initialValue)
     const [glassSize, setGlassSize] = useState(1) // 1 glass = 250ml
+    const [isValidated, setIsValidated] = useState(false)
 
     // Calculate percentage
     const percentage = Math.min(100, Math.round((intake / goal) * 100))
@@ -22,15 +23,21 @@ export function HydrationView({ initialValue, goal, onUpdate }: HydrationViewPro
     const handleAdd = () => {
         const newValue = intake + 1
         setIntake(newValue)
-        onUpdate(newValue)
+        setIsValidated(false)
     }
 
     const handleRemove = () => {
         if (intake > 0) {
             const newValue = intake - 1
             setIntake(newValue)
-            onUpdate(newValue)
+            setIsValidated(false)
         }
+    }
+
+    const handleValidate = () => {
+        onUpdate(intake)
+        setIsValidated(true)
+        setTimeout(() => setIsValidated(false), 2000)
     }
 
     return (
@@ -90,6 +97,29 @@ export function HydrationView({ initialValue, goal, onUpdate }: HydrationViewPro
                     onClick={handleAdd}
                 >
                     <Plus size={24} className="text-white" />
+                </Button>
+            </div>
+
+            {/* Validation Button */}
+            <div className="flex justify-center mt-6">
+                <Button
+                    onClick={handleValidate}
+                    disabled={isValidated}
+                    className={cn(
+                        "px-8 py-6 rounded-full font-bold text-sm tracking-wider transition-all",
+                        isValidated
+                            ? "bg-green-500 hover:bg-green-500 text-white shadow-lg shadow-green-200"
+                            : "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-200"
+                    )}
+                >
+                    {isValidated ? (
+                        <div className="flex items-center gap-2">
+                            <Check size={20} />
+                            <span>Validé !</span>
+                        </div>
+                    ) : (
+                        <span>Valider la quantité</span>
+                    )}
                 </Button>
             </div>
 

@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Battery, Zap } from "lucide-react"
+import { Battery, Zap, Check } from "lucide-react"
 import { Slider } from "@/components/ui/slider"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 interface EnergyViewProps {
@@ -13,10 +14,17 @@ interface EnergyViewProps {
 
 export function EnergyView({ date, initialData, onUpdate }: EnergyViewProps) {
     const [level, setLevel] = useState<number>(initialData?.energyLevel || 5)
+    const [isValidated, setIsValidated] = useState(false)
 
     const handleLevel = (val: number[]) => {
         setLevel(val[0])
-        onUpdate({ energyLevel: val[0] })
+        setIsValidated(false)
+    }
+
+    const handleValidate = () => {
+        onUpdate({ energyLevel: level })
+        setIsValidated(true)
+        setTimeout(() => setIsValidated(false), 2000)
     }
 
     const getRecommendation = (val: number) => {
@@ -80,6 +88,30 @@ export function EnergyView({ date, initialData, onUpdate }: EnergyViewProps) {
                     <span className="text-amber-600 font-bold text-base">{getRecommendation(level)}</span>
                 </p>
             </div>
+
+            {/* Validation Button */}
+            <div className="flex justify-center mt-6">
+                <Button
+                    onClick={handleValidate}
+                    disabled={isValidated}
+                    className={cn(
+                        "px-8 py-6 rounded-full font-bold text-sm tracking-wider transition-all",
+                        isValidated
+                            ? "bg-green-500 hover:bg-green-500 text-white shadow-lg shadow-green-200"
+                            : "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-200"
+                    )}
+                >
+                    {isValidated ? (
+                        <div className="flex items-center gap-2">
+                            <Check size={20} />
+                            <span>Validé !</span>
+                        </div>
+                    ) : (
+                        <span>Valider mes données</span>
+                    )}
+                </Button>
+            </div>
+
         </div>
     )
 }
