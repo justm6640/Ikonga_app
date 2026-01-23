@@ -18,6 +18,11 @@ const SignUpSchema = EmailSchema.extend({
         .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre"),
     firstName: z.string().min(2, "Le prénom est trop court"),
     lastName: z.string().optional(),
+    birthDate: z.string().optional(),
+    phone: z.string().optional(),
+    heightCm: z.coerce.number().min(100).max(250).optional(),
+    startWeight: z.coerce.number().min(30).max(300).optional(),
+    startDate: z.string().optional(),
 })
 
 export async function login(formData: FormData) {
@@ -52,6 +57,11 @@ export async function signup(formData: FormData) {
         password: formData.get("password") as string,
         firstName: formData.get("firstName") as string,
         lastName: formData.get("lastName") as string || undefined,
+        birthDate: formData.get("birthDate") as string || undefined,
+        phone: formData.get("phone") as string || undefined,
+        heightCm: formData.get("heightCm") as string || undefined,
+        startWeight: formData.get("startWeight") as string || undefined,
+        startDate: formData.get("startDate") as string || undefined,
     }
 
     const validatedFields = SignUpSchema.safeParse(rawData)
@@ -62,7 +72,7 @@ export async function signup(formData: FormData) {
         return { success: false, error: firstError || "Données invalides" }
     }
 
-    const { email, password, firstName, lastName } = validatedFields.data
+    const { email, password, firstName, lastName, birthDate, phone, heightCm, startWeight, startDate } = validatedFields.data
 
     // B. Inscription Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -91,7 +101,12 @@ export async function signup(formData: FormData) {
                     email: authData.user.email!,
                     firstName: firstName,
                     lastName: lastName,
-                    role: "USER" // Rôle par défaut
+                    role: "USER", // Rôle par défaut
+                    birthDate: birthDate ? new Date(birthDate) : undefined,
+                    phoneNumber: phone || undefined,
+                    heightCm: heightCm || undefined,
+                    startWeight: startWeight || undefined,
+                    startDate: startDate ? new Date(startDate) : undefined,
                 }
             })
         } catch (prismaError: any) {

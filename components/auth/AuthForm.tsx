@@ -57,16 +57,82 @@ export function AuthForm({ mode }: AuthFormProps) {
                 <div className="grid gap-4">
 
                     {mode === 'signup' && (
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="firstName">Prénom</Label>
-                                <Input id="firstName" name="firstName" placeholder="Anna" required className="h-11 rounded-xl" />
+                        <>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="firstName">Prénom</Label>
+                                    <Input id="firstName" name="firstName" placeholder="Anna" required className="h-11 rounded-xl" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="lastName">Nom</Label>
+                                    <Input id="lastName" name="lastName" placeholder="Doe" required className="h-11 rounded-xl" />
+                                </div>
                             </div>
+
                             <div className="grid gap-2">
-                                <Label htmlFor="lastName">Nom</Label>
-                                <Input id="lastName" name="lastName" placeholder="Doe" required className="h-11 rounded-xl" />
+                                <Label htmlFor="birthDate">Date de naissance</Label>
+                                <Input
+                                    id="birthDate"
+                                    name="birthDate"
+                                    type="date"
+                                    required
+                                    className="h-11 rounded-xl"
+                                />
                             </div>
-                        </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="phone">Numéro de téléphone</Label>
+                                <Input
+                                    id="phone"
+                                    name="phone"
+                                    type="tel"
+                                    placeholder="+33 6 12 34 56 78"
+                                    required
+                                    className="h-11 rounded-xl"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="heightCm">Taille (cm)</Label>
+                                    <Input
+                                        id="heightCm"
+                                        name="heightCm"
+                                        type="number"
+                                        placeholder="165"
+                                        min="100"
+                                        max="250"
+                                        required
+                                        className="h-11 rounded-xl"
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="startWeight">Poids de départ (kg)</Label>
+                                    <Input
+                                        id="startWeight"
+                                        name="startWeight"
+                                        type="number"
+                                        step="0.1"
+                                        placeholder="70"
+                                        min="30"
+                                        max="300"
+                                        required
+                                        className="h-11 rounded-xl"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="startDate">Date de début de cure</Label>
+                                <Input
+                                    id="startDate"
+                                    name="startDate"
+                                    type="date"
+                                    required
+                                    className="h-11 rounded-xl"
+                                />
+                            </div>
+                        </>
                     )}
 
                     <div className="grid gap-2">
