@@ -4,7 +4,8 @@ import { WeighInModal } from "@/components/weigh-in/WeighInModal"
 import { WeightChartFull } from "@/components/weigh-in/WeightChartFull"
 import { WeightHistory } from "@/components/weigh-in/WeightHistory"
 import { getWeightHistory } from "@/lib/actions/weight"
-import { Scale, TrendingDown, Target, Award } from "lucide-react"
+import { Scale, TrendingDown, Target, Award, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 export default async function WeighInPage({
     searchParams,
@@ -53,16 +54,22 @@ export default async function WeighInPage({
             </div>
 
             {/* Header */}
-            <div className="text-center space-y-4 pt-8 pb-8 animate-in fade-in slide-in-from-top-4 duration-700">
-                <div className="inline-flex p-4 rounded-3xl bg-gradient-to-br from-ikonga-pink/10 to-orange-400/10 mb-3 shadow-lg shadow-pink-500/10">
-                    <Scale className="text-ikonga-pink" size={40} strokeWidth={2.5} />
+            <div className="pt-8 pb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+                <div className="flex items-center gap-4 mb-6">
+                    <Link href="/dashboard">
+                        <button className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors">
+                            <ArrowLeft size={18} className="text-slate-600" />
+                        </button>
+                    </Link>
+                    <div className="flex flex-col">
+                        <h1 className="text-2xl font-serif font-black text-slate-900 tracking-tight leading-none uppercase">
+                            MA PESÉE
+                        </h1>
+                        <p className="text-xs text-slate-500 font-medium">
+                            Suis ta progression en toute bienveillance et célèbre chaque étape 💛
+                        </p>
+                    </div>
                 </div>
-                <h1 className="text-5xl md:text-6xl font-serif font-bold text-slate-900 tracking-tight">
-                    Ma Pesée
-                </h1>
-                <p className="text-slate-500 font-medium max-w-xl mx-auto text-lg">
-                    Suis ta progression en toute bienveillance et célèbre chaque étape 💛
-                </p>
             </div>
 
             {/* Stats Cards */}
