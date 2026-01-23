@@ -286,12 +286,31 @@ export function StepGeneral({ onNext }: StepGeneralProps) {
                     )}
                 />
 
-                <Button
-                    type="submit"
-                    className="w-full h-16 text-lg font-black uppercase tracking-widest rounded-3xl bg-ikonga-gradient hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-pink-200"
-                >
-                    Continuer
-                </Button>
+                <div className="space-y-3">
+                    <Button
+                        type="submit"
+                        className="w-full h-16 text-lg font-black uppercase tracking-widest rounded-3xl bg-ikonga-gradient hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-pink-200"
+                    >
+                        Continuer
+                    </Button>
+
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                            // Save minimal required data and skip
+                            const firstName = form.getValues("firstName")
+                            const email = form.getValues("email")
+                            if (firstName && email) {
+                                setData({ firstName, email })
+                                onNext()
+                            }
+                        }}
+                        className="w-full h-14 text-sm font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-2xl"
+                    >
+                        Remplir plus tard →
+                    </Button>
+                </div>
             </form>
         </Form>
     )

@@ -75,55 +75,55 @@ export function DailyMenuModal({ isOpen, onClose, dayData }: DailyMenuModalProps
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-md p-0 border-none sm:rounded-[2rem] overflow-hidden bg-white shadow-2xl">
+            <DialogContent className="max-w-md p-0 border-none sm:rounded-[2rem] overflow-hidden bg-white shadow-2xl max-h-[95vh] flex flex-col">
                 {/* Header */}
-                <div className="bg-slate-900 px-6 py-8 relative overflow-hidden">
+                <div className="bg-slate-900 px-4 sm:px-6 py-6 sm:py-8 relative overflow-hidden shrink-0">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full -mr-8 -mt-8" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-2">
-                            <Badge className="bg-orange-500 text-white border-none px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest">
+                            <Badge className="bg-orange-500 text-white border-none px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-widest">
                                 JOUR {dayData.dayNumber}
                             </Badge>
                         </div>
-                        <DialogTitle className="text-2xl font-serif font-black text-white capitalize leading-none">
+                        <DialogTitle className="text-xl sm:text-2xl font-serif font-black text-white capitalize leading-none">
                             {format(new Date(dayData.date), "EEEE", { locale: fr })}
                         </DialogTitle>
-                        <p className="text-slate-400 font-medium text-sm mt-1 capitalize">
+                        <p className="text-slate-400 font-medium text-xs sm:text-sm mt-1 capitalize">
                             {format(new Date(dayData.date), "d MMMM yyyy", { locale: fr })}
                         </p>
                     </div>
                 </div>
 
-                <ScrollArea className="h-[60vh] px-6 py-6">
-                    <div className="space-y-4">
+                <ScrollArea className="flex-1 min-h-0 px-4 sm:px-6 py-4 sm:py-6">
+                    <div className="space-y-3 sm:space-y-4">
                         {meals.map((meal) => (
                             meal.data ? (
                                 <div
                                     key={meal.id}
                                     className={cn(
-                                        "group p-5 rounded-2xl border transition-all duration-300",
+                                        "group p-4 sm:p-5 rounded-2xl border transition-all duration-300",
                                         "hover:shadow-lg bg-white",
                                         meal.border
                                     )}
                                 >
-                                    <div className="flex items-start gap-4">
+                                    <div className="flex items-start gap-3 sm:gap-4">
                                         <div className={cn(
-                                            "w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm shrink-0",
+                                            "w-10 h-10 rounded-xl flex items-center justify-center text-base sm:text-lg shadow-sm shrink-0",
                                             meal.bg
                                         )}>
                                             {meal.icon}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+                                            <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">
                                                 {meal.label}
                                             </span>
-                                            <h4 className="text-slate-900 font-bold text-base leading-snug">
+                                            <h4 className="text-slate-900 font-bold text-sm sm:text-base leading-snug line-clamp-2">
                                                 {getMealName(meal.data)}
                                             </h4>
 
                                             {getMealObject(meal.data) && (getMealObject(meal.data).calories > 0) && (
                                                 <div className="flex gap-2 mt-2">
-                                                    <Badge variant="secondary" className="bg-slate-50 text-slate-500 font-bold text-[10px] h-5 px-1.5">
+                                                    <Badge variant="secondary" className="bg-slate-50 text-slate-500 font-bold text-[9px] sm:text-[10px] h-5 px-1.5">
                                                         {getMealObject(meal.data).calories} kcal
                                                     </Badge>
                                                 </div>
@@ -135,17 +135,17 @@ export function DailyMenuModal({ isOpen, onClose, dayData }: DailyMenuModalProps
                         ))}
 
                         {!menu && (
-                            <div className="text-center py-10 text-slate-400 italic">
+                            <div className="text-center py-10 text-slate-400 italic text-sm">
                                 Menu en cours de préparation...
                             </div>
                         )}
                     </div>
                 </ScrollArea>
 
-                <div className="p-6 border-t border-slate-100 bg-slate-50">
+                <div className="p-4 sm:p-6 border-t border-slate-100 bg-slate-50 shrink-0">
                     <Button
                         onClick={onClose}
-                        className="w-full h-12 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors"
+                        className="w-full h-11 sm:h-12 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition-colors"
                     >
                         Fermer
                     </Button>

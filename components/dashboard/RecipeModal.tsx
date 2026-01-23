@@ -59,9 +59,9 @@ export function RecipeModal({ isOpen, onClose, recipe }: RecipeModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl p-0 border-none sm:rounded-[3rem] overflow-hidden bg-white shadow-2xl h-[90vh] sm:h-auto sm:max-h-[90vh]">
+            <DialogContent className="max-w-2xl p-0 border-none sm:rounded-[3rem] overflow-hidden bg-white shadow-2xl max-h-[95vh] sm:max-h-[90vh] flex flex-col">
                 {/* Header Image/Placeholder */}
-                <div className="relative h-48 sm:h-64 w-full bg-slate-100 overflow-hidden">
+                <div className="relative h-40 sm:h-48 md:h-64 w-full bg-slate-100 overflow-hidden shrink-0">
                     {recipe.imageUrl ? (
                         <img
                             src={recipe.imageUrl}
@@ -75,12 +75,12 @@ export function RecipeModal({ isOpen, onClose, recipe }: RecipeModalProps) {
                     )}
 
                     {/* Floating Badges */}
-                    <div className="absolute top-6 left-6 flex flex-wrap gap-2">
-                        <Badge className="bg-white/90 backdrop-blur-md text-slate-900 border-none px-4 py-1.5 rounded-full font-black uppercase tracking-widest text-[10px] shadow-lg">
+                    <div className="absolute top-4 sm:top-6 left-4 sm:left-6 flex flex-wrap gap-2">
+                        <Badge className="bg-white/90 backdrop-blur-md text-slate-900 border-none px-3 sm:px-4 py-1 sm:py-1.5 rounded-full font-black uppercase tracking-widest text-[9px] sm:text-[10px] shadow-lg">
                             {recipe.phase || "DETOX"}
                         </Badge>
-                        <Badge className="bg-ikonga-pink text-white border-none px-4 py-1.5 rounded-full font-black uppercase tracking-widest text-[10px] shadow-lg shadow-pink-500/20">
-                            <Flame size={12} className="mr-1" />
+                        <Badge className="bg-ikonga-pink text-white border-none px-3 sm:px-4 py-1 sm:py-1.5 rounded-full font-black uppercase tracking-widest text-[9px] sm:text-[10px] shadow-lg shadow-pink-500/20">
+                            <Flame size={10} className="mr-1" />
                             {recipe.calories || 0} kcal
                         </Badge>
                     </div>
@@ -88,30 +88,30 @@ export function RecipeModal({ isOpen, onClose, recipe }: RecipeModalProps) {
                     <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent" />
                 </div>
 
-                <div className="px-6 sm:px-10 -mt-6 relative z-10 flex flex-col h-[calc(90vh-12rem)] sm:h-[500px]">
-                    <DialogHeader className="mb-6 space-y-2">
-                        <div className="flex items-center gap-4 text-slate-400 font-bold uppercase tracking-widest text-[10px]">
+                <div className="px-4 sm:px-6 md:px-10 -mt-6 relative z-10 flex flex-col flex-1 min-h-0">
+                    <DialogHeader className="mb-4 sm:mb-6 space-y-2">
+                        <div className="flex items-center gap-3 sm:gap-4 text-slate-400 font-bold uppercase tracking-widest text-[9px] sm:text-[10px]">
                             <div className="flex items-center gap-1.5">
-                                <Clock size={14} className="text-ikonga-pink" />
+                                <Clock size={12} className="text-ikonga-pink sm:w-3.5 sm:h-3.5" />
                                 {recipe.prepTime || 15} MIN
                             </div>
                             <div className="flex items-center gap-1.5">
-                                <BarChart3 size={14} className="text-ikonga-pink" />
+                                <BarChart3 size={12} className="text-ikonga-pink sm:w-3.5 sm:h-3.5" />
                                 {recipe.difficulty || "MODÉRÉ"}
                             </div>
                         </div>
-                        <DialogTitle className="text-3xl sm:text-4xl font-serif font-black text-slate-900 leading-tight uppercase tracking-tighter">
+                        <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-serif font-black text-slate-900 leading-tight uppercase tracking-tighter">
                             {recipe.name}
                         </DialogTitle>
                     </DialogHeader>
 
                     {/* Tabs Navigation */}
                     <Tabs defaultValue="instructions" className="flex-1 flex flex-col min-h-0">
-                        <TabsList className="bg-slate-100/50 p-1 rounded-full w-fit mb-8">
-                            <TabsTrigger value="ingredients" className="rounded-full px-8 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase tracking-widest text-[10px]">
+                        <TabsList className="bg-slate-100/50 p-1 rounded-full w-full sm:w-fit mb-6 sm:mb-8">
+                            <TabsTrigger value="ingredients" className="rounded-full flex-1 sm:flex-initial px-4 sm:px-8 py-2 sm:py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase tracking-widest text-[9px] sm:text-[10px]">
                                 Ingrédients
                             </TabsTrigger>
-                            <TabsTrigger value="instructions" className="rounded-full px-8 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase tracking-widest text-[10px]">
+                            <TabsTrigger value="instructions" className="rounded-full flex-1 sm:flex-initial px-4 sm:px-8 py-2 sm:py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase tracking-widest text-[9px] sm:text-[10px]">
                                 Préparation
                             </TabsTrigger>
                         </TabsList>
@@ -171,23 +171,25 @@ export function RecipeModal({ isOpen, onClose, recipe }: RecipeModalProps) {
                     </Tabs>
 
                     {/* Footer Macros */}
-                    <div className="py-8 border-t border-slate-100 mt-auto bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center">
-                                <BarChart3 size={16} />
-                            </div>
-                            <span className="text-[10px] font-black uppercase tracking-tighter text-slate-400">Valeurs nutritionnelles</span>
-                        </div>
-                        <div className="flex items-center gap-4 sm:gap-6">
-                            {macros.map((macro) => (
-                                <div key={macro.label} className="flex flex-col items-center">
-                                    <span className="text-[9px] uppercase font-black text-slate-300 leading-none mb-1">{macro.label}</span>
-                                    <div className="flex items-center gap-1.5">
-                                        <div className={cn("w-1.5 h-1.5 rounded-full", macro.color.replace('text', 'bg'))} />
-                                        <span className="font-black text-xs sm:text-sm text-slate-800">{macro.value}</span>
-                                    </div>
+                    <div className="py-6 sm:py-8 border-t border-slate-100 mt-auto bg-white shrink-0">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                            <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+                                    <BarChart3 size={14} className="sm:w-4 sm:h-4" />
                                 </div>
-                            ))}
+                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tighter text-slate-400">Valeurs nutritionnelles</span>
+                            </div>
+                            <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-around sm:justify-end">
+                                {macros.map((macro) => (
+                                    <div key={macro.label} className="flex flex-col items-center">
+                                        <span className="text-[8px] sm:text-[9px] uppercase font-black text-slate-300 leading-none mb-1">{macro.label}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <div className={cn("w-1.5 h-1.5 rounded-full", macro.color.replace('text', 'bg'))} />
+                                            <span className="font-black text-xs sm:text-sm text-slate-800">{macro.value}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
