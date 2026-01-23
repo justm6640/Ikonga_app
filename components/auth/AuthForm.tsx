@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { login, signup } from "@/lib/actions/auth"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -30,21 +31,32 @@ function SubmitButton({ mode }: { mode: "login" | "signup" }) {
     )
 }
 
+const COUNTRY_CODES = [
+    { code: "+33", country: "France", flag: "🇫🇷" },
+    { code: "+1", country: "USA/Canada", flag: "🇺🇸" },
+    { code: "+44", country: "UK", flag: "🇬🇧" },
+    { code: "+212", country: "Maroc", flag: "🇲🇦" },
+    { code: "+213", country: "Algérie", flag: "🇩🇿" },
+    { code: "+216", country: "Tunisie", flag: "🇹🇳" },
+    { code: "+32", country: "Belgique", flag: "🇧🇪" },
+    { code: "+41", country: "Suisse", flag: "🇨🇭" },
+    { code: "+49", country: "Allemagne", flag: "🇩🇪" },
+    { code: "+34", country: "Espagne", flag: "🇪🇸" },
+    { code: "+39", country: "Italie", flag: "🇮🇹" },
+]
+
 export function AuthForm({ mode }: AuthFormProps) {
     const [showPassword, setShowPassword] = useState(false)
+    const [countryCode, setCountryCode] = useState("+33")
     const action = mode === "login" ? login : signup
 
     const handleSubmit = async (formData: FormData) => {
-        // Client-side toast handling wrapper if needed, or rely on server redirect/error return
-        // Server Actions usually return serializable objects.
-        // The simplified example in `lib/actions/auth.ts` redirects on success.
-        // On error it returns { error: string }.
-        // We need to wrap it to catch the error.
+        // Combine country code with phone number before submission
+        const phoneNumber = formData.get("phoneNumber") as string
+        if (phoneNumber && mode === "signup") {
+            formData.set("phone", `${countryCode}${phoneNumber}`)
+        }
 
-        // NOTE: Direct form action attribute usage `<form action={action}>` is standard.
-        // To handle errors, use `useFormState` hook (Next.js 14+) - but for speed simplicity here:
-        // We will stick to standard action. To catch error, we'd need a client wrapper or `useFormState`.
-        // Let's implement a simple wrapper here.
         const result = await action(formData);
         if (result?.error) {
             toast.error(result.error);
@@ -81,15 +93,32 @@ export function AuthForm({ mode }: AuthFormProps) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="phone">Numéro de téléphone</Label>
-                                <Input
-                                    id="phone"
-                                    name="phone"
-                                    type="tel"
-                                    placeholder="+33 6 12 34 56 78"
-                                    required
-                                    className="h-11 rounded-xl"
-                                />
+                                <Label htmlFor="phoneNumber">Numéro de téléphone</Label>
+                                <div className="flex gap-2">
+                                    <Select value={countryCode} onValueChange={setCountryCode}>
+                                        <SelectTrigger className="w-[140px] h-11 rounded-xl">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {COUNTRY_CODES.map((item) => (
+                                                <SelectItem key={item.code} value={item.code}>
+                                                    <span className="flex items-center gap-2">
+                                                        <span>{item.flag}</span>
+                                                        <span>{item.code}</span>
+                                                    </span>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <Input
+                                        id="phoneNumber"
+                                        name="phoneNumber"
+                                        type="tel"
+                                        placeholder="6 12 34 56 78"
+                                        required
+                                        className="flex-1 h-11 rounded-xl"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
