@@ -18,6 +18,7 @@ const SignUpSchema = EmailSchema.extend({
         .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre"),
     firstName: z.string().min(2, "Le prénom est trop court"),
     lastName: z.string().optional(),
+    gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(),
     birthDate: z.string().optional(),
     phone: z.string().optional(),
     heightCm: z.coerce.number().min(100).max(250).optional(),
@@ -57,6 +58,7 @@ export async function signup(formData: FormData) {
         password: formData.get("password") as string,
         firstName: formData.get("firstName") as string,
         lastName: formData.get("lastName") as string || undefined,
+        gender: formData.get("gender") as string || undefined,
         birthDate: formData.get("birthDate") as string || undefined,
         phone: formData.get("phone") as string || undefined,
         heightCm: formData.get("heightCm") as string || undefined,
@@ -72,7 +74,7 @@ export async function signup(formData: FormData) {
         return { success: false, error: firstError || "Données invalides" }
     }
 
-    const { email, password, firstName, lastName, birthDate, phone, heightCm, startWeight, startDate } = validatedFields.data
+    const { email, password, firstName, lastName, gender, birthDate, phone, heightCm, startWeight, startDate } = validatedFields.data
 
     // B. Inscription Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -102,6 +104,7 @@ export async function signup(formData: FormData) {
                     firstName: firstName,
                     lastName: lastName,
                     role: "USER", // Rôle par défaut
+                    gender: gender as any,
                     birthDate: birthDate ? new Date(birthDate) : undefined,
                     phoneNumber: phone || undefined,
                     heightCm: heightCm || undefined,

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { cn } from "@/lib/utils"
 import { login, signup } from "@/lib/actions/auth"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -148,6 +149,7 @@ const COUNTRY_CODES = [
 export function AuthForm({ mode }: AuthFormProps) {
     const [showPassword, setShowPassword] = useState(false)
     const [countryCode, setCountryCode] = useState("+33")
+    const [gender, setGender] = useState("FEMALE")
     const action = mode === "login" ? login : signup
 
     const handleSubmit = async (formData: FormData) => {
@@ -155,6 +157,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         const phoneNumber = formData.get("phoneNumber") as string
         if (phoneNumber && mode === "signup") {
             formData.set("phone", `${countryCode}${phoneNumber}`)
+            formData.set("gender", gender)
         }
 
         const result = await action(formData);
@@ -179,6 +182,24 @@ export function AuthForm({ mode }: AuthFormProps) {
                                     <Label htmlFor="lastName">Nom</Label>
                                     <Input id="lastName" name="lastName" placeholder="Doe" required className="h-11 rounded-xl" />
                                 </div>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>Sexe</Label>
+                                <RadioGroup value={gender} onValueChange={setGender} className="flex gap-4">
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="FEMALE" id="female" />
+                                        <Label htmlFor="female" className="font-normal cursor-pointer">Femme</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="MALE" id="male" />
+                                        <Label htmlFor="male" className="font-normal cursor-pointer">Homme</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="OTHER" id="other" />
+                                        <Label htmlFor="other" className="font-normal cursor-pointer">Autre</Label>
+                                    </div>
+                                </RadioGroup>
                             </div>
 
                             <div className="grid gap-2">

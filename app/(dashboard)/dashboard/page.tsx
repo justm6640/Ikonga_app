@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getOrCreateUser } from "@/lib/actions/user";
 import { differenceInCalendarDays, startOfDay } from "date-fns";
+import Link from "next/link";
+import { Sparkles, ArrowRight } from "lucide-react";
 
 // Dashboard Components
 import { PhaseCard } from "@/components/dashboard/PhaseCard";
@@ -79,7 +81,25 @@ export default async function DashboardPage() {
             <div className="max-w-xl mx-auto pb-32 px-4 sm:px-6 space-y-6 sm:space-y-8 relative">
                 {/* Decorative background blurs */}
                 <div className="fixed top-20 right-0 w-72 h-72 bg-ikonga-pink/5 rounded-full blur-3xl -z-10" />
+                <div className="fixed bottom-40 left-0 w-96 h-96 bg-orange-400/5 rounded-full blur-2xl -z-10" />
                 <div className="fixed bottom-40 left-0 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl -z-10" />
+
+                {/* BLOCK 0: Profile Completion CTA if skipped */}
+                {!dbUser.hasCompletedOnboarding && (
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 p-4 rounded-3xl mb-2 flex items-center justify-between group animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-amber-100 p-2 rounded-xl">
+                                <Sparkles size={16} className="text-amber-600" />
+                            </div>
+                            <p className="text-amber-900 text-sm font-medium">
+                                Personnalise ton programme à 100%
+                            </p>
+                        </div>
+                        <Link href="/onboarding" className="text-amber-700 text-xs font-black uppercase tracking-wider hover:text-amber-900 transition-colors flex items-center gap-1">
+                            Finir mon profil <ArrowRight size={14} />
+                        </Link>
+                    </div>
+                )}
 
                 {/* BLOCK 1: Phase Card */}
                 <PhaseCard

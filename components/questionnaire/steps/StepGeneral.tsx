@@ -18,7 +18,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { SelectionGrid } from "@/components/questionnaire/SelectionGrid"
-import { Globe, MapPin, Phone, User, Users, Star, Instagram } from "lucide-react"
+import { Globe, MapPin, Phone, User, Users, Star, Instagram, Loader2 } from "lucide-react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { skipOnboarding } from "@/lib/actions/onboarding"
 
 type Step1Data = z.infer<typeof step1GeneralSchema>
 
@@ -41,6 +45,8 @@ const REFERRAL_OPTIONS = [
 
 export function StepGeneral({ onNext }: StepGeneralProps) {
     const { data, setData } = useQuestionnaireStore()
+    const [isSkipping, setIsSkipping] = useState(false)
+    const router = useRouter()
 
     const form = useForm<Step1Data>({
         resolver: zodResolver(step1GeneralSchema),
@@ -297,18 +303,43 @@ export function StepGeneral({ onNext }: StepGeneralProps) {
                     <Button
                         type="button"
                         variant="ghost"
-                        onClick={() => {
-                            // Save minimal required data and skip
+                        disabled={isSkipping}
+                        onClick={async () => {
+                            // Save minimal required data and skip to dashboard
                             const firstName = form.getValues("firstName")
+                            const lastName = form.getValues("lastName")
                             const email = form.getValues("email")
-                            if (firstName && email) {
-                                setData({ firstName, email })
-                                onNext()
+
+                            if (!firstName || !email) {
+                                toast.error("Prénom et Email sont requis pour continuer")
+                                return
+                            }
+
+                            setIsSkipping(true)
+                            try {
+                                const result = await skipOnboarding({ firstName, lastName, email })
+                                if (result.success) {
+                                    toast.success("C'est noté ! Bienvenue.")
+                                    router.push("/dashboard")
+                                } else {
+                                    toast.error(result.error || "Une erreur est survenue")
+                                }
+                            } catch (err) {
+                                toast.error("Erreur de connexion")
+                            } finally {
+                                setIsSkipping(false)
                             }
                         }}
                         className="w-full h-14 text-sm font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-2xl"
                     >
-                        Remplir plus tard →
+                        {isSkipping ? (
+                            <div className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span>Enregistrement...</span>
+                            </div>
+                        ) : (
+                            "Remplir plus tard →"
+                        )}
                     </Button>
                 </div>
             </form>

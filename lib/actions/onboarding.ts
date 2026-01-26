@@ -179,3 +179,48 @@ export async function setJourneyStartDate(userId: string, date: Date | 'NOW') {
         return { success: false, error: "Impossible de définir la date de début." };
     }
 }
+
+/**
+ * Permet de sauter l'onboarding détaillé et d'aller directement au dashboard.
+ * Ne génère pas de bilan AI.
+ */
+export async function skipOnboarding(data: { firstName?: string, lastName?: string, email?: string }) {
+    try {
+        const supabase = await createClient()
+        const { data: { user }, error } = await supabase.auth.getUser()
+
+        if (error || !user) throw new Error("Utilisateur non connecté")
+
+        // 1. Mise à jour minimale du profil
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                firstName: data.firstName || undefined,
+                lastName: data.lastName || undefined,
+                // On s'assure que hasCompletedOnboarding reste à false (il l'est par défaut)
+                hasCompletedOnboarding: false,
+                // On définit une date de début pour que le dashboard ne redirige pas vers l'onboarding
+                startDate: new Date(),
+                isActive: true
+            }
+        })
+
+        // 2. Notification de bienvenue rapide
+        const { createNotification } = await import("./notifications");
+        await createNotification(
+            user.id,
+            "Bienvenue chez IKONGA ! 🌸",
+            "Tu as choisi de compléter ton profil plus tard. Tu peux accéder à tes outils dès maintenant.",
+            "INFO",
+            "/dashboard"
+        );
+
+        revalidatePath("/dashboard")
+        revalidatePath("/onboarding")
+
+        return { success: true }
+    } catch (error) {
+        console.error("[SKIP_ONBOARDING]", error)
+        return { success: false, error: "Une erreur est survenue lors de l'enregistrement." }
+    }
+}
