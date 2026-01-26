@@ -146,29 +146,38 @@ const COUNTRY_CODES = [
     { code: "+64", country: "Nouvelle-Zélande", flag: "🇳🇿" },
 ]
 
+import { useActionState, useEffect } from "react"
+
 export function AuthForm({ mode }: AuthFormProps) {
     const [showPassword, setShowPassword] = useState(false)
     const [countryCode, setCountryCode] = useState("+33")
     const [gender, setGender] = useState("FEMALE")
-    const action = mode === "login" ? login : signup
 
-    const handleSubmit = async (formData: FormData) => {
-        // Combine country code with phone number before submission
-        const phoneNumber = formData.get("phoneNumber") as string
-        if (phoneNumber && mode === "signup") {
+    const [state, formAction] = useActionState(
+        async (prevState: any, formData: FormData) => {
+            return mode === "login" ? login(prevState, formData) : signup(prevState, formData)
+        },
+        null
+    )
+
+    useEffect(() => {
+        if (state?.error) {
+            toast.error(state.error)
+        }
+    }, [state])
+
+    const handleAction = (formData: FormData) => {
+        if (mode === "signup") {
+            const phoneNumber = formData.get("phoneNumber") as string
             formData.set("phone", `${countryCode}${phoneNumber}`)
             formData.set("gender", gender)
         }
-
-        const result = await action(formData);
-        if (result?.error) {
-            toast.error(result.error);
-        }
-    };
+        formAction(formData)
+    }
 
     return (
         <div className="grid gap-6">
-            <form action={handleSubmit}>
+            <form action={handleAction}>
                 <div className="grid gap-4">
 
                     {mode === 'signup' && (

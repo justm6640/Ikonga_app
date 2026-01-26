@@ -26,29 +26,35 @@ const SignUpSchema = EmailSchema.extend({
     startDate: z.string().optional(),
 })
 
-export async function login(formData: FormData) {
+export async function login(prevState: any, formData: FormData) {
+    console.log("[AUTH_ACTION] Login attempt started")
     const supabase = await createClient()
 
     const email = formData.get("email") as string
     const password = formData.get("password") as string
+    console.log("[AUTH_ACTION] Attempting sign-in for:", email)
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
     })
 
     if (error) {
+        console.error("[AUTH_ACTION] Login error:", error.message)
         return { success: false, error: "Identifiants invalides ou compte non vérifié." }
     }
 
+    console.log("[AUTH_ACTION] Login successful for user:", data.user?.id)
+
     revalidatePath("/", "layout")
+    console.log("[AUTH_ACTION] Redirecting to /dashboard")
     redirect("/dashboard")
 }
 
 /**
  * Action d'inscription robuste avec validation Zod et synchronisation Prisma.
  */
-export async function signup(formData: FormData) {
+export async function signup(prevState: any, formData: FormData) {
     const supabase = await createClient()
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
