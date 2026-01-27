@@ -38,8 +38,12 @@ export async function middleware(request: NextRequest) {
 
     try {
         const { data: { user }, error } = await supabase.auth.getUser()
+
         if (error) {
-            console.error('[Middleware] Auth Error:', error.message)
+            // Silence specific common noise like missing/invalid refresh tokens
+            if (error.code !== 'refresh_token_not_found' && error.code !== 'session_not_found') {
+                console.error('[Middleware] Auth Error:', error.message)
+            }
         }
 
         // 🔒 Route Protection
@@ -47,16 +51,18 @@ export async function middleware(request: NextRequest) {
             request.nextUrl.pathname.startsWith(path)
         )
 
+        // Special case: if we are in a protected route and have no user, redirect to login
         if (isProtectedRoute && !user) {
             const redirectUrl = request.nextUrl.clone()
             redirectUrl.pathname = '/login'
-            // Optional: Add redirect param to return after login
-            // redirectUrl.searchParams.set('next', request.nextUrl.pathname)
             return NextResponse.redirect(redirectUrl)
         }
 
     } catch (err: any) {
-        console.error('[Middleware] Unexpected Error:', err.message || err)
+        // Only log truly unexpected errors
+        if (process.env.NODE_ENV === 'development') {
+            console.error('[Middleware] Unexpected Error:', err.message || err)
+        }
     }
 
     return response

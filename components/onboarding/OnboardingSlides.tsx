@@ -141,13 +141,7 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                 </span>
                             </div>
 
-                            {/* Skip Button */}
-                            <button
-                                onClick={handleSkip}
-                                className="px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors"
-                            >
-                                <span className="text-white text-sm font-medium">Se connecter</span>
-                            </button>
+                            {/* Removed Skip Button */}
                         </div>
 
                         {/* Main Content */}
@@ -212,15 +206,7 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                 </Button>
                             </div>
 
-                            {/* Skip Link */}
-                            <div className="text-center">
-                                <button
-                                    onClick={handleSkip}
-                                    className="text-white/60 hover:text-white text-sm font-medium transition-colors"
-                                >
-                                    Passer et s'inscrire
-                                </button>
-                            </div>
+                            {/* Removed Skip Link */}
                         </div>
                     </div>
                 </motion.div>
