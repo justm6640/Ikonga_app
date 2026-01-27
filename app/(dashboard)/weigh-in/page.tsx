@@ -147,7 +147,8 @@ export default async function WeighInPage({
                 </div>
                 <WeightChartFull
                     data={chartLogs as any[]}
-                    targetWeight={dbUser.targetWeight || undefined}
+                    startWeight={dbUser.startWeight || (dbUser.weighIns[0]?.weight || 0)}
+                    targetWeight={dbUser.targetWeight || 0}
                 />
             </div>
 
