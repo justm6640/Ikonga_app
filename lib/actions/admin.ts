@@ -58,3 +58,14 @@ export async function getAdminAlerts() {
         take: 20
     })
 }
+
+export async function createContentItem(data: any) {
+    await checkAdminAccess()
+
+    return await prisma.contentLibrary.create({
+        data: {
+            ...data,
+            isActive: true
+        }
+    })
+}
