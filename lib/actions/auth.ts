@@ -110,7 +110,7 @@ export async function signup(prevState: any, formData: FormData) {
                     firstName: firstName,
                     lastName: lastName,
                     role: "USER", // Rôle par défaut
-                    gender: gender as any,
+                    gender: gender as "MALE" | "FEMALE" | "OTHER" | undefined,
                     birthDate: birthDate ? new Date(birthDate) : undefined,
                     phoneNumber: phone || undefined,
                     heightCm: heightCm || undefined,

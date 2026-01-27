@@ -30,12 +30,6 @@ interface StepGeneralProps {
     onNext: () => void
 }
 
-const GENDER_OPTIONS = [
-    { id: "FEMALE", label: "Femme" },
-    { id: "MALE", label: "Homme" },
-    { id: "OTHER", label: "Autre" }
-]
-
 const REFERRAL_OPTIONS = [
     { id: "SOCIAL", label: "Réseaux sociaux", icon: Instagram },
     { id: "RECO", label: "Recommandation", icon: Users },
@@ -51,12 +45,6 @@ export function StepGeneral({ onNext }: StepGeneralProps) {
     const form = useForm<Step1Data>({
         resolver: zodResolver(step1GeneralSchema),
         defaultValues: {
-            firstName: data.firstName || "",
-            lastName: data.lastName || "",
-            email: data.email || "",
-            // @ts-ignore
-            birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
-            gender: data.gender || "FEMALE",
             countryOrigin: data.countryOrigin || "",
             countryResidence: data.countryResidence || "",
             city: data.city || "",
@@ -76,91 +64,6 @@ export function StepGeneral({ onNext }: StepGeneralProps) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-
-                {/* Identification */}
-                <div className="space-y-4">
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest border-l-4 border-ikonga-pink pl-3">
-                        Ton Profil
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="firstName"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <Input placeholder="Prénom" className="h-14 rounded-2xl bg-slate-50 border-none px-6 focus-visible:ring-ikonga-pink/20" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="lastName"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <Input placeholder="Nom" className="h-14 rounded-2xl bg-slate-50 border-none px-6 focus-visible:ring-ikonga-pink/20" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormControl>
-                                    <Input placeholder="Email" type="email" className="h-14 rounded-2xl bg-slate-50 border-none px-6 focus-visible:ring-ikonga-pink/20" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-
-                {/* Sexe & Naissance */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <FormField
-                        control={form.control}
-                        name="gender"
-                        render={({ field }) => (
-                            <FormItem className="space-y-4">
-                                <FormLabel className="text-slate-900 font-bold">Ton Sexe</FormLabel>
-                                <FormControl>
-                                    <SelectionGrid
-                                        options={GENDER_OPTIONS}
-                                        selected={[field.value]}
-                                        onChange={(val) => field.onChange(val[0])}
-                                        multi={false}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="birthDate"
-                        render={({ field }) => (
-                            <FormItem className="space-y-4">
-                                <FormLabel className="text-slate-900 font-bold">Date de naissance</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="date"
-                                        className="h-14 rounded-2xl bg-slate-50 border-none px-6 focus-visible:ring-ikonga-pink/20"
-                                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                                        onChange={(e) => field.onChange(e.target.valueAsDate)}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
 
                 {/* Localisation */}
                 <div className="space-y-4">
@@ -305,19 +208,10 @@ export function StepGeneral({ onNext }: StepGeneralProps) {
                         variant="ghost"
                         disabled={isSkipping}
                         onClick={async () => {
-                            // Save minimal required data and skip to dashboard
-                            const firstName = form.getValues("firstName")
-                            const lastName = form.getValues("lastName")
-                            const email = form.getValues("email")
-
-                            if (!firstName || !email) {
-                                toast.error("Prénom et Email sont requis pour continuer")
-                                return
-                            }
-
+                            // No validation needed - just skip to dashboard
                             setIsSkipping(true)
                             try {
-                                const result = await skipOnboarding({ firstName, lastName, email })
+                                const result = await skipOnboarding()
                                 if (result.success) {
                                     toast.success("C'est noté ! Bienvenue.")
                                     router.push("/dashboard")

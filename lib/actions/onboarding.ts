@@ -17,25 +17,15 @@ export async function submitOnboarding(data: QuestionnaireData) {
             throw new Error("Utilisateur non connecté")
         }
 
-        // 1. Calculs Métaboliques
-        const gender = (data.gender === 'MALE' || data.gender === 'FEMALE')
-            ? data.gender
-            : 'FEMALE';
-
-        const pisi = calculatePISI(data.heightCm, gender);
-        const imc = calculateIMC(data.startWeight, data.heightCm);
-        const age = data.birthDate ? calculateAge(data.birthDate) : 0;
-        const finalTargetWeight = data.targetWeight || pisi;
-
-        // 2. Récupération / Création User Prisma (Self-healing)
+        // 1. Get basic user data that's already in database (from signup)
         let prismaUser = await prisma.user.findUnique({ where: { email: user.email! } });
 
         if (!prismaUser) {
             console.log("SubmitOnboarding: User Prisma introuvable, création à la volée...");
             try {
-                // Utilisation des métadonnées de la session courante (pas besoin d'admin)
-                const firstName = user.user_metadata?.first_name || data.firstName;
-                const lastName = user.user_metadata?.last_name || data.lastName;
+                // Utilisation des métadonnées de la session courante
+                const firstName = user.user_metadata?.first_name || "User";
+                const lastName = user.user_metadata?.last_name;
 
                 prismaUser = await prisma.user.create({
                     data: {
@@ -51,15 +41,21 @@ export async function submitOnboarding(data: QuestionnaireData) {
             }
         }
 
+        // 2. Calculs Métaboliques using data from questionnaire + database
+        const gender = prismaUser.gender || 'FEMALE'; // From signup
+        const birthDate = prismaUser.birthDate; // From signup
+
+        const pisi = calculatePISI(data.heightCm, gender);
+        const imc = calculateIMC(data.startWeight, data.heightCm);
+        const age = birthDate ? calculateAge(birthDate) : 0;
+        const finalTargetWeight = data.targetWeight || pisi;
+
         await prisma.$transaction(async (tx) => {
-            // A. Update User Profile
+            // A. Update User Profile (keep firstName, lastName, gender, birthDate from signup)
             await tx.user.update({
-                where: { id: prismaUser!.id }, // prismaUser is asserted existing now
+                where: { id: prismaUser!.id },
                 data: {
-                    firstName: data.firstName,
-                    lastName: data.lastName,
-                    gender: gender,
-                    birthDate: data.birthDate,
+                    // firstName, lastName, gender, birthDate already set from signup - don't overwrite
                     heightCm: data.heightCm,
                     startWeight: data.startWeight,
                     targetWeight: finalTargetWeight,
@@ -183,27 +179,26 @@ export async function setJourneyStartDate(userId: string, date: Date | 'NOW') {
 /**
  * Permet de sauter l'onboarding détaillé et d'aller directement au dashboard.
  * Ne génère pas de bilan AI.
+ * User data (firstName, lastName, email, etc.) is already in database from signup.
  */
-export async function skipOnboarding(data: { firstName?: string, lastName?: string, email?: string }) {
+export async function skipOnboarding() {
     try {
         const supabase = await createClient()
         const { data: { user }, error } = await supabase.auth.getUser()
 
         if (error || !user) throw new Error("Utilisateur non connecté")
 
-        // 1. Mise à jour minimale du profil
+        // 1. Mark onboarding as completed to prevent re-entry
         await prisma.user.update({
             where: { id: user.id },
             data: {
-                firstName: data.firstName || undefined,
-                lastName: data.lastName || undefined,
-                // On s'assure que hasCompletedOnboarding reste à false (il l'est par défaut)
-                hasCompletedOnboarding: false,
-                // On définit une date de début pour que le dashboard ne redirige pas vers l'onboarding
+                // Mark as completed to prevent re-entry into onboarding flow
+                hasCompletedOnboarding: true,
                 startDate: new Date(),
                 isActive: true
             }
         })
+
 
         // 2. Notification de bienvenue rapide
         const { createNotification } = await import("./notifications");

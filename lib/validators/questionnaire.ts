@@ -9,11 +9,7 @@ const DayStatusEnum = z.enum(["FRAGILE", "STABLE", "STRONG"]);
 // --- SCHEMA COMPLET DU QUESTIONNAIRE ---
 export const questionnaireSchema = z.object({
     // 1. GENERAL
-    firstName: z.string().min(2, "Prénom requis."),
-    lastName: z.string().min(2, "Nom requis."),
-    email: z.string().email("Email invalide."),
-    birthDate: z.date({ message: "Date requise." }),
-    gender: z.string().min(1, "Sexe requis."),
+    // Removed: firstName, lastName, email, birthDate, gender (collected at signup)
     countryOrigin: z.string().min(1, "Pays d'origine requis."),
     countryResidence: z.string().min(1, "Pays de résidence requis."),
     city: z.string().min(1, "Ville requise."),
@@ -74,7 +70,6 @@ export type QuestionnaireData = z.infer<typeof questionnaireSchema>;
 
 // Step-specific schemas
 export const step1GeneralSchema = questionnaireSchema.pick({
-    firstName: true, lastName: true, email: true, birthDate: true, gender: true,
     countryOrigin: true, countryResidence: true, city: true, whatsapp: true,
     heightCm: true, startWeight: true, targetWeight: true, referralSource: true
 });

@@ -320,6 +320,7 @@ enum Role {
 enum Gender {
   FEMALE
   MALE
+  OTHER
 }
 
 enum SubscriptionTier {
