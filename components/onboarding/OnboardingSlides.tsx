@@ -145,12 +145,12 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                         </div>
 
                         {/* Main Content */}
-                        <div className="space-y-6 max-w-2xl">
+                        <div className="flex-1 flex flex-col justify-center min-h-0 py-4 md:py-8 space-y-4 md:space-y-6 max-w-2xl">
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="text-4xl md:text-6xl font-serif font-black text-white leading-tight"
+                                className="text-3xl sm:text-4xl md:text-6xl font-serif font-black text-white leading-[1.1] md:leading-tight"
                             >
                                 {slide.title}
                             </motion.h1>
@@ -158,14 +158,14 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3 }}
-                                className="text-lg md:text-xl text-white/90 leading-relaxed"
+                                className="text-sm sm:text-base md:text-xl text-white/90 leading-relaxed max-w-xl"
                             >
                                 {slide.description}
                             </motion.p>
                         </div>
 
                         {/* Bottom Section */}
-                        <div className="space-y-6">
+                        <div className="space-y-6 pb-2 md:pb-0 mb-safe">
                             {/* Progress Indicators */}
                             <div className="flex items-center justify-center gap-2">
                                 {SLIDES.map((_, idx) => (
@@ -176,10 +176,10 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                             setCurrentSlide(idx)
                                         }}
                                         className={cn(
-                                            "h-2 rounded-full transition-all",
+                                            "h-1.5 md:h-2 rounded-full transition-all",
                                             idx === currentSlide
-                                                ? "w-8 bg-gradient-to-r from-orange-500 to-pink-500"
-                                                : "w-2 bg-white/30 hover:bg-white/50"
+                                                ? "w-6 md:w-8 bg-gradient-to-r from-orange-500 to-pink-500"
+                                                : "w-1.5 md:w-2 bg-white/30 hover:bg-white/50"
                                         )}
                                     />
                                 ))}
@@ -192,7 +192,7 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                         onClick={handlePrev}
                                         variant="ghost"
                                         size="icon"
-                                        className="rounded-full w-12 h-12 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white"
+                                        className="rounded-full w-12 h-12 md:w-14 md:h-14 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white shrink-0"
                                     >
                                         <ChevronLeft size={24} />
                                     </Button>
@@ -200,7 +200,7 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
 
                                 <Button
                                     onClick={handleNext}
-                                    className="flex-1 h-14 rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-pink-600 hover:from-orange-600 hover:via-pink-600 hover:to-pink-700 text-white font-bold text-base shadow-2xl shadow-pink-500/50 transition-all hover:scale-105"
+                                    className="flex-1 h-12 md:h-14 rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-pink-600 hover:from-orange-600 hover:via-pink-600 hover:to-pink-700 text-white font-bold text-sm md:text-base shadow-2xl shadow-pink-500/50 transition-all hover:scale-105 active:scale-95"
                                 >
                                     {isLastSlide ? "Commencer l'aventure" : "Suivant"}
                                 </Button>
