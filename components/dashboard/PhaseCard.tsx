@@ -1,127 +1,125 @@
 "use client"
 
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import { PhaseType } from "@prisma/client";
-import { differenceInDays } from "date-fns";
-import { ArrowDown, Info, Sparkles } from "lucide-react";
-import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card"
+import { motion } from "framer-motion"
+import { Calendar, Timer, TrendingDown, Target, Zap, Waves } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface PhaseCardProps {
-    phase: PhaseType | string;
-    startDate: Date;
-    plan?: string;
-    currentWeight?: number;
-    startWeight?: number;
-    targetWeight?: number;
-    pisi?: number;
-    dayTotal?: number;
-    isCoachOverridden?: boolean;
+    phaseName: string;
+    currentDay: number;
+    totalDays: number;
+    planName: string;
+    currentWeight: number;
+    weightLost: number;
+    startWeight: number;
+    pisi: number;
 }
 
 export function PhaseCard({
-    phase,
-    startDate,
-    plan = "Standard 12",
-    currentWeight = 0,
-    startWeight = 0,
-    targetWeight = 0,
-    pisi = 0,
-    dayTotal = 21,
-    isCoachOverridden = false
+    phaseName,
+    currentDay,
+    totalDays,
+    planName,
+    currentWeight,
+    weightLost,
+    startWeight,
+    pisi
 }: PhaseCardProps) {
-    const dayCurrent = Math.max(1, differenceInDays(new Date(), new Date(startDate)) + 1);
-    const progress = Math.min(100, (dayCurrent / dayTotal) * 100);
-    const weightLost = startWeight - currentWeight;
-    const remainingToGoal = Math.max(0, currentWeight - (pisi || targetWeight));
-
-    const phaseLabel = phase.toString().replace("_", " ");
+    const timeProgress = (currentDay / totalDays) * 100;
+    const weightToLose = startWeight - pisi;
+    const weightProgress = weightToLose > 0
+        ? Math.min(100, (weightLost / weightToLose) * 100)
+        : 0;
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={cn(
-                "relative overflow-hidden rounded-[2.5rem] p-5 sm:p-6 text-white shadow-2xl shadow-pink-200/50",
-                "bg-ikonga-gradient group cursor-pointer"
-            )}
-        >
-            {/* Background Decorative Elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl animate-pulse" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full -ml-16 -mb-16 blur-2xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-            <div className="relative z-10 space-y-5">
-                {/* Top Row: Phase & Plan */}
-                <div className="flex justify-between items-start">
-                    <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                            <h3 className="text-2xl sm:text-3xl font-serif font-black tracking-tight uppercase drop-shadow-sm">{phaseLabel}</h3>
-                            {isCoachOverridden && (
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    className="bg-white/20 backdrop-blur-md px-2 py-0.5 rounded-full flex items-center gap-1 border border-white/20"
-                                >
-                                    <Sparkles size={9} className="text-yellow-200" />
-                                    <span className="text-[8px] font-black uppercase tracking-wider">Coach</span>
-                                </motion.div>
-                            )}
-                        </div>
-                        <p className="text-[10px] font-bold opacity-80 tracking-[0.2em] uppercase">{plan}</p>
-                    </div>
-                    <div className="text-right">
-                        <div className="flex items-baseline justify-end gap-0.5">
-                            <span className="text-4xl sm:text-5xl font-black italic tracking-tighter drop-shadow-sm">J{dayCurrent}</span>
-                            <span className="text-base sm:text-lg opacity-60 font-bold">/{dayTotal}</span>
-                        </div>
-                        <p className="text-[9px] uppercase font-black opacity-80 tracking-widest">Calendrier</p>
-                    </div>
-                </div>
-
-                {/* Stats Row */}
-                <div className="grid grid-cols-3 gap-3 py-3 sm:py-4 border-y border-white/10 bg-white/5 rounded-3xl backdrop-blur-sm">
-                    <div className="text-center group-hover:scale-105 transition-transform duration-300">
-                        <p className="text-[9px] uppercase font-bold opacity-60 mb-0.5 tracking-wider">Actuel</p>
-                        <p className="text-lg sm:text-xl font-black">{currentWeight} <span className="text-xs sm:text-sm font-medium opacity-70">kg</span></p>
-                    </div>
-                    <div className="text-center border-x border-white/10 px-2 group-hover:scale-105 transition-transform duration-300 delay-75">
-                        <p className="text-[9px] uppercase font-bold opacity-60 mb-0.5 tracking-wider">Perte</p>
-                        <div className="flex items-center justify-center gap-0.5">
-                            <ArrowDown size={12} className="text-emerald-300 stroke-[3] animate-bounce" />
-                            <p className="text-xl sm:text-2xl font-black text-white">{weightLost > 0 ? `${weightLost.toFixed(1)}` : '0'} <span className="text-xs sm:text-sm font-medium opacity-70">kg</span></p>
-                        </div>
-                    </div>
-                    <div className="text-center group-hover:scale-105 transition-transform duration-300 delay-150">
-                        <p className="text-[9px] uppercase font-bold opacity-60 mb-0.5 tracking-wider">Objectif</p>
-                        <p className="text-lg sm:text-xl font-black">{remainingToGoal.toFixed(1)} <span className="text-xs sm:text-sm font-medium opacity-70">kg</span></p>
-                    </div>
-                </div>
-
-                {/* Bottom Row: Progress */}
-                <div className="space-y-2">
-                    <div className="flex justify-between items-end">
-                        <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Progression Phase</p>
-                        <motion.span
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="text-xl sm:text-2xl font-black italic"
-                        >
-                            {Math.round(progress)}%
-                        </motion.span>
-                    </div>
-                    <div className="h-3 sm:h-4 bg-black/20 rounded-full p-0.5 sm:p-1 overflow-hidden backdrop-blur-sm">
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progress}%` }}
-                            transition={{ duration: 1.5, ease: "easeOut" }}
-                            className="h-full bg-white rounded-full relative shadow-[0_0_15px_rgba(255,255,255,0.6)]"
-                        >
-                            <div className="absolute top-0 right-0 h-full w-full bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-30 animate-shimmer" />
-                        </motion.div>
-                    </div>
-                </div>
+        <Card className="rounded-[2.5rem] border-none shadow-xl bg-slate-900 text-white overflow-hidden relative group">
+            {/* Animated Ambient Background */}
+            <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-700">
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-pink-500 rounded-full blur-[80px] animate-pulse" />
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-500 rounded-full blur-[80px]" />
             </div>
-        </motion.div>
+
+            <CardContent className="p-8 relative z-10">
+                {/* Header Section */}
+                <div className="flex justify-between items-start mb-8">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-pink-400 mb-1">
+                            <Zap size={14} fill="currentColor" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Programme Actif</span>
+                        </div>
+                        <h3 className="text-3xl font-black tracking-tight">{phaseName}</h3>
+                        <p className="text-sm font-bold text-slate-400 flex items-center gap-2">
+                            <Waves size={14} className="text-slate-400" />
+                            {planName}
+                        </p>
+                    </div>
+
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/5 text-center min-w-[80px]">
+                        <p className="text-2xl font-black">J{currentDay}</p>
+                        <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">Sur {totalDays}</p>
+                    </div>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest mb-1.5 text-center">Actuel</p>
+                        <p className="text-xl font-black text-center">{currentWeight.toFixed(1)}<span className="text-[10px] text-slate-500 ml-0.5">kg</span></p>
+                    </div>
+                    <div className="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/10">
+                        <p className="text-[8px] font-black uppercase text-emerald-400 tracking-widest mb-1.5 text-center">Perte</p>
+                        <p className="text-xl font-black text-emerald-400 text-center">-{weightLost.toFixed(1)}<span className="text-[10px] ml-0.5 opacity-60">kg</span></p>
+                    </div>
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest mb-1.5 text-center">Reste</p>
+                        <p className="text-xl font-black text-center">{(currentWeight - pisi).toFixed(1)}<span className="text-[10px] text-slate-500 ml-0.5">kg</span></p>
+                    </div>
+                </div>
+
+                {/* Dual Progress Bars */}
+                <div className="space-y-6">
+                    {/* Time Progress */}
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-end">
+                            <div className="flex items-center gap-2">
+                                <Timer size={12} className="text-white/40" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Progression Phase</span>
+                            </div>
+                            <span className="text-xs font-black">{Math.round(timeProgress)}%</span>
+                        </div>
+                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${timeProgress}%` }}
+                                transition={{ duration: 1, ease: "easeOut" }}
+                                className="h-full bg-white rounded-full relative"
+                            >
+                                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.3)_50%,transparent_100%)] animate-shimmer" />
+                            </motion.div>
+                        </div>
+                    </div>
+
+                    {/* Weight Progress */}
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-end">
+                            <div className="flex items-center gap-2">
+                                <Target size={12} className="text-emerald-400/50" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400/50">Vers l'objectif (PISI)</span>
+                            </div>
+                            <span className="text-xs font-black text-emerald-400">{Math.round(weightProgress)}%</span>
+                        </div>
+                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${weightProgress}%` }}
+                                transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     );
 }

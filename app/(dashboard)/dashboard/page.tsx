@@ -103,14 +103,14 @@ export default async function DashboardPage() {
 
                 {/* BLOCK 1: Phase Card */}
                 <PhaseCard
-                    phase={activePhaseType}
-                    startDate={phaseStartDate}
+                    phaseName={activePhaseType}
+                    currentDay={differenceInCalendarDays(today, new Date(phaseStartDate)) + 1}
+                    totalDays={21}
+                    planName="Standard 12"
                     currentWeight={currentWeight}
+                    weightLost={dbUser.startWeight ? dbUser.startWeight - currentWeight : 0}
                     startWeight={dbUser.startWeight || currentWeight}
                     pisi={dbUser.pisi || 0}
-                    dayTotal={21}
-                    plan="Standard 12"
-                    isCoachOverridden={isCoachOverridden}
                 />
 
                 {/* BLOCK 3: Weight Chart */}

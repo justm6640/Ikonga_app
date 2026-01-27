@@ -1,13 +1,34 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { OnboardingSlides } from "./OnboardingSlides"
 import { WelcomeScreen } from "./WelcomeScreen"
-import { QuestionnaireWizard } from "@/components/questionnaire/QuestionnaireWizard"
+import { skipOnboarding } from "@/lib/actions/onboarding"
 import { motion, AnimatePresence } from "framer-motion"
+import { Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 export function OnboardingClient() {
-    const [view, setView] = useState<"slides" | "welcome" | "questionnaire">("slides")
+    const [view, setView] = useState<"slides" | "welcome">("slides")
+    const [isCompleting, setIsCompleting] = useState(false)
+    const router = useRouter()
+
+    const handleStartJourney = async () => {
+        setIsCompleting(true)
+        try {
+            const result = await skipOnboarding()
+            if (result.success) {
+                router.push("/dashboard")
+            } else {
+                toast.error(result.error || "Une erreur est survenue")
+                setIsCompleting(false)
+            }
+        } catch (error) {
+            toast.error("Erreur de connexion")
+            setIsCompleting(false)
+        }
+    }
 
     return (
         <div className="min-h-screen w-full bg-slate-50">
@@ -34,34 +55,16 @@ export function OnboardingClient() {
                         transition={{ duration: 0.5 }}
                         className="min-h-screen"
                     >
-                        <WelcomeScreen onContinue={() => setView("questionnaire")} />
-                    </motion.div>
-                )}
-
-                {view === "questionnaire" && (
-                    <motion.div
-                        key="questionnaire"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                        className="min-h-screen flex flex-col items-center pt-10 px-4"
-                    >
-                        <div className="w-full max-w-2xl mb-8 text-center">
-                            <h1 className="text-4xl md:text-5xl font-serif font-black text-slate-900 tracking-tighter uppercase mb-4">
-                                Bienvenue chez <span className="text-ikonga-pink">IKONGA</span>
-                            </h1>
-                            <p className="text-slate-500 text-lg md:text-xl font-light max-w-lg mx-auto leading-relaxed">
-                                Quelques questions pour bâtir <span className="font-bold text-slate-800">ton programme idéal</span>.
-                            </p>
-                        </div>
-
-                        <div className="w-full max-w-2xl bg-white/40 backdrop-blur-xl shadow-2xl shadow-slate-200/50 rounded-[3rem] border border-white p-6 md:p-10">
-                            <QuestionnaireWizard />
-                        </div>
-
-                        <div className="mt-8 mb-12 text-slate-400 text-xs font-medium uppercase tracking-[0.2em]">
-                            Piliers : Nutrition • Fitness • Wellness • Beauty
-                        </div>
+                        {isCompleting ? (
+                            <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+                                <Loader2 className="h-12 w-12 animate-spin text-ikonga-pink" />
+                                <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">
+                                    Initialisation de ton espace...
+                                </p>
+                            </div>
+                        ) : (
+                            <WelcomeScreen onContinue={handleStartJourney} />
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
