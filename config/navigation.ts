@@ -25,19 +25,19 @@ export const NAV_ITEMS: NavItem[] = [
         label: "IKO-NUTRITION",
         href: "/nutrition",
         icon: Utensils,
-        requiredFeature: 'MENUS'
-    },
-    {
-        label: "IKO-WELLNESS",
-        href: "/wellness",
-        icon: Map,
-        requiredFeature: 'JOURNAL'
+        requiredFeature: 'DASHBOARD_VIEW'
     },
     {
         label: "IKO-FITNESS",
         href: "/fitness",
         icon: Dumbbell,
-        requiredFeature: 'FITNESS'
+        requiredFeature: 'DASHBOARD_VIEW'
+    },
+    {
+        label: "IKO-WELLNESS",
+        href: "/wellness",
+        icon: Map,
+        requiredFeature: 'DASHBOARD_VIEW'
     },
     {
         label: "IKO-BEAUTY",

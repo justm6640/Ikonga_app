@@ -58,7 +58,7 @@ export function WeightMiniChart({ data, currentWeight, startWeight, pisi = 65 }:
                 </div>
 
                 <div className="h-[140px] w-full relative -mx-4 group-hover:scale-[1.02] transition-transform duration-500">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minHeight={140}>
                         <AreaChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
