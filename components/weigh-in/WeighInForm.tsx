@@ -43,6 +43,7 @@ interface WeighInFormProps {
 
 export function WeighInForm({ onSuccess }: WeighInFormProps) {
     const [isPending, setIsPending] = useState(false)
+    const [weightInput, setWeightInput] = useState<string>('')
 
     const form = useForm<WeighInFormValues>({
         resolver: zodResolver(weighInSchema),
@@ -68,6 +69,7 @@ export function WeighInForm({ onSuccess }: WeighInFormProps) {
                 // Reset logic if needed, but keeping value might be better for UX or clear?
                 // Usually clear weight to prevent double sub.
                 form.reset({ date: new Date(), weight: undefined })
+                setWeightInput('')
                 onSuccess?.()
             }
 
@@ -134,13 +136,39 @@ export function WeighInForm({ onSuccess }: WeighInFormProps) {
                                 <FormControl>
                                     <div className="relative flex justify-center items-center">
                                         <Input
-                                            type="number"
-                                            step="0.1"
-                                            maxLength={5}
+                                            type="text"
+                                            inputMode="decimal"
+                                            maxLength={6}
                                             placeholder="00.0"
                                             className="text-7xl font-serif text-center h-32 w-full border-none bg-transparent focus-visible:ring-0 placeholder:text-muted-foreground/20 "
-                                            {...field}
-                                            onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                                            value={weightInput}
+                                            onChange={(e) => {
+                                                const input = e.target.value
+                                                if (/^[0-9.,]*$/.test(input)) {
+                                                    setWeightInput(input)
+
+                                                    if (input === '') {
+                                                        field.onChange(undefined)
+                                                        return
+                                                    }
+
+                                                    const normalized = input.replace(/,/g, '.')
+                                                    const numValue = parseFloat(normalized)
+                                                    if (!isNaN(numValue)) {
+                                                        field.onChange(numValue)
+                                                    }
+                                                }
+                                            }}
+                                            onBlur={() => {
+                                                if (weightInput) {
+                                                    const normalized = weightInput.replace(/,/g, '.')
+                                                    const num = parseFloat(normalized)
+                                                    if (!isNaN(num)) {
+                                                        setWeightInput(num.toString())
+                                                        field.onChange(num)
+                                                    }
+                                                }
+                                            }}
                                         />
                                         <span className="absolute right-8 text-xl font-medium text-muted-foreground mt-8">kg</span>
                                     </div>

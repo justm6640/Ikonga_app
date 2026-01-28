@@ -46,6 +46,7 @@ export function WeighInInput({ onSuccess }: WeighInInputProps) {
     const [photoPreview, setPhotoPreview] = useState<string | null>(null)
     const [photoFile, setPhotoFile] = useState<File | null>(null)
     const [duplicateModal, setDuplicateModal] = useState<{ open: boolean, data?: WeighInFormValues }>({ open: false })
+    const [weightInput, setWeightInput] = useState<string>('')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const form = useForm<WeighInFormValues>({
@@ -56,6 +57,16 @@ export function WeighInInput({ onSuccess }: WeighInInputProps) {
     })
 
     const watchWeight = form.watch("weight")
+
+    // Sync external value (e.g. from draft or edit) to local input state
+    // This ensures if we load a value, it displays
+    const formWeight = form.watch("weight")
+    /* eslint-disable react-hooks/exhaustive-deps */
+    useState(() => {
+        if (form.getValues("weight")) {
+            setWeightInput(form.getValues("weight").toString())
+        }
+    })
 
     const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -106,6 +117,7 @@ export function WeighInInput({ onSuccess }: WeighInInputProps) {
                     icon: <CheckCircle2 className="text-emerald-500" />
                 })
                 form.reset({ date: new Date(), weight: 0 })
+                setWeightInput('')
                 removePhoto()
                 setDuplicateModal({ open: false })
                 onSuccess?.()
@@ -170,13 +182,47 @@ export function WeighInInput({ onSuccess }: WeighInInputProps) {
                                     <div className="flex flex-col items-center justify-center">
                                         <div className="relative flex items-baseline">
                                             <Input
-                                                type="number"
+                                                type="text"
                                                 inputMode="decimal"
-                                                step="0.1"
                                                 placeholder="00.0"
                                                 className="text-[6rem] sm:text-[8rem] font-black text-slate-900 h-auto w-full border-none bg-transparent text-center focus-visible:ring-0 placeholder:text-slate-100 leading-none tracking-tighter"
-                                                {...field}
-                                                onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                                                value={weightInput}
+                                                onChange={(e) => {
+                                                    let input = e.target.value
+
+                                                    // Replace comma with dot for normalization logic, but keep in display if needed?
+                                                    // User wants both to work. We allow typing both.
+
+                                                    // Regex: Allow digits and dots/commas
+                                                    if (/^[0-9.,]*$/.test(input)) {
+                                                        setWeightInput(input)
+
+                                                        if (input === '') {
+                                                            field.onChange(undefined)
+                                                            return
+                                                        }
+
+                                                        // Helper to parse: first replace logic
+                                                        const normalized = input.replace(/,/g, '.')
+                                                        const numValue = parseFloat(normalized)
+
+                                                        // Only update form if valid number and not ending in separator (to allow typing "75.")
+                                                        if (!isNaN(numValue)) {
+                                                            field.onChange(numValue)
+                                                        }
+                                                    }
+                                                }}
+                                                onBlur={() => {
+                                                    // On blur, format nicely if valid
+                                                    if (weightInput) {
+                                                        const normalized = weightInput.replace(/,/g, '.')
+                                                        const num = parseFloat(normalized)
+                                                        if (!isNaN(num)) {
+                                                            setWeightInput(num.toString())
+                                                            field.onChange(num)
+                                                        }
+                                                    }
+                                                }}
                                             />
                                             <span className="text-2xl font-black text-slate-300 ml-2">kg</span>
                                         </div>
