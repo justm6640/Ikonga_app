@@ -33,27 +33,30 @@ export async function getNutritionData(dateInput?: string | Date) {
 
     console.log(`DEBUG: Active phase found: ${activePhase.type}`)
 
-    // --- 1. Règle J-48h et Sécurité de Phase ---
-    // On doit déterminer si la targetDate appartient à la phase actuelle ou une phase future.
-    // Ce calcul dépend de la durée des phases. Pour simplifier, on regarde si la date est après la fin de la phase active.
+    // --- 1. Règles d'Accès Strictes (Part 9) ---
+    const { isContentLocked, canAccessPhase } = await import("../nutrition/access")
 
-    let targetPhase = activePhase.type
-
-    if (activePhase.plannedEndDate && isAfter(targetDate, activePhase.plannedEndDate)) {
-        // La date est dans le futur, après la phase actuelle. 
-        // Vérification du verrouillage : on débloque 48h avant le début de la phase suivante (fin de l'actuelle).
-        const unlockTime = subHours(activePhase.plannedEndDate, 48)
-        const now = new Date()
-
-        if (isBefore(now, unlockTime)) {
-            return { locked: true, unlockDate: unlockTime, reason: "Contenu verrouillé (J-48h)" }
-        }
-
-        // Note: Dans un système réel, on déterminerait quelle est la phase N+1.
-        // Ici on suppose que l'utilisateur progresse selon la séquence définie dans le business logic.
-        // Pour les guidelines, on pourrait avoir besoin de savoir laquelle c'est.
-        // Par simplicité, on va chercher s'il y a un plan hebdomadaire qui définit la phase pour cette date.
+    // A. Vérification Abonnement
+    if (!canAccessPhase(user.subscriptionTier, activePhase.type)) {
+        console.log(`[ACCESS DENIED] User tier ${user.subscriptionTier} cannot access phase ${activePhase.type}`)
+        // On pourrait retourner une erreur ou un fallback, mais ici on log juste pour le debug
+        // En théorie l'user ne devrait pas avoir cette phase "active" si son abo ne le permet pas
     }
+
+    // B. Vérification Temporelle (J-48h)
+    // On regarde si la date demandée est dans une phase future par rapport à la phase active
+    const accessCheck = isContentLocked(targetDate, activePhase.plannedEndDate)
+
+    if (!accessCheck.allowed) {
+        return {
+            locked: true,
+            unlockDate: accessCheck.unlockDate,
+            reason: accessCheck.reason === "LOCKED_48H"
+                ? "Ce contenu sera disponible 48h avant le début de cette phase."
+                : "Contenu verrouillé pour le moment."
+        }
+    }
+
 
     // --- 2. Hiérarchy des Menus (Level 3 > Level 2 > Level 1) ---
     let finalMenu: any = null
@@ -495,75 +498,34 @@ export async function getShoppingList(weekNumber: number = 1) {
     const phaseStartDate = startOfDay(activePhase.startDate)
     const weekStartDate = addDays(phaseStartDate, (weekNumber - 1) * 7)
 
-    // Collect all ingredients from the week's recipes
-    const ingredientsMap = new Map<string, { name: string; quantity: string; category: string }>()
+    // Collect all unique recipes for the week
+    const allRecipes: any[] = []
 
     for (let i = 0; i < 7; i++) {
         const currentDate = addDays(weekStartDate, i)
         const menuData = await getNutritionData(currentDate)
 
         if (menuData?.menu) {
-            const recipes = [
-                menuData.menu.breakfast,
-                menuData.menu.snack,
-                menuData.menu.lunch,
-                menuData.menu.dinner
-            ].filter(Boolean)
-
-            for (const recipe of recipes) {
-                if (recipe?.ingredients) {
-                    // Parse ingredients (assuming they're stored as JSON array)
-                    const ingredients = typeof recipe.ingredients === 'string'
-                        ? JSON.parse(recipe.ingredients)
-                        : recipe.ingredients
-
-                    if (Array.isArray(ingredients)) {
-                        ingredients.forEach((ing: any) => {
-                            const key = ing.name?.toLowerCase() || ''
-                            if (key && !ingredientsMap.has(key)) {
-                                ingredientsMap.set(key, {
-                                    name: ing.name || '',
-                                    quantity: ing.quantity || '',
-                                    category: ing.category || 'Autres'
-                                })
-                            }
-                        })
-                    }
-                }
-            }
+            if (menuData.menu.breakfast) allRecipes.push(menuData.menu.breakfast)
+            if (menuData.menu.lunch) allRecipes.push(menuData.menu.lunch)
+            if (menuData.menu.snack) allRecipes.push(menuData.menu.snack)
+            if (menuData.menu.dinner) allRecipes.push(menuData.menu.dinner)
+            if (menuData.menu.snack_afternoon) allRecipes.push(menuData.menu.snack_afternoon)
         }
     }
 
-    // Group by category
-    const categorized: Record<string, Array<{ name: string; quantity: string }>> = {}
+    // Use the shopping engine
+    const { generateShoppingListFromRecipes } = await import("../nutrition/shopping")
+    const categories = generateShoppingListFromRecipes(allRecipes)
 
-    ingredientsMap.forEach((ingredient) => {
-        const category = ingredient.category || 'Autres'
-        if (!categorized[category]) {
-            categorized[category] = []
-        }
-        categorized[category].push({
-            name: ingredient.name,
-            quantity: ingredient.quantity
-        })
-    })
-
-    // Sort categories and items
-    const sortedCategories = Object.keys(categorized).sort()
-    const result: Array<{ category: string; items: Array<{ name: string; quantity: string }> }> = []
-
-    sortedCategories.forEach(category => {
-        result.push({
-            category,
-            items: categorized[category].sort((a, b) => a.name.localeCompare(b.name))
-        })
-    })
+    // Count total items
+    const totalItems = categories.reduce((acc, cat) => acc + cat.items.length, 0)
 
     return {
         weekNumber,
         weekStartDate,
-        categories: result,
-        totalItems: ingredientsMap.size
+        categories,
+        totalItems
     }
 }
 

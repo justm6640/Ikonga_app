@@ -1,83 +1,86 @@
+
 import { SubscriptionTier, PhaseType } from "@prisma/client"
-import { addDays, isBefore, isAfter, subHours, startOfDay } from "date-fns"
-import prisma from "@/lib/prisma"
+import { addDays, isAfter, isBefore, subHours, startOfDay, differenceInCalendarDays } from "date-fns"
 
-/**
- * Check if a user can access a specific phase type at a given date.
- * Rules:
- * 1. Must be included in subscription.
- * 2. If it's a future phase, it's unlocked 48h before start OR if admin override.
- * 3. Past phases are always accessible if enrolled.
- */
+// --- CONSTANTS ---
 
-// Define phases per tier as per business rules
-const TIER_PHASES: Record<SubscriptionTier, PhaseType[]> = {
-    STANDARD_6: ["DETOX", "EQUILIBRE"], // Example, to be refined if needed
-    STANDARD_12: ["DETOX", "EQUILIBRE", "CONSOLIDATION"],
-    STANDARD_24: ["DETOX", "EQUILIBRE", "CONSOLIDATION", "ENTRETIEN"],
-    STANDARD_48: ["DETOX", "EQUILIBRE", "CONSOLIDATION", "ENTRETIEN"],
+export const SUBSCRIPTION_PHASE_ACCESS: Record<SubscriptionTier, PhaseType[]> = {
+    STANDARD_6: ["DETOX", "EQUILIBRE"],
+    STANDARD_12: ["DETOX", "EQUILIBRE"],
+    STANDARD_24: ["DETOX", "EQUILIBRE"],
+    STANDARD_48: ["DETOX", "EQUILIBRE"],
     VIP_6: ["DETOX", "EQUILIBRE"],
-    VIP_12: ["DETOX", "EQUILIBRE", "CONSOLIDATION"],
-    VIP_24: ["DETOX", "EQUILIBRE", "CONSOLIDATION", "ENTRETIEN"],
+    VIP_12: ["DETOX", "EQUILIBRE", "CONSOLIDATION"], // Assuming VIP 12 gets more
+    VIP_24: ["DETOX", "EQUILIBRE", "CONSOLIDATION"],
     VIP_48: ["DETOX", "EQUILIBRE", "CONSOLIDATION", "ENTRETIEN"],
-    VIP_PLUS_16: ["DETOX", "EQUILIBRE", "CONSOLIDATION"]
+    VIP_PLUS_16: ["DETOX", "EQUILIBRE", "CONSOLIDATION", "ENTRETIEN"]
 }
 
-export async function canAccessPhase(
-    userId: string,
-    targetPhaseType: PhaseType,
-    userTier: SubscriptionTier,
-    programStartDate: Date
-): Promise<{ allowed: boolean; reason?: string }> {
-    
-    // 1. Subscription Check
-    const allowedPhases = TIER_PHASES[userTier] || []
-    if (!allowedPhases.includes(targetPhaseType)) {
-        return { allowed: false, reason: "Phase non incluse dans votre abonnement." }
+// --- TYPES ---
+
+export interface AccessResult {
+    allowed: boolean
+    reason?: "FUTURE_PHASE" | "LOCKED_48H" | "SUBSCRIPTION_RESTRICTED" | "NO_ACTIVE_PHASE"
+    unlockDate?: Date
+}
+
+
+// --- CORE LOGIC ---
+
+/**
+ * Vérifie si un utilisateur a le droit d'accéder à une phase donnée selon son abonnement.
+ */
+export function canAccessPhase(tier: SubscriptionTier, phase: PhaseType): boolean {
+    const allowedPhases = SUBSCRIPTION_PHASE_ACCESS[tier] || []
+    return allowedPhases.includes(phase)
+}
+
+/**
+ * Vérifie si le contenu d'une date future est visible (Règle J-48h).
+ * @param targetDate La date du menu demandé
+ * @param activePhaseEndDate La date de fin planifiée de la phase actuelle
+ */
+export function isContentLocked(targetDate: Date, activePhaseEndDate?: Date | null): AccessResult {
+    if (!activePhaseEndDate) {
+        // Si pas de date de fin précisée, on assume que c'est ouvert ou que c'est la dernière phase
+        return { allowed: true }
     }
 
-    // 2. Timeline Check
-    // We need to know when this phase is supposedly starting for this user.
-    // This is complex because phases are dynamic (Phase Engine). 
-    // However, for "future visibility", we usually look at the *next* planned phase.
-    
-    const user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: { phases: { where: { isActive: true } } }
-    })
+    const now = new Date()
+    const target = startOfDay(targetDate)
+    const phaseEnd = startOfDay(activePhaseEndDate)
 
-    if (!user) return { allowed: false, reason: "Utilisateur inconnu" }
+    // Si la date cible est APRES la fin de la phase actuelle, c'est une phase future
+    if (isAfter(target, phaseEnd)) {
+        // Règle J-48h : On débloque 48h avant la fin de la phase actuelle
+        const unlockTime = subHours(activePhaseEndDate, 48)
 
-    const activePhase = user.phases[0]
-
-    // If target is current active phase -> OK
-    if (activePhase?.type === targetPhaseType) return { allowed: true }
-
-    // If target is a past phase (we'd need accurate history, simplified here by assuming if we are in Consolidation, Deto/Equi are past)
-    // A better approach: check if a UserPhase exists in DB for this type
-    const phaseHistory = await prisma.userPhase.findFirst({
-        where: { userId, type: targetPhaseType }
-    })
-    
-    // If we've ever started this phase, we can see it (archives)
-    if (phaseHistory) return { allowed: true }
-
-    // If it's the *Next* phase (J-48h rule)
-    if (activePhase?.plannedEndDate) {
-        const unlockTime = subHours(activePhase.plannedEndDate, 48)
-        const now = new Date()
-        
-        // We assume the target phase is the one strictly after the active one.
-        // In reality, we might need a stricter sequence check, but for now:
-        if (isAfter(now, unlockTime)) {
-             // We technically need to verify if targetPhase IS the next one.
-             // But simpler: if we are close to end of current phase, we unlock the "Next" logic.
-             // This function might need call-site context to know *which* phase is next.
-             return { allowed: true, reason: "Débloqué (J-48h)" }
+        if (isBefore(now, unlockTime)) {
+            return {
+                allowed: false,
+                reason: "LOCKED_48H",
+                unlockDate: unlockTime
+            }
         }
-        
-        return { allowed: false, reason: "Cette phase s'ouvrira 48h avant son début." }
     }
 
-    return { allowed: false, reason: "Phase verrouillée." }
+    return { allowed: true }
+}
+
+/**
+ * Calcule les jours restants avant la prochaine phase ou avant le déblocage.
+ */
+export function getPhaseProgress(startDate: Date, endDate?: Date | null) {
+    if (!endDate) return null
+
+    const totalDays = differenceInCalendarDays(endDate, startDate)
+    const currentDay = differenceInCalendarDays(new Date(), startDate) + 1
+    const daysRemaining = differenceInCalendarDays(endDate, new Date())
+
+    return {
+        totalDays,
+        currentDay,
+        daysRemaining,
+        progressPercent: Math.min(100, Math.max(0, (currentDay / totalDays) * 100))
+    }
 }

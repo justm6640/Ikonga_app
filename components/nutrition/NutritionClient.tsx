@@ -13,6 +13,7 @@ import { RecipeModal } from "@/components/dashboard/RecipeModal"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { ChevronDown, BookOpen, CheckCircle2, ArrowLeft } from "lucide-react"
 import { DoDontView } from "./DoDontView"
+import { AlternativesView } from "./AlternativesView"
 import { cn } from "@/lib/utils"
 import {
     DropdownMenu,
@@ -516,9 +517,7 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                         <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
                         <span className="text-sm font-bold uppercase tracking-widest">Retour</span>
                     </button>
-                    <div className="p-8 text-center bg-white rounded-3xl border border-slate-100">
-                        <p className="text-slate-500 italic">Section Alternatives en construction 🚧</p>
-                    </div>
+                    <AlternativesView currentPhase={currentData.phase} />
                 </div>
             )}
 
