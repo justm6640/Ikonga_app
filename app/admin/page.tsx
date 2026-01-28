@@ -3,6 +3,9 @@ import { Users, Utensils, Video, Activity, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 
+// Force dynamic rendering to avoid build-time DB connection errors
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboardPage() {
     // Fetch some quick stats
     const [userCount, recipeCount, menuCount] = await Promise.all([
