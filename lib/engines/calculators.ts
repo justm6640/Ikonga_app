@@ -30,7 +30,7 @@ export function calculatePISI(heightCm: number, gender: Gender): number {
     // FEMALE: (H - 100) - ((H - 150) / 2)
     const factor = gender === Gender.MALE ? 4 : 2
     const pisi = (heightCm - 100) - ((heightCm - 150) / factor)
-    return Math.round(pisi)
+    return Number(pisi.toFixed(1))
 }
 
 export function calculateBodyFat(bmi: number, age: number, gender: Gender): number {

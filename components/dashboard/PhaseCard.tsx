@@ -18,18 +18,32 @@ interface PhaseCardProps {
 
 export function PhaseCard({
     phaseName,
-    currentDay,
-    totalDays,
+    currentDay = 1,
+    totalDays = 21,
     planName,
-    currentWeight,
-    weightLost,
-    startWeight,
-    pisi
+    currentWeight = 0,
+    weightLost = 0,
+    startWeight = 0,
+    pisi = 0
 }: PhaseCardProps) {
-    const timeProgress = (currentDay / totalDays) * 100;
-    const weightToLose = startWeight - pisi;
-    const weightProgress = weightToLose > 0
-        ? Math.min(100, (weightLost / weightToLose) * 100)
+    // 1. Safe Calculations
+    const safeCurrentDay = Number(currentDay) || 1;
+    const safeTotalDays = Number(totalDays) || 21;
+
+    // Protection against division by zero
+    const timeProgress = safeTotalDays > 0
+        ? Math.min(100, Math.max(0, (safeCurrentDay / safeTotalDays) * 100))
+        : 0;
+
+    const safeStartWeight = Number(startWeight) || 0;
+    const safePisi = Number(pisi) || 0;
+    const safeCurrentWeight = Number(currentWeight) || 0;
+    const safeWeightLost = Number(weightLost) || 0;
+
+    const weightToLose = safeStartWeight - safePisi;
+
+    const weightProgress = weightToLose > 0.1
+        ? Math.min(100, Math.max(0, (safeWeightLost / weightToLose) * 100))
         : 0;
 
     return (
@@ -56,8 +70,8 @@ export function PhaseCard({
                     </div>
 
                     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/5 text-center min-w-[80px]">
-                        <p className="text-2xl font-black">J{currentDay}</p>
-                        <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">Sur {totalDays}</p>
+                        <p className="text-2xl font-black">J{safeCurrentDay}</p>
+                        <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">Sur {safeTotalDays}</p>
                     </div>
                 </div>
 
@@ -65,15 +79,15 @@ export function PhaseCard({
                 <div className="grid grid-cols-3 gap-4 mb-8">
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
                         <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest mb-1.5 text-center">Actuel</p>
-                        <p className="text-xl font-black text-center">{currentWeight.toFixed(1)}<span className="text-[10px] text-slate-500 ml-0.5">kg</span></p>
+                        <p className="text-xl font-black text-center">{safeCurrentWeight.toFixed(1)}<span className="text-[10px] text-slate-500 ml-0.5">kg</span></p>
                     </div>
                     <div className="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/10">
                         <p className="text-[8px] font-black uppercase text-emerald-400 tracking-widest mb-1.5 text-center">Perte</p>
-                        <p className="text-xl font-black text-emerald-400 text-center">-{weightLost.toFixed(1)}<span className="text-[10px] ml-0.5 opacity-60">kg</span></p>
+                        <p className="text-xl font-black text-emerald-400 text-center">{safeWeightLost.toFixed(1)}<span className="text-[10px] ml-0.5 opacity-60">kg</span></p>
                     </div>
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
                         <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest mb-1.5 text-center">Reste</p>
-                        <p className="text-xl font-black text-center">{(currentWeight - pisi).toFixed(1)}<span className="text-[10px] text-slate-500 ml-0.5">kg</span></p>
+                        <p className="text-xl font-black text-center">{(safeCurrentWeight - safePisi).toFixed(1)}<span className="text-[10px] text-slate-500 ml-0.5">kg</span></p>
                     </div>
                 </div>
 

@@ -188,19 +188,49 @@ export async function skipOnboarding() {
 
         if (error || !user) throw new Error("Utilisateur non connecté")
 
-        // 1. Mark onboarding as completed to prevent re-entry
-        await prisma.user.update({
+        // 1. Récupérer les données utilisateur existantes
+        const existingUser = await prisma.user.findUnique({
             where: { id: user.id },
-            data: {
-                // Mark as completed to prevent re-entry into onboarding flow
-                hasCompletedOnboarding: true,
-                startDate: new Date(),
-                isActive: true
+            select: {
+                heightCm: true,
+                gender: true,
+                startWeight: true,
+                pisi: true,
+                targetWeight: true,
             }
         })
 
+        if (!existingUser) {
+            throw new Error("Utilisateur introuvable en base de données")
+        }
 
-        // 2. Notification de bienvenue rapide
+        // 2. Calculer le PISI si les informations nécessaires sont disponibles
+        let calculatedPISI = existingUser.pisi // Garde la valeur existante si déjà calculée
+        let targetWeight = existingUser.targetWeight
+
+        if (existingUser.heightCm && existingUser.gender && !existingUser.pisi) {
+            calculatedPISI = calculatePISI(existingUser.heightCm, existingUser.gender)
+            console.log(`[SKIP_ONBOARDING] PISI calculé: ${calculatedPISI} kg pour taille ${existingUser.heightCm} cm et genre ${existingUser.gender}`)
+        }
+
+        // 3. Si targetWeight n'est pas défini, utiliser le PISI comme objectif par défaut
+        if (!targetWeight && calculatedPISI) {
+            targetWeight = calculatedPISI
+        }
+
+        // 4. Mark onboarding as completed and update PISI + targetWeight
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                hasCompletedOnboarding: true,
+                startDate: new Date(),
+                isActive: true,
+                ...(calculatedPISI && { pisi: calculatedPISI }),
+                ...(targetWeight && { targetWeight }),
+            }
+        })
+
+        // 5. Notification de bienvenue rapide
         const { createNotification } = await import("./notifications");
         await createNotification(
             user.id,
@@ -219,3 +249,4 @@ export async function skipOnboarding() {
         return { success: false, error: "Une erreur est survenue lors de l'enregistrement." }
     }
 }
+

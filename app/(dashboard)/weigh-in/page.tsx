@@ -7,11 +7,10 @@ import { getWeightHistory } from "@/lib/actions/weight"
 import { Scale, TrendingDown, Target, Award, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
-export default async function WeighInPage({
-    searchParams,
-}: {
-    searchParams: { page?: string; limit?: string };
+export default async function WeighInPage(props: {
+    searchParams: Promise<{ page?: string; limit?: string }>;
 }) {
+    const searchParams = await props.searchParams;
     const page = Number(searchParams.page) || 1;
     const limit = Number(searchParams.limit) || 20;
 
@@ -54,8 +53,8 @@ export default async function WeighInPage({
             </div>
 
             {/* Header */}
-            <div className="pt-8 pb-8 animate-in fade-in slide-in-from-top-4 duration-700">
-                <div className="flex items-center gap-4 mb-6">
+            <div className="pt-8 pb-6 md:pb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+                <div className="flex items-center gap-3 md:gap-4 mb-6">
                     <Link href="/dashboard">
                         <button className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors">
                             <ArrowLeft size={18} className="text-slate-600" />
@@ -74,51 +73,51 @@ export default async function WeighInPage({
 
             {/* Stats Cards */}
             {currentWeight && (
-                <div className="grid grid-cols-3 gap-2 md:gap-6 mb-8 animate-in fade-in slide-in-from-top-6 duration-700 delay-150">
+                <div className="grid grid-cols-3 gap-3 md:gap-6 mb-8 animate-in fade-in slide-in-from-top-6 duration-700 delay-150">
                     {/* Current Weight */}
-                    <div className="group relative bg-gradient-to-br from-white to-slate-50/50 backdrop-blur-sm rounded-2xl md:rounded-3xl p-3 md:p-6 border border-slate-100/50 shadow-lg shadow-slate-200/30 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                        <div className="absolute top-4 right-4 p-2 rounded-2xl bg-ikonga-pink/10 hidden md:block">
+                    <div className="group relative bg-gradient-to-br from-white to-slate-50/50 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 border border-slate-100/50 shadow-lg shadow-slate-200/30 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                        <div className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-2xl bg-ikonga-pink/10 hidden md:block">
                             <Scale size={20} className="text-ikonga-pink" strokeWidth={2.5} />
                         </div>
                         <div className="space-y-1">
                             <p className="text-[10px] md:text-xs uppercase tracking-wider font-black text-slate-400">Poids</p>
                             <div className="flex items-baseline gap-1 md:gap-2">
-                                <span className="text-xl md:text-4xl font-black text-slate-900 tracking-tight">
+                                <span className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">
                                     {currentWeight.toFixed(1)}
                                 </span>
-                                <span className="text-xs md:text-lg font-bold text-slate-400">kg</span>
+                                <span className="text-sm md:text-lg font-bold text-slate-400">kg</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Progress */}
-                    <div className="group relative bg-gradient-to-br from-white to-emerald-50/30 backdrop-blur-sm rounded-2xl md:rounded-3xl p-3 md:p-6 border border-emerald-100/50 shadow-lg shadow-emerald-200/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                        <div className="absolute top-4 right-4 p-2 rounded-2xl bg-emerald-500/10 hidden md:block">
+                    <div className="group relative bg-gradient-to-br from-white to-emerald-50/30 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 border border-emerald-100/50 shadow-lg shadow-emerald-200/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                        <div className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-2xl bg-emerald-500/10 hidden md:block">
                             <TrendingDown size={20} className="text-emerald-500" strokeWidth={2.5} />
                         </div>
                         <div className="space-y-1">
                             <p className="text-[10px] md:text-xs uppercase tracking-wider font-black text-slate-400">Progrès</p>
                             <div className="flex items-baseline gap-1 md:gap-2">
-                                <span className={`text-xl md:text-4xl font-black tracking-tight ${totalProgress > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
+                                <span className={`text-2xl md:text-4xl font-black tracking-tight ${totalProgress > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
                                     {totalProgress > 0 ? '-' : ''}{Math.abs(totalProgress).toFixed(1)}
                                 </span>
-                                <span className="text-xs md:text-lg font-bold text-slate-400">kg</span>
+                                <span className="text-sm md:text-lg font-bold text-slate-400">kg</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Remaining */}
-                    <div className="group relative bg-gradient-to-br from-white to-purple-50/30 backdrop-blur-sm rounded-2xl md:rounded-3xl p-3 md:p-6 border border-purple-100/50 shadow-lg shadow-purple-200/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                        <div className="absolute top-4 right-4 p-2 rounded-2xl bg-purple-500/10 hidden md:block">
+                    <div className="group relative bg-gradient-to-br from-white to-purple-50/30 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 border border-purple-100/50 shadow-lg shadow-purple-200/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                        <div className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-2xl bg-purple-500/10 hidden md:block">
                             <Target size={20} className="text-purple-500" strokeWidth={2.5} />
                         </div>
                         <div className="space-y-1">
                             <p className="text-[10px] md:text-xs uppercase tracking-wider font-black text-slate-400">Objectif</p>
                             <div className="flex items-baseline gap-1 md:gap-2">
-                                <span className="text-xl md:text-4xl font-black text-purple-500 tracking-tight">
+                                <span className="text-2xl md:text-4xl font-black text-purple-500 tracking-tight">
                                     {targetWeight ? (remainingWeight > 0 ? remainingWeight.toFixed(1) : 'OK') : '--'}
                                 </span>
-                                <span className="text-xs md:text-lg font-bold text-slate-400">kg</span>
+                                <span className="text-sm md:text-lg font-bold text-slate-400">kg</span>
                             </div>
                         </div>
                     </div>
@@ -141,10 +140,7 @@ export default async function WeighInPage({
             )}
 
             {/* Main Chart Area */}
-            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-6 md:p-10 shadow-2xl shadow-slate-300/40 border border-slate-100 relative overflow-hidden group mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-                <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
-                    <Scale size={160} className="text-slate-900 rotate-12" />
-                </div>
+            <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
                 <WeightChartFull
                     data={chartLogs as any[]}
                     startWeight={dbUser.startWeight || (dbUser.weighIns[0]?.weight || 0)}
@@ -163,7 +159,7 @@ export default async function WeighInPage({
             </div>
 
             {/* Floating Action Button */}
-            <div className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-40">
+            <div className="fixed bottom-24 md:bottom-8 right-4 sm:right-6 md:right-8 z-40">
                 <WeighInModal />
             </div>
 

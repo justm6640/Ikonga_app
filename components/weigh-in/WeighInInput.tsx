@@ -171,6 +171,7 @@ export function WeighInInput({ onSuccess }: WeighInInputProps) {
                                         <div className="relative flex items-baseline">
                                             <Input
                                                 type="number"
+                                                inputMode="decimal"
                                                 step="0.1"
                                                 placeholder="00.0"
                                                 className="text-[6rem] sm:text-[8rem] font-black text-slate-900 h-auto w-full border-none bg-transparent text-center focus-visible:ring-0 placeholder:text-slate-100 leading-none tracking-tighter"

@@ -18,13 +18,22 @@ interface WeightMiniChartProps {
     pisi?: number;
 }
 
-export function WeightMiniChart({ data, currentWeight, startWeight, pisi = 65 }: WeightMiniChartProps) {
-    const loss = startWeight - currentWeight;
+export function WeightMiniChart({ data = [], currentWeight, startWeight, pisi = 65 }: WeightMiniChartProps) {
+    const safeCurrentWeight = Number(currentWeight) || 0;
+    const safeStartWeight = Number(startWeight) || 0;
+    const safePisi = Number(pisi) || 65;
+
+    const loss = safeStartWeight - safeCurrentWeight;
     const isLoss = loss > 0;
 
     // Calculate total progress towards goal
-    const totalToLose = startWeight - pisi;
-    const progressPercent = totalToLose > 0 ? Math.min(100, Math.round((loss / totalToLose) * 100)) : 0;
+    const totalToLose = safeStartWeight - safePisi;
+    const progressPercent = totalToLose > 0.1
+        ? Math.min(100, Math.round((loss / totalToLose) * 100))
+        : 0;
+
+    // Ensure data is valid for chart
+    const safeData = Array.isArray(data) ? data : [];
 
     return (
         <Card className="rounded-[2.5rem] border-none shadow-xl bg-white/70 backdrop-blur-xl overflow-hidden group hover:shadow-2xl transition-all duration-500">
@@ -39,7 +48,7 @@ export function WeightMiniChart({ data, currentWeight, startWeight, pisi = 65 }:
                         </div>
                         <div className="flex items-baseline gap-1">
                             <span className="text-5xl font-black text-slate-900 tracking-tighter transition-transform group-hover:scale-110 origin-left duration-500">
-                                {currentWeight.toFixed(1)}
+                                {safeCurrentWeight.toFixed(1)}
                             </span>
                             <span className="text-xl font-bold text-slate-300">kg</span>
                         </div>
@@ -73,19 +82,19 @@ export function WeightMiniChart({ data, currentWeight, startWeight, pisi = 65 }:
                     </div>
                 </div>
 
-                {/* Mini Chart Area */}
-                <div className="h-24 w-full -mx-2 opacity-60 group-hover:opacity-100 transition-opacity duration-500">
+                {/* Mini Chart Area - Fixed height container */}
+                <div className="h-24 w-full -mx-2 opacity-60 group-hover:opacity-100 transition-opacity duration-500" style={{ minHeight: '96px' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={data.slice(-7)}>
+                        <AreaChart data={safeData.slice(-7)}>
                             <defs>
                                 <linearGradient id="miniGradient" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#EC4899" stopOpacity={0.3} />
                                     <stop offset="95%" stopColor="#EC4899" stopOpacity={0.01} />
                                 </linearGradient>
                             </defs>
-                            {pisi && (
+                            {safePisi > 0 && (
                                 <ReferenceLine
-                                    y={pisi}
+                                    y={safePisi}
                                     stroke="#10b981"
                                     strokeDasharray="4 4"
                                     strokeWidth={1}

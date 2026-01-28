@@ -73,17 +73,25 @@ export async function saveWeightLog(
     behavior: "CHECK" | "REPLACE" | "ADD" = "CHECK"
 ): Promise<LogWeightResult> {
     try {
+        console.log("[saveWeightLog] Starting...");
         const supabase = await createClient()
+        console.log("[saveWeightLog] Supabase client created");
+
         const { data: { user }, error } = await supabase.auth.getUser()
+        console.log("[saveWeightLog] User retrieved:", user?.id, "Error:", error);
 
         if (error || !user || !user.email) {
+            console.error("[saveWeightLog] Auth error or missing user");
             throw new Error("Utilisateur non connecté")
         }
 
+        console.log("[saveWeightLog] Finding Prisma user for:", user.email);
         const prismaUser = await prisma.user.findUnique({
             where: { email: user.email! },
-            include: { userPhase: true }
+            include: { phases: true }
         });
+        console.log("[saveWeightLog] Prisma user found:", prismaUser?.id);
+
         if (!prismaUser) throw new Error("Utilisateur Prisma introuvable");
 
         const startOfDay = new Date(date);
@@ -134,8 +142,7 @@ export async function saveWeightLog(
                 userId: prismaUser.id,
                 date: date,
                 weight: weight,
-                photoUrl: photoUrl,
-                moderationStatus: "APPROVED"
+                photoUrl: photoUrl
             }
         });
 
@@ -334,7 +341,7 @@ export async function getWeightStats() {
             select: { date: true, weight: true }
         });
 
-        return { logs, startWeight: prismaUser.startingWeight || 0, targetWeight: prismaUser.targetWeight || 0 };
+        return { logs, startWeight: prismaUser.startWeight || 0, targetWeight: prismaUser.targetWeight || 0 };
     } catch (error) { return null; }
 }
 
@@ -362,8 +369,8 @@ const milestones = [
 async function checkMilestones(userId: string, currentWeight: number) {
     try {
         const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (!user || !user.startingWeight) return;
-        const totalLost = user.startingWeight - currentWeight;
+        if (!user || !user.startWeight) return;
+        const totalLost = user.startWeight - currentWeight;
         for (const m of milestones) {
             if (totalLost >= m.kg) {
                 const existing = await prisma.notification.findFirst({ where: { userId, title: { contains: `${m.kg}kg` } } });
@@ -396,7 +403,7 @@ export async function sendWeeklySummary(userId: string) {
         if (logs.length < 2) return;
         const weeklyChange = logs[logs.length - 1].weight - logs[0].weight;
         let message = "";
-        let type = NotificationType.INFO;
+        let type: NotificationType = NotificationType.INFO;
         if (weeklyChange < -0.5) {
             message = `Une superbe semaine ! ${Math.abs(weeklyChange).toFixed(1)} kg de perdus. Continue comme ça ! 🚀`;
             type = NotificationType.SUCCESS;
