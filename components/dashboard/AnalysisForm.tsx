@@ -7,7 +7,7 @@ import { motion } from "framer-motion"
 import { Loader2, Sparkles, ChevronRight, Check } from "lucide-react"
 import { toast } from "sonner"
 
-import { AnalysisFormData, analysisFormSchema } from "@/lib/validators/analysis"
+import { AnalysisFormData, analysisFormSchema, AnalysisResult } from "@/lib/validators/analysis"
 import { generateAndSaveAnalysis } from "@/lib/actions/analysis"
 
 import { Button } from "@/components/ui/button"
@@ -34,9 +34,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 interface AnalysisFormProps {
     existingData?: Partial<AnalysisFormData>
     onCancel?: () => void
+    onAnalysisGenerated?: (result: AnalysisResult, submittedData: AnalysisFormData) => void
 }
 
-export function AnalysisForm({ existingData, onCancel }: AnalysisFormProps) {
+export function AnalysisForm({ existingData, onCancel, onAnalysisGenerated }: AnalysisFormProps) {
     const [isPending, startTransition] = useTransition()
 
     // Default values merging
@@ -71,7 +72,10 @@ export function AnalysisForm({ existingData, onCancel }: AnalysisFormProps) {
                     description: "Rosy a terminé son analyse.",
                     icon: <Sparkles className="text-purple-500" />
                 })
-                // Page will refresh automatically due to revalidatePath
+
+                if (onAnalysisGenerated && result.data) {
+                    onAnalysisGenerated(result.data, data)
+                }
             } else {
                 toast.error("Erreur", {
                     description: result.error
@@ -82,19 +86,7 @@ export function AnalysisForm({ existingData, onCancel }: AnalysisFormProps) {
 
     return (
         <div className="max-w-2xl mx-auto">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-8 text-center"
-            >
-                <div className="bg-ikonga-pink/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Sparkles className="w-8 h-8 text-ikonga-pink" />
-                </div>
-                <h2 className="text-2xl font-serif font-bold text-slate-900">Analyse Rosy</h2>
-                <p className="text-slate-600 mt-2">
-                    Remplissez ce questionnaire sincèrement pour que je puisse vous créer un bilan 100% sur mesure.
-                </p>
-            </motion.div>
+
 
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">

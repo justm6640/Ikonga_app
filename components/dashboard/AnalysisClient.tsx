@@ -13,16 +13,26 @@ interface AnalysisClientProps {
 }
 
 export function AnalysisClient({ initialAnalysis, existingFormData }: AnalysisClientProps) {
+    const [analysis, setAnalysis] = useState<AnalysisResult | null>(initialAnalysis)
     const [isEditing, setIsEditing] = useState(!initialAnalysis)
+    const [lastFormData, setLastFormData] = useState<Partial<AnalysisFormData> | undefined>(undefined)
 
-    // If we have an analysis but user wants to edit, we show the form
-    // If we don't have analysis, we force show the form (handled by state init)
+    // Handle initialAnalysis updates from server (revalidatePath)
+    if (initialAnalysis && !analysis) {
+        setAnalysis(initialAnalysis)
+        if (isEditing && initialAnalysis) setIsEditing(false)
+    }
 
     if (isEditing) {
         return (
             <AnalysisForm
-                existingData={existingFormData}
-                onCancel={initialAnalysis ? () => setIsEditing(false) : undefined}
+                existingData={lastFormData ?? existingFormData}
+                onCancel={analysis ? () => setIsEditing(false) : undefined}
+                onAnalysisGenerated={(result, submittedData) => {
+                    setAnalysis(result)
+                    setLastFormData(submittedData)
+                    setIsEditing(false)
+                }}
             />
         )
     }
@@ -40,7 +50,7 @@ export function AnalysisClient({ initialAnalysis, existingFormData }: AnalysisCl
                 </Button>
             </div>
 
-            <AnalysisWidget analysis={initialAnalysis} />
+            <AnalysisWidget analysis={analysis} />
         </div>
     )
 }

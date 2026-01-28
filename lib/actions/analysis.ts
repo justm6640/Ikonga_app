@@ -81,7 +81,7 @@ export async function generateAndSaveAnalysis(data: AnalysisFormData) {
         })
 
         revalidatePath("/mon-analyse")
-        return { success: true }
+        return { success: true, data: analysisResult }
 
     } catch (error) {
         console.error("Analysis Generation Error:", error)
