@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getOrCreateUser } from "@/lib/actions/user";
-import { AnalysisWidget } from "@/components/dashboard/AnalysisWidget";
-import { AnalysisResult } from "@/lib/ai/generator";
+import { AnalysisResult } from "@/lib/validators/analysis";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { AnalysisClient } from "@/components/dashboard/AnalysisClient";
+
 
 export default async function MonAnalysePage() {
     // Fetch User
@@ -25,11 +26,19 @@ export default async function MonAnalysePage() {
 
     if (!dbUser) redirect("/login");
 
-    // Get AI Analysis
+    // Get AI Analysis & Input Data
     let analysisData: AnalysisResult | null = null;
+    let inputData: any | null = null;
+
     if (dbUser.analysis?.content) {
         analysisData = dbUser.analysis.content as unknown as AnalysisResult;
     }
+
+    if (dbUser.analysis?.inputData) {
+        inputData = dbUser.analysis.inputData;
+    }
+
+    const hasAnalysis = !!analysisData;
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -47,8 +56,11 @@ export default async function MonAnalysePage() {
                     </div>
                 </div>
 
-                {/* Analysis Widget */}
-                <AnalysisWidget analysis={analysisData} />
+                {/* Client Component to handle View Switching */}
+                <AnalysisClient
+                    initialAnalysis={analysisData}
+                    existingFormData={inputData}
+                />
             </div>
         </div>
     );

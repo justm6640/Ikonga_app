@@ -1,23 +1,12 @@
 import OpenAI from 'openai'
 import { SYSTEM_PROMPT_API } from './prompts'
 import { QuestionnaireData } from '@/lib/validators/questionnaire'
+import { AnalysisResult } from '@/lib/validators/analysis'
 
 // Initialize OpenAI Client
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
-
-export interface AnalysisResult {
-    introduction: string;
-    nutrition: string;
-    fitness: string;
-    wellness: string;
-    nutrition_plus: string;
-    lifestyle: string;
-    beauty: string;
-    summary: string;
-    next_steps: string;
-}
 
 const FALLBACK_ANALYSIS: AnalysisResult = {
     introduction: "Hello [Prénom], ravie de t'accompagner ! Ton profil est prometteur.",
@@ -31,7 +20,7 @@ const FALLBACK_ANALYSIS: AnalysisResult = {
     next_steps: "Je prépare ton programme personnalisé. Signature : Rosy – IKONGA Lifestyle"
 };
 
-export async function generateUserAnalysis(userProfile: any, answers: QuestionnaireData): Promise<AnalysisResult> {
+export async function generateUserAnalysis(userProfile: any, answers: any): Promise<AnalysisResult> {
     if (!process.env.OPENAI_API_KEY) {
         console.warn("OPENAI_API_KEY Missing - Returning Fallback");
         return FALLBACK_ANALYSIS;

@@ -287,6 +287,7 @@ model UserAnalysis {
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id])
   content   Json     // L'analyse complète (introduction, nutrition, fitness, wellness, conclusion)
+  inputData Json?    // Les réponses du questionnaire (allergies, etc.) pour régénération
   createdAt DateTime @default(now())
 }
 
