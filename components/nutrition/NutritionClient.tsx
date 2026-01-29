@@ -345,6 +345,24 @@ export function NutritionClient({ initialData, subscriptionTier, phaseDays }: Nu
                                                 {format(new Date(selectedDay.date), "EEEE d MMMM", { locale: fr })}
                                             </span>
                                         )}
+
+                                        {/* Source Badge */}
+                                        {(currentData.source === 'COACH' || !currentData.source) && (
+                                            <div className="inline-flex items-center gap-1.5 bg-purple-50 px-3 py-1 rounded-full border border-purple-100 w-fit mt-1">
+                                                <span className="text-sm">✨</span>
+                                                <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wide">
+                                                    Menu conseillé par ta coach
+                                                </span>
+                                            </div>
+                                        )}
+                                        {currentData.source === 'USER' && (
+                                            <div className="inline-flex items-center gap-1.5 bg-orange-50 px-3 py-1 rounded-full border border-orange-100 w-fit mt-1">
+                                                <span className="text-sm">👤</span>
+                                                <span className="text-[10px] font-bold text-orange-700 uppercase tracking-wide">
+                                                    Ton menu personnalisé
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <DaySelectorStrip

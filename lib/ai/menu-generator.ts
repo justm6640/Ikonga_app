@@ -73,17 +73,34 @@ export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: b
     const analysisData = user.analysis?.content ? (user.analysis.content as any) : {};
     const allergies = analysisData?.nutrition?.allergies || "Aucune";
 
+    // 1.8 Fetch Phase Guidelines
+    const guidelines = await prisma.phaseGuideline.findMany({
+        where: { phase: currentPhase as any }
+    });
+
+    const allowed = guidelines.filter(g => g.type === "ALLOWED").map(g => g.content).join(", ");
+    const forbidden = guidelines.filter(g => g.type === "FORBIDDEN").map(g => g.content).join(", ");
+
     // 2. Prompt IA
     const userPrompt = `
     Génère le menu pour : ${user.firstName || 'Abonnée'}
-    Phase : ${currentPhase}
-    Allergies : ${allergies}
-    Objectif : Perte de poids.
+    Phase Actuelle : ${currentPhase}
+    
+    RÈGLES DE LA PHASE :
+    ✅ À PRIVILÉGIER : ${allowed || "Légumes verts, protéines maigres, eau"}
+    ❌ À ÉVITER : ${forbidden || "Sucre, alcool, produits transformés"}
+
+    Profil Abonné :
+    - Allergies : ${allergies}
+    - Objectif : Perte de poids
+    - Préférences : ${analysisData?.nutrition?.tastes || "Standard"}
+    
+    Format : JSON strict compatible avec le schéma attendu.
   `;
 
     try {
         const completion = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: "gpt-4o", // Use standard model for better quality
             messages: [
                 { role: "system", content: SYSTEM_PROMPT_MENU },
                 { role: "user", content: userPrompt }

@@ -212,6 +212,7 @@ export async function getNutritionData(dateInput?: string | Date) {
         menu: enrichedMenu,
         guidelines: formattedGuidelines,
         phase: sourcePhase,
+        source: customMenu ? 'USER' : 'COACH', // Explicit source tracking
         isCompleted: dailyLog?.nutritionDone || false,
         date: targetDate
     }

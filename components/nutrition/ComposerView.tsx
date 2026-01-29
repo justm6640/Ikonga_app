@@ -188,65 +188,52 @@ export function ComposerView({ phaseDays, currentPhase, initialData }: ComposerV
 
             {/* Inputs Grid */}
             <div className="space-y-4">
-                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">
-                        PETIT-DÉJEUNER
-                    </label>
-                    <Textarea
-                        value={formData.breakfast}
-                        onChange={(e) => setFormData({ ...formData, breakfast: e.target.value })}
-                        placeholder="Clique sur ✨ Générer ou écris ici..."
-                        className="bg-slate-50 border-0 focus-visible:ring-1 focus-visible:ring-orange-200 text-sm min-h-[60px] resize-none rounded-xl placeholder:italic placeholder:text-slate-400"
-                    />
-                </div>
+                {[
+                    { key: 'breakfast', label: 'PETIT-DÉJEUNER' },
+                    { key: 'snack', label: 'SNACK MATIN' },
+                    { key: 'lunch', label: 'DÉJEUNER' },
+                    { key: 'snack_afternoon', label: 'SNACK APRÈS-MIDI' },
+                    { key: 'dinner', label: 'DÎNER' }
+                ].map((meal) => (
+                    <div key={meal.key} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm relative group">
+                        <div className="flex items-center justify-between mb-3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                                {meal.label}
+                            </label>
 
-                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">
-                        SNACK MATIN
-                    </label>
-                    <Textarea
-                        value={formData.snack}
-                        onChange={(e) => setFormData({ ...formData, snack: e.target.value })}
-                        placeholder="Clique sur ✨ Générer ou écris ici..."
-                        className="bg-slate-50 border-0 focus-visible:ring-1 focus-visible:ring-orange-200 text-sm min-h-[60px] resize-none rounded-xl placeholder:italic placeholder:text-slate-400"
-                    />
-                </div>
+                            {/* Recipe Picker */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-6 px-2 text-[10px] bg-slate-50 text-slate-500 hover:text-orange-500 hover:bg-orange-50 font-bold uppercase tracking-wider rounded-lg transition-colors">
+                                        + Choisir une recette
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-[200px] max-h-[200px] overflow-y-auto">
+                                    {availableRecipes.length > 0 ? (
+                                        availableRecipes.map((recipe) => (
+                                            <DropdownMenuItem
+                                                key={recipe.id}
+                                                onClick={() => setFormData(prev => ({ ...prev, [meal.key]: recipe.name }))}
+                                                className="cursor-pointer text-xs font-medium"
+                                            >
+                                                {recipe.name}
+                                            </DropdownMenuItem>
+                                        ))
+                                    ) : (
+                                        <div className="p-2 text-xs text-slate-400 italic">Aucune recette trouvée</div>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
 
-                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">
-                        DÉJEUNER
-                    </label>
-                    <Textarea
-                        value={formData.lunch}
-                        onChange={(e) => setFormData({ ...formData, lunch: e.target.value })}
-                        placeholder="Clique sur ✨ Générer ou écris ici..."
-                        className="bg-slate-50 border-0 focus-visible:ring-1 focus-visible:ring-orange-200 text-sm min-h-[60px] resize-none rounded-xl placeholder:italic placeholder:text-slate-400"
-                    />
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">
-                        SNACK APRÈS-MIDI
-                    </label>
-                    <Textarea
-                        value={formData.snack_afternoon}
-                        onChange={(e) => setFormData({ ...formData, snack_afternoon: e.target.value })}
-                        placeholder="Clique sur ✨ Générer ou écris ici..."
-                        className="bg-slate-50 border-0 focus-visible:ring-1 focus-visible:ring-orange-200 text-sm min-h-[60px] resize-none rounded-xl placeholder:italic placeholder:text-slate-400"
-                    />
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">
-                        DÎNER
-                    </label>
-                    <Textarea
-                        value={formData.dinner}
-                        onChange={(e) => setFormData({ ...formData, dinner: e.target.value })}
-                        placeholder="Clique sur ✨ Générer ou écris ici..."
-                        className="bg-slate-50 border-0 focus-visible:ring-1 focus-visible:ring-orange-200 text-sm min-h-[60px] resize-none rounded-xl placeholder:italic placeholder:text-slate-400"
-                    />
-                </div>
+                        <Textarea
+                            value={(formData as any)[meal.key]}
+                            onChange={(e) => setFormData({ ...formData, [meal.key]: e.target.value })}
+                            placeholder="Clique sur ✨ Générer ou écris ici..."
+                            className="bg-slate-50 border-0 focus-visible:ring-1 focus-visible:ring-orange-200 text-sm min-h-[60px] resize-none rounded-xl placeholder:italic placeholder:text-slate-400"
+                        />
+                    </div>
+                ))}
             </div>
 
             {/* Validate Button */}
