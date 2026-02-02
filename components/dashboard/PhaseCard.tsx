@@ -47,18 +47,18 @@ export function PhaseCard({
         : 0;
 
     return (
-        <Card className="rounded-[2.5rem] border-none shadow-xl bg-slate-900 text-white overflow-hidden relative group">
-            {/* Animated Ambient Background */}
+        <Card className="rounded-[2.5rem] border-none shadow-xl bg-gradient-to-br from-ikonga-coral via-ikonga-pink-accent to-ikonga-coral text-white overflow-hidden relative group">
+            {/* Animated Ambient Background - IKONGA Charter */}
             <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-700">
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-pink-500 rounded-full blur-[80px] animate-pulse" />
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-500 rounded-full blur-[80px]" />
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-ikonga-pink-accent rounded-full blur-[80px] animate-pulse" />
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-ikonga-coral rounded-full blur-[80px]" />
             </div>
 
             <CardContent className="p-8 relative z-10">
                 {/* Header Section */}
                 <div className="flex justify-between items-start mb-8">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-pink-400 mb-1">
+                        <div className="flex items-center gap-2 text-white/90 mb-1">
                             <Zap size={14} fill="currentColor" />
                             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Programme Actif</span>
                         </div>
