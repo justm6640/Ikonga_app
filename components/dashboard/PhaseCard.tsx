@@ -62,32 +62,32 @@ export function PhaseCard({
                             <Zap size={14} fill="currentColor" />
                             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Programme Actif</span>
                         </div>
-                        <h3 className="text-3xl font-black tracking-tight">{phaseName}</h3>
-                        <p className="text-sm font-bold text-slate-400 flex items-center gap-2">
-                            <Waves size={14} className="text-slate-400" />
+                        <h3 className="text-3xl font-black tracking-tight text-white">{phaseName}</h3>
+                        <p className="text-sm font-bold text-white/70 flex items-center gap-2">
+                            <Waves size={14} className="text-white/60" />
                             {planName}
                         </p>
                     </div>
 
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/5 text-center min-w-[80px]">
-                        <p className="text-2xl font-black">J{safeCurrentDay}</p>
-                        <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">Sur {safeTotalDays}</p>
+                    <div className="bg-white/20 backdrop-blur-xl rounded-2xl p-4 border border-white/10 text-center min-w-[80px] shadow-lg">
+                        <p className="text-2xl font-black text-white">J{safeCurrentDay}</p>
+                        <p className="text-[8px] font-black uppercase tracking-widest text-white/60">Sur {safeTotalDays}</p>
                     </div>
                 </div>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-3 gap-4 mb-8">
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                        <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest mb-1.5 text-center">Actuel</p>
-                        <p className="text-xl font-black text-center">{safeCurrentWeight.toFixed(1)}<span className="text-[10px] text-slate-500 ml-0.5">kg</span></p>
+                    <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm">
+                        <p className="text-[8px] font-black uppercase text-white/60 tracking-widest mb-1.5 text-center">Actuel</p>
+                        <p className="text-xl font-black text-center text-white">{safeCurrentWeight.toFixed(1)}<span className="text-[10px] text-white/50 ml-0.5">kg</span></p>
                     </div>
-                    <div className="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/10">
-                        <p className="text-[8px] font-black uppercase text-emerald-400 tracking-widest mb-1.5 text-center">Perte</p>
-                        <p className="text-xl font-black text-emerald-400 text-center">{safeWeightLost.toFixed(1)}<span className="text-[10px] ml-0.5 opacity-60">kg</span></p>
+                    <div className="p-4 bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 shadow-md">
+                        <p className="text-[8px] font-black uppercase text-white/90 tracking-widest mb-1.5 text-center">Perte</p>
+                        <p className="text-xl font-black text-white text-center">{safeWeightLost.toFixed(1)}<span className="text-[10px] ml-0.5 opacity-60">kg</span></p>
                     </div>
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                        <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest mb-1.5 text-center">Reste</p>
-                        <p className="text-xl font-black text-center">{(safeCurrentWeight - safePisi).toFixed(1)}<span className="text-[10px] text-slate-500 ml-0.5">kg</span></p>
+                    <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm">
+                        <p className="text-[8px] font-black uppercase text-white/60 tracking-widest mb-1.5 text-center">Reste</p>
+                        <p className="text-xl font-black text-center text-white">{(safeCurrentWeight - safePisi).toFixed(1)}<span className="text-[10px] text-white/50 ml-0.5">kg</span></p>
                     </div>
                 </div>
 
@@ -118,17 +118,17 @@ export function PhaseCard({
                     <div className="space-y-2">
                         <div className="flex justify-between items-end">
                             <div className="flex items-center gap-2">
-                                <Target size={12} className="text-emerald-400/50" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400/50">Vers l'objectif (PISI)</span>
+                                <Target size={12} className="text-white/60" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Vers l'objectif (PISI)</span>
                             </div>
-                            <span className="text-xs font-black text-emerald-400">{Math.round(weightProgress)}%</span>
+                            <span className="text-xs font-black text-white">{Math.round(weightProgress)}%</span>
                         </div>
-                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-2 bg-white/20 rounded-full overflow-hidden">
                             <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${weightProgress}%` }}
                                 transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-                                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full"
+                                className="h-full bg-white rounded-full"
                             />
                         </div>
                     </div>
