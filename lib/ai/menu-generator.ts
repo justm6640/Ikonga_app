@@ -71,9 +71,25 @@ export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: b
 
     const currentPhase = user.phases[0]?.type || "DETOX";
     const analysisData = user.analysis?.content ? (user.analysis.content as any) : {};
-    const allergies = analysisData?.nutrition?.allergies || "Aucune";
 
-    // 1.8 Fetch Phase Guidelines
+    // 1.8 Gather Personalization Data
+    const physicalData = {
+        weight: user.startWeight || "Non spécifié",
+        height: user.heightCm || "Non spécifié",
+        pisi: user.pisi || "Non spécifié",
+        bmi: user.startWeight && user.heightCm
+            ? (user.startWeight / (Math.pow(user.heightCm / 100, 2))).toFixed(1)
+            : "Inconnu"
+    };
+
+    const preferences = {
+        allergies: user.allergies?.length ? user.allergies.join(", ") : (analysisData?.nutrition?.allergies || "Aucune"),
+        diet: user.dietaryUsage || analysisData?.nutrition?.dietaryUsage || "Standard",
+        country: user.countryOrigin || "Non spécifié",
+        tastes: analysisData?.nutrition?.tastes || "Afro-Fusion & Varié"
+    };
+
+    // 1.9 Fetch Phase Guidelines
     const guidelines = await prisma.phaseGuideline.findMany({
         where: { phase: currentPhase as any }
     });
@@ -86,21 +102,31 @@ export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: b
     Génère le menu pour : ${user.firstName || 'Abonnée'}
     Phase Actuelle : ${currentPhase}
     
-    RÈGLES DE LA PHASE :
+    🌍 CONTEXTE GÉOGRAPHIQUE :
+    Pays d'origine : ${preferences.country}
+    (Privilégie des recettes locales saines et Afro-Fusion adaptées à ce pays)
+
+    ⚖️ PROFIL PHYSIQUE :
+    Poids : ${physicalData.weight}kg
+    Taille : ${physicalData.height}cm
+    IMC : ${physicalData.bmi}
+    Objectif (PISI) : ${physicalData.pisi}kg
+    
+    ⚠️ SANTÉ & RÉGIME :
+    Régime : ${preferences.diet}
+    Allergies : ${preferences.allergies}
+    Préférences : ${preferences.tastes}
+
+    📋 RÈGLES DE LA PHASE ${currentPhase} :
     ✅ À PRIVILÉGIER : ${allowed || "Légumes verts, protéines maigres, eau"}
     ❌ À ÉVITER : ${forbidden || "Sucre, alcool, produits transformés"}
-
-    Profil Abonné :
-    - Allergies : ${allergies}
-    - Objectif : Perte de poids
-    - Préférences : ${analysisData?.nutrition?.tastes || "Standard"}
     
-    Format : JSON strict compatible avec le schéma attendu.
+    Format : JSON strict.
   `;
 
     try {
         const completion = await openai.chat.completions.create({
-            model: "gpt-4o", // Use standard model for better quality
+            model: "gpt-4o",
             messages: [
                 { role: "system", content: SYSTEM_PROMPT_MENU },
                 { role: "user", content: userPrompt }
