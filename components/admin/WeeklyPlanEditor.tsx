@@ -80,7 +80,7 @@ export function WeeklyPlanEditor({ plan }: WeeklyPlanEditorProps) {
                     size="sm"
                     onClick={handleRegenerate}
                     disabled={isRegenerating}
-                    className="rounded-full border-ikonga-pink text-ikonga-pink hover:bg-ikonga-pink/5 font-bold"
+                    className="rounded-full border-ikonga-coral text-ikonga-coral hover:bg-ikonga-coral/5 font-bold"
                 >
                     {isRegenerating ? (
                         <Loader2 size={14} className="animate-spin mr-2" />
@@ -111,19 +111,19 @@ export function WeeklyPlanEditor({ plan }: WeeklyPlanEditorProps) {
                                         <div key={meal} className="relative group w-full">
                                             <div className="lg:hidden text-[9px] font-black uppercase text-slate-400 mb-1 ml-1 tracking-widest flex items-center gap-2">
                                                 {MEAL_LABELS[meal]}
-                                                {isSaving && <Loader2 size={10} className="animate-spin text-ikonga-pink" />}
+                                                {isSaving && <Loader2 size={10} className="animate-spin text-ikonga-coral" />}
                                             </div>
                                             <Input
                                                 defaultValue={plan.content?.[day]?.[meal] || ""}
                                                 onBlur={(e) => handleUpdate(day, meal, e.target.value)}
-                                                className="h-11 lg:h-10 text-xs border-transparent bg-slate-50 focus:bg-white focus:border-ikonga-pink transition-all pr-8 rounded-xl"
+                                                className="h-11 lg:h-10 text-xs border-transparent bg-slate-50 focus:bg-white focus:border-ikonga-coral transition-all pr-8 rounded-xl"
                                                 placeholder="..."
                                             />
                                             <div className="absolute right-3 top-[34px] lg:top-1/2 lg:-translate-y-1/2">
                                                 {!isSaving && (
                                                     <CheckCircle2 size={14} className="text-emerald-500 opacity-0 group-hover:opacity-20 transition-opacity" />
                                                 )}
-                                                {isSaving && <div className="hidden lg:block"><Loader2 size={14} className="animate-spin text-ikonga-pink" /></div>}
+                                                {isSaving && <div className="hidden lg:block"><Loader2 size={14} className="animate-spin text-ikonga-coral" /></div>}
                                             </div>
                                         </div>
                                     )

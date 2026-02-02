@@ -85,7 +85,7 @@ export function ChatInterface({ channelId, userId, initialMessages, onSendMessag
                             {/* Avatar */}
                             <div className={cn(
                                 "h-10 w-10 rounded-2xl shrink-0 overflow-hidden border-2",
-                                isCoach ? "border-ikonga-orange" : "border-white"
+                                isCoach ? "border-ikonga-coral" : "border-white"
                             )}>
                                 {msg.sender.image ? (
                                     <img src={msg.sender.image} alt="avatar" className="h-full w-full object-cover" />
@@ -109,7 +109,7 @@ export function ChatInterface({ channelId, userId, initialMessages, onSendMessag
                                         {isOwn ? "Moi" : msg.sender.name || "Abonné(e)"}
                                     </span>
                                     {isCoach && (
-                                        <span className="text-[8px] font-black uppercase tracking-wider bg-ikonga-orange text-white px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                                        <span className="text-[8px] font-black uppercase tracking-wider bg-ikonga-coral text-white px-1.5 py-0.5 rounded-md flex items-center gap-1">
                                             <ShieldCheck size={8} />
                                             Coach IKONGA
                                         </span>
@@ -149,7 +149,7 @@ export function ChatInterface({ channelId, userId, initialMessages, onSendMessag
             {/* Input Area */}
             <div className="p-4 bg-white border-t border-slate-100">
                 <div className="max-w-xl mx-auto flex items-center gap-3">
-                    <Button variant="ghost" size="icon" className="rounded-2xl text-slate-400 hover:text-ikonga-pink">
+                    <Button variant="ghost" size="icon" className="rounded-2xl text-slate-400 hover:text-ikonga-coral">
                         <ImageIcon size={20} />
                     </Button>
                     <div className="relative flex-1">
@@ -158,7 +158,7 @@ export function ChatInterface({ channelId, userId, initialMessages, onSendMessag
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleSend()}
                             placeholder="Écris un message bienveillant..."
-                            className="rounded-3xl border-none bg-slate-50 focus-visible:ring-1 focus-visible:ring-ikonga-pink/20 pr-12 h-12 text-sm font-medium"
+                            className="rounded-3xl border-none bg-slate-50 focus-visible:ring-1 focus-visible:ring-ikonga-coral/20 pr-12 h-12 text-sm font-medium"
                         />
                         <Button
                             onClick={handleSend}

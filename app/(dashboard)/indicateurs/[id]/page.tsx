@@ -69,7 +69,7 @@ export default async function IndicatorDetailPage({ params }: PageProps) {
                 {
                     title: "Comment IKONGA t'aide ?",
                     content: "IKONGA organise ton alimentation et ton activité physique à travers différentes phases pour faire descendre progressivement ton IMC vers ton PISI (Poids Idéal Santé IKONGA).",
-                    icon: <Lightbulb className="text-ikonga-orange" size={18} />
+                    icon: <Lightbulb className="text-ikonga-coral" size={18} />
                 }
             ],
             bonus: (
@@ -104,7 +104,7 @@ export default async function IndicatorDetailPage({ params }: PageProps) {
                 {
                     title: "Comment IKONGA t'aide ?",
                     content: "Grâce aux menus ciblés et à l'alternance des phases Détox/Équilibre, le programme cible la perte de graisse tout en préservant ton muscle grâce au sport.",
-                    icon: <Lightbulb className="text-ikonga-orange" size={18} />
+                    icon: <Lightbulb className="text-ikonga-coral" size={18} />
                 }
             ]
         },
@@ -126,7 +126,7 @@ export default async function IndicatorDetailPage({ params }: PageProps) {
                 {
                     title: "Comment IKONGA t'aide ?",
                     content: "Les menus sont calculés pour protéger ton BMR actuel. Le sport régulier aide également à maintenir une 'chaudière énergétique' efficace.",
-                    icon: <Lightbulb className="text-ikonga-orange" size={18} />
+                    icon: <Lightbulb className="text-ikonga-coral" size={18} />
                 }
             ]
         },
@@ -148,7 +148,7 @@ export default async function IndicatorDetailPage({ params }: PageProps) {
                 {
                     title: "Comment IKONGA t'aide ?",
                     content: "Chaque kilo perdu et chaque séance de sport réduit ton âge métabolique. L'objectif est de le rapprocher (ou le faire passer en dessous) de ton âge réel.",
-                    icon: <Lightbulb className="text-ikonga-orange" size={18} />
+                    icon: <Lightbulb className="text-ikonga-coral" size={18} />
                 }
             ]
         }

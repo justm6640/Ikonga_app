@@ -62,7 +62,7 @@ export function PhaseTimeline({ sessions }: PhaseTimelineProps) {
                                         <div className="flex items-center gap-2 mb-1">
                                             <h4 className="font-black text-slate-900">Session {session.sessionNumber}</h4>
                                             {session.isCurrent && (
-                                                <span className="text-[10px] font-black uppercase tracking-wider bg-ikonga-pink text-white px-2 py-0.5 rounded-full">
+                                                <span className="text-[10px] font-black uppercase tracking-wider bg-ikonga-coral text-white px-2 py-0.5 rounded-full">
                                                     En cours
                                                 </span>
                                             )}
@@ -72,7 +72,7 @@ export function PhaseTimeline({ sessions }: PhaseTimelineProps) {
                                         </p>
                                     </div>
                                     <div className="text-right">
-                                        <div className="flex items-center gap-1 justify-end text-ikonga-pink">
+                                        <div className="flex items-center gap-1 justify-end text-ikonga-coral">
                                             <TrendingDown size={14} strokeWidth={3} />
                                             <span className="text-sm font-black">-{session.targetLoss}kg</span>
                                         </div>

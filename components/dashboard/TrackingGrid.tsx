@@ -79,7 +79,7 @@ export function TrackingGrid() {
                                         <item.icon size={24} strokeWidth={2.5} />
                                     </div>
                                     <div className="space-y-1">
-                                        <h4 className="font-black text-sm text-slate-900 leading-tight group-hover:text-ikonga-pink transition-colors">
+                                        <h4 className="font-black text-sm text-slate-900 leading-tight group-hover:text-ikonga-coral transition-colors">
                                             {item.title}
                                         </h4>
                                         <p className="text-[10px] font-semibold text-slate-500/80 leading-tight">

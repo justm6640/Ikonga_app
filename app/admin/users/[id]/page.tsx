@@ -69,7 +69,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                 <Card className="rounded-[2.5rem] border-slate-100 shadow-md">
                     <CardHeader className="p-8 pb-4">
                         <CardTitle className="text-lg font-serif font-bold text-slate-800 flex items-center gap-2">
-                            <Info size={18} className="text-ikonga-pink" /> État Actuel
+                            <Info size={18} className="text-ikonga-coral" /> État Actuel
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 pt-0 space-y-6">
@@ -88,7 +88,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                             </div>
                             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                 <span className="text-[10px] uppercase font-black text-slate-400 tracking-widest block mb-1">PISI (Cible)</span>
-                                <span className="font-bold text-slate-900 text-ikonga-pink">{user.pisi || user.targetWeight ? `${user.pisi || user.targetWeight} kg` : "N/A"}</span>
+                                <span className="font-bold text-slate-900 text-ikonga-coral">{user.pisi || user.targetWeight ? `${user.pisi || user.targetWeight} kg` : "N/A"}</span>
                             </div>
                         </div>
                     </CardContent>

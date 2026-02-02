@@ -32,7 +32,7 @@ export default async function AdminContentPage() {
                 {/* Videos Section */}
                 <section className="space-y-4">
                     <div className="flex items-center gap-2 mb-4">
-                        <Video size={20} className="text-ikonga-pink" />
+                        <Video size={20} className="text-ikonga-coral" />
                         <h2 className="text-xl font-bold text-slate-900">Bibliothèque Multimédia ({videos.length})</h2>
                     </div>
                     {videos.length === 0 ? (
@@ -51,7 +51,7 @@ export default async function AdminContentPage() {
                                             <h4 className="text-sm font-bold text-slate-900">{item.title}</h4>
                                             <div className="flex gap-2 mt-1">
                                                 <span className="text-[10px] font-black uppercase text-slate-400">{item.category}</span>
-                                                <span className="text-[10px] font-black uppercase text-ikonga-pink">• {(item.targetPhases as string[]).join(", ")}</span>
+                                                <span className="text-[10px] font-black uppercase text-ikonga-coral">• {(item.targetPhases as string[]).join(", ")}</span>
                                             </div>
                                         </div>
                                     </div>

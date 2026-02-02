@@ -43,7 +43,7 @@ export default async function AdminDashboardPage() {
                             <div className="text-4xl font-black text-slate-900 mb-4">{stat.value}</div>
                             <Link
                                 href={stat.href}
-                                className="inline-flex items-center text-xs font-bold text-slate-400 hover:text-ikonga-pink transition-colors gap-2"
+                                className="inline-flex items-center text-xs font-bold text-slate-400 hover:text-ikonga-coral transition-colors gap-2"
                             >
                                 Gérer <ArrowRight size={14} />
                             </Link>

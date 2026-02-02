@@ -23,7 +23,7 @@ export function AdminFAB() {
             >
                 <Shield
                     size={24}
-                    className="text-ikonga-pink group-hover:drop-shadow-[0_0_8px_rgba(229,72,138,0.5)] transition-all duration-300"
+                    className="text-ikonga-coral group-hover:drop-shadow-[0_0_8px_rgba(229,72,138,0.5)] transition-all duration-300"
                 />
             </Link>
         </div>

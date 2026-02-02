@@ -79,7 +79,7 @@ export function WeightHistoryList({ logs }: WeightHistoryListProps) {
                     <Button
                         variant="ghost"
                         onClick={() => setShowMore(!showMore)}
-                        className="rounded-2xl px-8 py-6 text-slate-600 hover:text-ikonga-pink hover:bg-pink-50 transition-all font-bold gap-2"
+                        className="rounded-2xl px-8 py-6 text-slate-600 hover:text-ikonga-coral hover:bg-pink-50 transition-all font-bold gap-2"
                     >
                         {showMore ? (
                             <>

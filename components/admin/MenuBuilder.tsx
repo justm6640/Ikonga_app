@@ -170,7 +170,7 @@ export function MenuBuilder() {
                                 name="breakfast"
                                 render={({ field }) => (
                                     <FormItem className="space-y-3">
-                                        <div className="flex items-center gap-2 text-ikonga-pink">
+                                        <div className="flex items-center gap-2 text-ikonga-coral">
                                             <Coffee size={20} />
                                             <FormLabel className="text-base font-semibold">Petit-Déjeuner</FormLabel>
                                         </div>

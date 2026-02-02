@@ -11,25 +11,60 @@ const config: Config = {
 	theme: {
 		extend: {
 			fontFamily: {
-				sans: [
-					'var(--font-sans)',
-					'sans-serif'
-				],
-				serif: [
-					'var(--font-serif)',
-					'serif'
-				],
-				hand: [
-					'var(--font-hand)',
-					'cursive'
-				]
+				// IKONGA Charter Fonts
+				sans: ['Poppins', 'var(--font-sans)', 'sans-serif'],  // Body, buttons, forms
+				serif: ['DM Serif Display', 'var(--font-serif)', 'serif'], // Headings H1-H6
+				hand: ['var(--font-hand)', 'cursive']
+			},
+			fontWeight: {
+				// IKONGA Charter Weights
+				normal: '400',   // Body text
+				medium: '500',   // Buttons, labels, links
+				semibold: '600', // Titles, blog elements
+				bold: '700',     // Strong emphasis
 			},
 			backgroundImage: {
-				'ikonga-gradient': 'linear-gradient(90deg, #F79A32 0%, #E5488A 100%)'
+				// Update gradient to use charter colors
+				'ikonga-gradient': 'linear-gradient(90deg, #fa8662 0%, #ff559c 100%)'
+			},
+			fontSize: {
+				// IKONGA Charter Typography Scale
+				'h1': ['2.25rem', { lineHeight: '1.4' }],      // 36px desktop
+				'h1-mobile': ['1.875rem', { lineHeight: '1.4' }], // 30px mobile
+				'h2': ['1.875rem', { lineHeight: '1.3' }],     // 30px desktop
+				'h2-mobile': ['1.5625rem', { lineHeight: '1.3' }], // 25px mobile
+				'h3': ['1.5rem', { lineHeight: '1.3' }],       // 24px desktop
+				'h3-mobile': ['1.25rem', { lineHeight: '1.3' }],  // 20px mobile
+				'h4': ['1.25rem', { lineHeight: '1.2' }],      // 20px
+				'h5': ['1.125rem', { lineHeight: '1.2' }],     // 18px
+				'h6': ['1rem', { lineHeight: '1.25' }],        // 16px
+				'body': ['1rem', { lineHeight: '1.65' }],      // 16px
+				'label': ['0.875rem', { lineHeight: '1.43' }], // 14px
+				'small': ['0.625rem', { lineHeight: '1' }],    // 10px (copyright)
+			},
+			boxShadow: {
+				// IKONGA Charter Shadows
+				'form': '0px 1px 2px 0px rgba(0, 0, 0, 0.05)',
+				'badge': '1px 1px 3px 0px rgba(0, 0, 0, 0.3)',
 			},
 			colors: {
-				'ikonga-orange': '#F79A32',
-				'ikonga-pink': '#E5488A',
+				// IKONGA Charter Colors (Website)
+				'ikonga-coral': '#fa8662',        // Primary brand color
+				'ikonga-pink-accent': '#ff559c',  // Hover/active states
+
+				// Slate Scale (Charter)
+				'slate-dark': '#1e293b',          // Headings, important text
+				'slate-medium': '#334155',        // Body text
+				'slate-light': '#F0F5FA',         // Secondary backgrounds
+				'slate-border': '#D1D5DB',        // Borders, separators
+				'focus-blue': '#046BD2',          // Focus states
+				'footer-dark': '#222222',         // Footer background
+
+				// Deprecated (backwards compatibility)
+				'ikonga-orange': '#F79A32',       // @deprecated Use ikonga-coral
+				'ikonga-pink': '#E5488A',         // @deprecated Use ikonga-pink-accent
+
+				// Pillar Colors (Keep existing)
 				'pillar-nutrition': {
 					DEFAULT: '#E8F5E9',
 					foreground: '#2E7D32'
@@ -90,7 +125,14 @@ const config: Config = {
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+				// IKONGA Charter Radius
+				'button': '4px',           // Standard buttons
+				'form': '4px',             // Form elements (inputs, selects, etc.)
+				'card': '6px',             // Cards, articles
+				'pill': '9999px',          // Outline buttons (fully rounded)
+				'badge': '99px',           // Badges, counters
+				'avatar': '100%',          // Avatars (circle)
 			},
 			keyframes: {
 				'accordion-down': {

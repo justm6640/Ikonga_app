@@ -17,7 +17,7 @@ export default function LoginPage() {
 
                     <div className="mt-4 text-center text-sm">
                         Pas encore de compte ?{" "}
-                        <Link href="/signup" className="underline font-medium text-ikonga-pink">
+                        <Link href="/signup" className="underline font-medium text-ikonga-coral">
                             S'inscrire
                         </Link>
                     </div>
@@ -27,7 +27,7 @@ export default function LoginPage() {
                 {/* Placeholder for Image */}
                 <div className="absolute inset-0 bg-ikonga-gradient opacity-10" />
                 <div className="flex items-center justify-center h-full">
-                    <h1 className="text-6xl font-serif text-ikonga-pink opacity-20">IKONGA</h1>
+                    <h1 className="text-6xl font-serif text-ikonga-coral opacity-20">IKONGA</h1>
                 </div>
             </div>
         </div>

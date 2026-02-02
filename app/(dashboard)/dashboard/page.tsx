@@ -80,7 +80,7 @@ export default async function DashboardPage() {
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
             <div className="max-w-xl mx-auto pb-32 px-4 sm:px-6 space-y-6 sm:space-y-8 relative">
                 {/* Decorative background blurs */}
-                <div className="fixed top-20 right-0 w-72 h-72 bg-ikonga-pink/5 rounded-full blur-3xl -z-10" />
+                <div className="fixed top-20 right-0 w-72 h-72 bg-ikonga-coral/5 rounded-full blur-3xl -z-10" />
                 <div className="fixed bottom-40 left-0 w-96 h-96 bg-orange-400/5 rounded-full blur-2xl -z-10" />
                 <div className="fixed bottom-40 left-0 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl -z-10" />
 

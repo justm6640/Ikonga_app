@@ -5,7 +5,7 @@ import { Star, Quote } from "lucide-react"
 
 const TESTIMONIALS = [
     { name: "Sophie D.", text: "J'ai perdu 4.5kg en Phase 1 sans jamais ressentir de fatigue. C'est magique.", role: "Detox terminée", color: "bg-emerald-50 text-emerald-600" },
-    { name: "Marie L.", text: "La méthode m'a réconciliée avec mon corps. Les recettes sont délicieuses.", role: "Stabilisation", color: "bg-pink-50 text-ikonga-pink" },
+    { name: "Marie L.", text: "La méthode m'a réconciliée avec mon corps. Les recettes sont délicieuses.", role: "Stabilisation", color: "bg-pink-50 text-ikonga-coral" },
     { name: "Julie P.", text: "Une clarté mentale incroyable dès la première semaine. Je revis !", role: "Consolidation", color: "bg-blue-50 text-blue-600" },
     { name: "Amélie K.", text: "L'application est tellement intuitive. Un vrai plaisir au quotidien.", role: "Nouvelle membre", color: "bg-orange-50 text-orange-600" },
     { name: "Inès B.", text: "Enfin un programme qui s'adapte à ma vie de maman débordée.", role: "Maman active", color: "bg-indigo-50 text-indigo-600" },
@@ -43,13 +43,13 @@ export function TestimonialsMarquee() {
                     {[...TESTIMONIALS, ...TESTIMONIALS].map((t, idx) => (
                         <div
                             key={idx}
-                            className="inline-block w-[420px] bg-[#fafafa] p-10 rounded-[2.5rem] border border-slate-100 hover:border-ikonga-pink/20 transition-colors group"
+                            className="inline-block w-[420px] bg-[#fafafa] p-10 rounded-[2.5rem] border border-slate-100 hover:border-ikonga-coral/20 transition-colors group"
                         >
                             <div className="flex justify-between items-start mb-8">
-                                <div className="flex gap-1 text-ikonga-pink">
+                                <div className="flex gap-1 text-ikonga-coral">
                                     {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
                                 </div>
-                                <Quote size={24} className="text-slate-200 group-hover:text-ikonga-pink/20 transition-colors" />
+                                <Quote size={24} className="text-slate-200 group-hover:text-ikonga-coral/20 transition-colors" />
                             </div>
 
                             <p className="text-slate-700 font-medium mb-8 whitespace-normal leading-relaxed text-lg font-serif italic">
@@ -71,7 +71,7 @@ export function TestimonialsMarquee() {
             </div>
 
             <div className="mt-20 text-center">
-                <button className="text-sm font-bold text-slate-900 border-b-2 border-ikonga-pink pb-1 hover:text-ikonga-pink hover:border-slate-900 transition-all">
+                <button className="text-sm font-bold text-slate-900 border-b-2 border-ikonga-coral pb-1 hover:text-ikonga-coral hover:border-slate-900 transition-all">
                     Plus de témoignages
                 </button>
             </div>

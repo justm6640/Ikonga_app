@@ -56,7 +56,7 @@ export function NotificationBell({ userId, initialNotifications, unreadCount: in
             case NotificationType.ERROR:
                 return <AlertTriangle className="text-rose-500" size={16} />
             case NotificationType.COACH:
-                return <Sparkles className="text-ikonga-pink" size={16} />
+                return <Sparkles className="text-ikonga-coral" size={16} />
             default:
                 return <Info className="text-blue-500" size={16} />
         }
@@ -68,7 +68,7 @@ export function NotificationBell({ userId, initialNotifications, unreadCount: in
                 <Button variant="ghost" size="icon" className="rounded-full relative hover:bg-slate-100 transition-colors">
                     <Bell size={20} className="text-slate-600" />
                     {unreadCount > 0 && (
-                        <span className="absolute top-2 right-2 flex h-4 w-4 transform translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-ikonga-pink text-[10px] font-bold text-white border-2 border-white animate-in zoom-in-50">
+                        <span className="absolute top-2 right-2 flex h-4 w-4 transform translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-ikonga-coral text-[10px] font-bold text-white border-2 border-white animate-in zoom-in-50">
                             {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                     )}
@@ -80,7 +80,7 @@ export function NotificationBell({ userId, initialNotifications, unreadCount: in
                     {unreadCount > 0 && (
                         <button
                             onClick={handleMarkAllAsRead}
-                            className="text-[11px] font-black uppercase tracking-wider text-ikonga-pink hover:opacity-70 transition-opacity"
+                            className="text-[11px] font-black uppercase tracking-wider text-ikonga-coral hover:opacity-70 transition-opacity"
                         >
                             Tout marquer comme lu
                         </button>
@@ -108,17 +108,17 @@ export function NotificationBell({ userId, initialNotifications, unreadCount: in
                                     onClick={() => !notif.isRead && handleMarkAsRead(notif.id)}
                                     className={cn(
                                         "flex gap-4 p-4 text-left transition-all hover:bg-slate-50 relative border-b border-slate-50 last:border-0",
-                                        !notif.isRead && "bg-ikonga-pink/5"
+                                        !notif.isRead && "bg-ikonga-coral/5"
                                     )}
                                 >
                                     {/* Type Indicator Dot for Coach */}
                                     {notif.type === NotificationType.COACH && (
-                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-ikonga-pink" />
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-ikonga-coral" />
                                     )}
 
                                     <div className={cn(
                                         "shrink-0 w-10 h-10 rounded-xl flex items-center justify-center",
-                                        notif.type === NotificationType.COACH ? "bg-ikonga-pink/10" : "bg-slate-100"
+                                        notif.type === NotificationType.COACH ? "bg-ikonga-coral/10" : "bg-slate-100"
                                     )}>
                                         {getIcon(notif.type)}
                                     </div>
@@ -144,7 +144,7 @@ export function NotificationBell({ userId, initialNotifications, unreadCount: in
                                     </div>
 
                                     {!notif.isRead && (
-                                        <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-ikonga-pink" />
+                                        <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-ikonga-coral" />
                                     )}
                                 </button>
                             ))}

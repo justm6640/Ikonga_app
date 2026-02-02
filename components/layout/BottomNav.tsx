@@ -41,7 +41,7 @@ export function BottomNav() {
                         >
                             <div className={cn(
                                 "p-1.5 rounded-xl transition-all duration-300",
-                                isActive ? "bg-ikonga-pink/10 text-ikonga-pink scale-110" : "text-slate-400 group-hover:text-slate-600"
+                                isActive ? "bg-ikonga-coral/10 text-ikonga-coral scale-110" : "text-slate-400 group-hover:text-slate-600"
                             )}>
                                 <Icon
                                     size={20}
@@ -53,7 +53,7 @@ export function BottomNav() {
                                 className={cn(
                                     "text-[9px] uppercase tracking-tight font-black transition-colors duration-200 truncate max-w-full px-0.5",
                                     isActive
-                                        ? "text-ikonga-pink"
+                                        ? "text-ikonga-coral"
                                         : "text-slate-400"
                                 )}
                             >
@@ -62,7 +62,7 @@ export function BottomNav() {
 
                             {/* Dot indicator */}
                             {isActive && (
-                                <span className="absolute bottom-[-2px] w-1 h-1 bg-ikonga-pink rounded-full shadow-lg shadow-pink-500/50" />
+                                <span className="absolute bottom-[-2px] w-1 h-1 bg-ikonga-coral rounded-full shadow-lg shadow-pink-500/50" />
                             )}
                         </Link>
                     );

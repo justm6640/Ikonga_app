@@ -9,10 +9,10 @@ const PILLARS = [
         subtitle: "Gourmande & Intuitive",
         desc: "Finies les privations. Apprenez à nourrir votre corps avec des recettes éclatantes qui soutiennent votre métabolisme.",
         icon: Salad,
-        color: "from-pink-50 to-rose-50 text-ikonga-pink",
+        color: "from-pink-50 to-rose-50 text-ikonga-coral",
         label: "Pillar 01",
         span: "lg:col-span-2 lg:row-span-2",
-        iconBg: "bg-ikonga-pink/10",
+        iconBg: "bg-ikonga-coral/10",
         img: null
     },
     {
@@ -56,7 +56,7 @@ export function BentoMethod() {
                         <motion.span
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
-                            className="text-xs font-bold uppercase tracking-[0.3em] text-ikonga-pink"
+                            className="text-xs font-bold uppercase tracking-[0.3em] text-ikonga-coral"
                         >
                             La Méthode IKONGA
                         </motion.span>
@@ -98,7 +98,7 @@ export function BentoMethod() {
 
                             <div className="space-y-2 mb-4">
                                 <h3 className="text-2xl md:text-3xl font-bold text-slate-950 tracking-tight">{pillar.title}</h3>
-                                <p className="text-sm font-bold text-ikonga-pink/70 uppercase tracking-widest">{pillar.subtitle}</p>
+                                <p className="text-sm font-bold text-ikonga-coral/70 uppercase tracking-widest">{pillar.subtitle}</p>
                             </div>
 
                             <p className="text-slate-600/80 leading-relaxed max-w-xs font-sans">

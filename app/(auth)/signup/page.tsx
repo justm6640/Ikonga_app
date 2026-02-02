@@ -17,7 +17,7 @@ export default function SignupPage() {
 
                     <div className="mt-4 text-center text-sm">
                         Déjà un compte ?{" "}
-                        <Link href="/login" className="underline font-medium text-ikonga-pink">
+                        <Link href="/login" className="underline font-medium text-ikonga-coral">
                             Se connecter
                         </Link>
                     </div>
@@ -26,7 +26,7 @@ export default function SignupPage() {
             <div className="hidden bg-muted lg:block relative">
                 <div className="absolute inset-0 bg-ikonga-gradient opacity-10" />
                 <div className="flex items-center justify-center h-full">
-                    <h1 className="text-6xl font-serif text-ikonga-pink opacity-20">IKONGA</h1>
+                    <h1 className="text-6xl font-serif text-ikonga-coral opacity-20">IKONGA</h1>
                 </div>
             </div>
         </div>

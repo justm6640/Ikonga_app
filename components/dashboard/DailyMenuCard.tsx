@@ -24,13 +24,13 @@ export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
 
     if (!nutrition) {
         return (
-            <Card className="rounded-[2.5rem] border-dashed border-ikonga-pink/20 bg-ikonga-pink/[0.02] shadow-none h-full flex flex-col items-center justify-center p-8 text-center group hover:bg-ikonga-pink/[0.04] transition-colors">
-                <div className="w-16 h-16 rounded-full bg-ikonga-pink/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <ChefHat className="text-ikonga-pink" size={32} />
+            <Card className="rounded-[2.5rem] border-dashed border-ikonga-coral/20 bg-ikonga-coral/[0.02] shadow-none h-full flex flex-col items-center justify-center p-8 text-center group hover:bg-ikonga-coral/[0.04] transition-colors">
+                <div className="w-16 h-16 rounded-full bg-ikonga-coral/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <ChefHat className="text-ikonga-coral" size={32} />
                 </div>
                 <h3 className="text-lg font-serif font-bold text-slate-900 uppercase tracking-widest">Menu à venir</h3>
                 <p className="text-sm text-slate-500 mt-2 italic max-w-[200px]">Votre menu personnalisé est en cours de préparation...</p>
-                <Link href="/onboarding" className="mt-6 text-xs font-bold text-ikonga-pink uppercase tracking-widest hover:underline">
+                <Link href="/onboarding" className="mt-6 text-xs font-bold text-ikonga-coral uppercase tracking-widest hover:underline">
                     Générer mon menu →
                 </Link>
             </Card>
@@ -40,7 +40,7 @@ export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
     const { content, phase = "DETOX" } = nutrition
 
     const meals = [
-        { id: "breakfast", label: "Matin", icon: Coffee, text: content.breakfast, color: "text-ikonga-pink", bg: "bg-ikonga-pink/5" },
+        { id: "breakfast", label: "Matin", icon: Coffee, text: content.breakfast, color: "text-ikonga-coral", bg: "bg-ikonga-coral/5" },
         { id: "lunch", label: "Midi", icon: Salad, text: content.lunch, color: "text-pillar-nutrition", bg: "bg-pillar-nutrition/5" },
         { id: "snack", label: "Goûter", icon: Apple, text: content.snack, color: "text-pillar-fitness", bg: "bg-pillar-fitness/5" },
         { id: "dinner", label: "Soir", icon: Soup, text: content.dinner, color: "text-pillar-wellness", bg: "bg-pillar-wellness/5" },
@@ -74,7 +74,7 @@ export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
                     <h3 className="font-serif font-bold text-slate-900 uppercase tracking-tighter text-lg">
                         {nutrition.title}
                     </h3>
-                    <ChefHat className="text-ikonga-pink opacity-20" size={24} />
+                    <ChefHat className="text-ikonga-coral opacity-20" size={24} />
                 </div>
 
                 <div className="space-y-3">
@@ -83,7 +83,7 @@ export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
                             key={meal.id}
                             onClick={() => handleMealClick(meal.text)}
                             className={cn(
-                                "group p-4 rounded-3xl border border-slate-100 bg-white hover:border-ikonga-pink/30 hover:shadow-lg hover:shadow-pink-500/5 transition-all duration-300 cursor-pointer relative overflow-hidden",
+                                "group p-4 rounded-3xl border border-slate-100 bg-white hover:border-ikonga-coral/30 hover:shadow-lg hover:shadow-pink-500/5 transition-all duration-300 cursor-pointer relative overflow-hidden",
                                 isLoading && "opacity-50 pointer-events-none"
                             )}
                         >
@@ -103,7 +103,7 @@ export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
 
                             {/* Subtle indicator that it's clickable */}
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <ChefHat size={16} className="text-ikonga-pink" />
+                                <ChefHat size={16} className="text-ikonga-coral" />
                             </div>
                         </div>
                     ))}
@@ -112,9 +112,9 @@ export function DailyMenuCard({ nutrition }: DailyMenuCardProps) {
                 {/* Shopping List Link */}
                 <Link
                     href="/shopping-list"
-                    className="block w-full p-4 mt-4 rounded-2xl bg-gradient-to-r from-ikonga-pink/10 to-pink-100/50 border border-ikonga-pink/20 hover:border-ikonga-pink/40 transition-all text-center group"
+                    className="block w-full p-4 mt-4 rounded-2xl bg-gradient-to-r from-ikonga-coral/10 to-pink-100/50 border border-ikonga-coral/20 hover:border-ikonga-coral/40 transition-all text-center group"
                 >
-                    <span className="text-sm font-bold text-ikonga-pink group-hover:underline">
+                    <span className="text-sm font-bold text-ikonga-coral group-hover:underline">
                         📋 Voir ma liste de courses
                     </span>
                 </Link>

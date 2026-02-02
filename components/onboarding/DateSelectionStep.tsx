@@ -49,7 +49,7 @@ export function DateSelectionStep({ userId, onNext }: DateSelectionStepProps) {
         >
             <div className="text-center space-y-2">
                 <h2 className="text-3xl md:text-4xl font-serif font-black text-slate-900 uppercase tracking-tighter leading-tight">
-                    Quand souhaites-tu <br /> <span className="text-ikonga-pink underline decoration-pink-100 italic">débuter</span> ?
+                    Quand souhaites-tu <br /> <span className="text-ikonga-coral underline decoration-pink-100 italic">débuter</span> ?
                 </h2>
                 <p className="text-slate-500 font-light text-lg">
                     Ton programme s'adaptera parfaitement à ton timing.
@@ -62,10 +62,10 @@ export function DateSelectionStep({ userId, onNext }: DateSelectionStepProps) {
                     disabled={!!loading}
                     onClick={() => handleSelect('NOW')}
                     className={`group relative flex items-center gap-5 p-8 rounded-[2.5rem] bg-white border-2 transition-all text-left shadow-sm
-                        ${loading === 'NOW' ? 'border-ikonga-pink ring-4 ring-pink-50' : 'border-slate-50 hover:border-ikonga-pink/30 hover:shadow-xl hover:shadow-pink-500/5'}
+                        ${loading === 'NOW' ? 'border-ikonga-coral ring-4 ring-pink-50' : 'border-slate-50 hover:border-ikonga-coral/30 hover:shadow-xl hover:shadow-pink-500/5'}
                     `}
                 >
-                    <div className="w-14 h-14 rounded-2xl bg-pink-50 flex items-center justify-center text-ikonga-pink group-hover:scale-110 transition-transform">
+                    <div className="w-14 h-14 rounded-2xl bg-pink-50 flex items-center justify-center text-ikonga-coral group-hover:scale-110 transition-transform">
                         {loading === 'NOW' ? <Loader2 className="animate-spin" /> : <Calendar className="w-7 h-7" />}
                     </div>
                     <div className="flex-1">
@@ -78,7 +78,7 @@ export function DateSelectionStep({ userId, onNext }: DateSelectionStepProps) {
                     </div>
                     {loading === 'NOW' && (
                         <div className="absolute top-4 right-8">
-                            <span className="text-[10px] text-ikonga-pink font-black uppercase tracking-widest animate-pulse">Activation...</span>
+                            <span className="text-[10px] text-ikonga-coral font-black uppercase tracking-widest animate-pulse">Activation...</span>
                         </div>
                     )}
                 </button>
@@ -88,7 +88,7 @@ export function DateSelectionStep({ userId, onNext }: DateSelectionStepProps) {
                     disabled={!!loading}
                     onClick={() => handleSelect('MONDAY')}
                     className={`group relative flex items-center gap-5 p-8 rounded-[2.5rem] bg-white border-2 transition-all text-left shadow-sm
-                        ${loading === 'MONDAY' ? 'border-ikonga-pink ring-4 ring-pink-50' : 'border-slate-50 hover:border-ikonga-pink/30 hover:shadow-xl hover:shadow-pink-500/5'}
+                        ${loading === 'MONDAY' ? 'border-ikonga-coral ring-4 ring-pink-50' : 'border-slate-50 hover:border-ikonga-coral/30 hover:shadow-xl hover:shadow-pink-500/5'}
                     `}
                 >
                     <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
@@ -106,7 +106,7 @@ export function DateSelectionStep({ userId, onNext }: DateSelectionStepProps) {
                     </div>
                     {loading === 'MONDAY' && (
                         <div className="absolute top-4 right-8">
-                            <span className="text-[10px] text-ikonga-pink font-black uppercase tracking-widest animate-pulse">Planification...</span>
+                            <span className="text-[10px] text-ikonga-coral font-black uppercase tracking-widest animate-pulse">Planification...</span>
                         </div>
                     )}
                 </button>

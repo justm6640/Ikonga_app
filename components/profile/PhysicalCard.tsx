@@ -141,11 +141,11 @@ export function PhysicalCard({ user }: PhysicalCardProps) {
                                 name="targetWeight"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="flex items-center gap-2 text-ikonga-pink font-semibold">
+                                        <FormLabel className="flex items-center gap-2 text-ikonga-coral font-semibold">
                                             <Target size={14} /> Objectif (kg)
                                         </FormLabel>
                                         <FormControl>
-                                            <Input type="number" step="0.1" {...field} className="bg-pink-50 border-pink-100 text-ikonga-pink font-bold" />
+                                            <Input type="number" step="0.1" {...field} className="bg-pink-50 border-pink-100 text-ikonga-coral font-bold" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -181,7 +181,7 @@ export function PhysicalCard({ user }: PhysicalCardProps) {
                                     </>
                                 ) : (
                                     <>
-                                        <Activity className="mr-2 h-4 w-4 text-ikonga-pink" /> Mettre à jour mes métriques
+                                        <Activity className="mr-2 h-4 w-4 text-ikonga-coral" /> Mettre à jour mes métriques
                                     </>
                                 )}
                             </Button>

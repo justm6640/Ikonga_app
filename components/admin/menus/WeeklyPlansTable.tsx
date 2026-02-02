@@ -68,14 +68,14 @@ export function WeeklyPlansTable({ plans, weekStart }: { plans: any[], weekStart
                                                 <div className="flex flex-col min-w-0">
                                                     <span className="font-bold text-slate-900 truncate text-sm sm:text-base">{plan.user.firstName || "Inconnue"}</span>
                                                     <span className="text-[10px] text-slate-400 font-medium truncate hidden sm:block">{plan.user.email}</span>
-                                                    <Badge variant="outline" className="sm:hidden w-fit mt-1 rounded-full bg-ikonga-pink/5 text-ikonga-pink border-ikonga-pink/20 font-bold uppercase text-[8px] px-1 h-3.5">
+                                                    <Badge variant="outline" className="sm:hidden w-fit mt-1 rounded-full bg-ikonga-coral/5 text-ikonga-coral border-ikonga-coral/20 font-bold uppercase text-[8px] px-1 h-3.5">
                                                         {plan.phase}
                                                     </Badge>
                                                 </div>
                                             </div>
                                         </TableCell>
                                         <TableCell className="py-4 px-6 hidden sm:table-cell">
-                                            <Badge variant="outline" className="rounded-full bg-ikonga-pink/5 text-ikonga-pink border-ikonga-pink/20 font-bold uppercase text-[9px]">
+                                            <Badge variant="outline" className="rounded-full bg-ikonga-coral/5 text-ikonga-coral border-ikonga-coral/20 font-bold uppercase text-[9px]">
                                                 {plan.phase}
                                             </Badge>
                                         </TableCell>
@@ -87,7 +87,7 @@ export function WeeklyPlansTable({ plans, weekStart }: { plans: any[], weekStart
                                         <TableCell className="py-4 px-6 text-right">
                                             <Sheet>
                                                 <SheetTrigger asChild>
-                                                    <Button size="sm" variant="outline" className="rounded-full border-slate-200 hover:border-ikonga-pink hover:text-ikonga-pink group/btn px-3 sm:px-4">
+                                                    <Button size="sm" variant="outline" className="rounded-full border-slate-200 hover:border-ikonga-coral hover:text-ikonga-coral group/btn px-3 sm:px-4">
                                                         <Edit2 size={14} className="sm:mr-2" />
                                                         <span className="hidden sm:inline">Modifier</span>
                                                     </Button>

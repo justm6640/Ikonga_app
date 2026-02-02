@@ -49,9 +49,9 @@ export function LoadingStep() {
                     className="absolute -inset-8 bg-pink-200 rounded-full blur-3xl"
                 />
 
-                <div className="relative w-32 h-32 rounded-full border-b-4 border-ikonga-pink animate-spin">
+                <div className="relative w-32 h-32 rounded-full border-b-4 border-ikonga-coral animate-spin">
                     <div className="absolute inset-2 rounded-full border-t-2 border-slate-100 flex items-center justify-center">
-                        <Zap className="text-ikonga-pink w-10 h-10 fill-ikonga-pink/10" />
+                        <Zap className="text-ikonga-coral w-10 h-10 fill-ikonga-coral/10" />
                     </div>
                 </div>
             </div>

@@ -6,10 +6,10 @@ import Link from "next/link"
 export default function VerifyEmailPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-ikonga-soft p-4">
-            <Card className="w-full max-w-md border-ikonga-pink/20 bg-white/80 backdrop-blur-sm shadow-xl">
+            <Card className="w-full max-w-md border-ikonga-coral/20 bg-white/80 backdrop-blur-sm shadow-xl">
                 <CardHeader className="text-center pb-2">
-                    <div className="mx-auto mb-4 bg-ikonga-pink/10 p-3 rounded-full w-fit">
-                        <Mail className="h-8 w-8 text-ikonga-pink" />
+                    <div className="mx-auto mb-4 bg-ikonga-coral/10 p-3 rounded-full w-fit">
+                        <Mail className="h-8 w-8 text-ikonga-coral" />
                     </div>
                     <CardTitle className="text-2xl font-serif text-primary">
                         Vérifiez votre boîte mail

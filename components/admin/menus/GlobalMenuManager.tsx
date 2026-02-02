@@ -188,7 +188,7 @@ function CreateMenuDialog({ onSuccess, open, onOpenChange }: { onSuccess: () => 
 
                     <div className="flex justify-end gap-3">
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Annuler</Button>
-                        <Button type="submit" disabled={isSubmitting} className="bg-ikonga-pink text-white hover:bg-pink-600 rounded-full px-8">
+                        <Button type="submit" disabled={isSubmitting} className="bg-ikonga-coral text-white hover:bg-pink-600 rounded-full px-8">
                             {isSubmitting && <Loader2 className="animate-spin mr-2" />}
                             Créer le menu
                         </Button>

@@ -81,7 +81,7 @@ export function ForgotPasswordForm() {
 
             <Link
                 href="/login"
-                className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-ikonga-pink transition-colors"
+                className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-ikonga-coral transition-colors"
             >
                 <ArrowLeft size={14} />
                 Retour à la connexion

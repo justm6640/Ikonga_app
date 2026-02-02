@@ -5,26 +5,39 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  // IKONGA Charter: Base button styles
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-sans font-medium transition-colors focus-visible:outline-dotted focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
+        // Charter: Primary (filled) - coral bg, black text
         default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+          "bg-ikonga-coral text-black shadow-form hover:bg-ikonga-pink-accent border-0 rounded-button",
+        // Charter: Outline - coral border, rounded-full
         outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+          "border-2 border-ikonga-coral text-ikonga-coral bg-transparent hover:bg-ikonga-pink-accent hover:text-black hover:border-ikonga-pink-accent rounded-pill",
+        // Ghost variant for subtle actions
+        ghost: "hover:bg-slate-light hover:text-slate-dark",
+        // Destructive (keep standard)
+        destructive:
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 rounded-button",
+        // Secondary (using charter colors)
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-slate-light text-slate-dark shadow-sm hover:bg-slate-border rounded-button",
+        // Link variant
+        link: "text-ikonga-coral underline-offset-4 hover:underline hover:text-ikonga-pink-accent",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        // Charter: Desktop padding - 15px 30px
+        default: "h-auto px-[30px] py-[15px] text-base leading-[1em]",
+        // Charter: Tablet padding - 14px 28px (≤921px)
+        tablet: "h-auto px-[28px] py-[14px] text-base leading-[1em]",
+        // Charter: Mobile padding - 12px 24px (≤544px)
+        mobile: "h-auto px-[24px] py-[12px] text-base leading-[1em]",
+        // Small size for compact UIs
+        sm: "h-auto px-4 py-2 text-sm",
+        // Icon button
+        icon: "h-9 w-9 p-0",
       },
     },
     defaultVariants: {
@@ -36,7 +49,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean
 }
 

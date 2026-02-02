@@ -31,7 +31,7 @@ export function Sidebar() {
                 className={cn(
                     "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group",
                     isActive
-                        ? "bg-ikonga-pink text-white shadow-lg shadow-pink-500/20 font-bold"
+                        ? "bg-ikonga-coral text-white shadow-lg shadow-pink-500/20 font-bold"
                         : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                 )}
             >

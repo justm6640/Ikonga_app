@@ -32,7 +32,7 @@ export function HeroSection() {
                         transition={{ duration: 0.8, ease: "easeOut" }}
                     >
                         <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-md border border-white px-4 py-2 rounded-full mb-6">
-                            <Sparkles size={16} className="text-ikonga-pink" />
+                            <Sparkles size={16} className="text-ikonga-coral" />
                             <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Le coaching nouvelle génération</span>
                         </div>
                         <h1 className="text-4xl sm:text-5xl md:text-7xl xl:text-8xl font-serif text-slate-950 leading-[1.05] tracking-tight">
@@ -47,7 +47,7 @@ export function HeroSection() {
                             transition={{ delay: 1, duration: 1 }}
                             className="absolute -top-4 -right-8 hidden xl:block"
                         >
-                            <span className="font-hand text-3xl text-ikonga-pink opacity-80 decoration-ikonga-pink underline decoration-2 underline-offset-8">
+                            <span className="font-hand text-3xl text-ikonga-coral opacity-80 decoration-ikonga-coral underline decoration-2 underline-offset-8">
                                 Enfin pour vous !
                             </span>
                         </motion.div>
@@ -102,12 +102,12 @@ export function HeroSection() {
                         <div className="relative h-full w-full bg-white rounded-[2.8rem] overflow-hidden flex flex-col pt-10 px-6">
                             <div className="flex justify-between items-center mb-8">
                                 <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center">
-                                    <div className="w-4 h-4 rounded-full bg-ikonga-pink" />
+                                    <div className="w-4 h-4 rounded-full bg-ikonga-coral" />
                                 </div>
                                 <div className="w-8 h-8 rounded-full bg-slate-100" />
                             </div>
 
-                            <h2 className="text-2xl font-serif mb-6 leading-tight">Bonjour, <br /><span className="text-ikonga-pink">Sophie ✨</span></h2>
+                            <h2 className="text-2xl font-serif mb-6 leading-tight">Bonjour, <br /><span className="text-ikonga-coral">Sophie ✨</span></h2>
 
                             <div className="space-y-6">
                                 <div className="p-5 bg-pink-50 rounded-3xl space-y-3">
@@ -116,7 +116,7 @@ export function HeroSection() {
                                         <span>Jour 4/14</span>
                                     </div>
                                     <div className="h-2 bg-white rounded-full overflow-hidden">
-                                        <div className="h-full bg-ikonga-pink w-1/3" />
+                                        <div className="h-full bg-ikonga-coral w-1/3" />
                                     </div>
                                 </div>
 

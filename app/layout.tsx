@@ -7,17 +7,20 @@ const dmSerif = DM_Serif_Display({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-serif",
+  display: "swap",  // Prevent FOIT
 });
 
 const poppins = Poppins({
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600"],  // Charter: normal, medium, semibold
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",  // Prevent FOIT
 });
 
 const dancingScript = Dancing_Script({
   subsets: ["latin"],
   variable: "--font-hand",
+  display: "swap",  // Prevent FOIT
 });
 
 export const metadata: Metadata = {

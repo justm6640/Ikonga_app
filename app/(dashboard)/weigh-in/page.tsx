@@ -76,8 +76,8 @@ export default async function WeighInPage(props: {
                 <div className="grid grid-cols-3 gap-3 md:gap-6 mb-8 animate-in fade-in slide-in-from-top-6 duration-700 delay-150">
                     {/* Current Weight */}
                     <div className="group relative bg-gradient-to-br from-white to-slate-50/50 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 border border-slate-100/50 shadow-lg shadow-slate-200/30 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                        <div className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-2xl bg-ikonga-pink/10 hidden md:block">
-                            <Scale size={20} className="text-ikonga-pink" strokeWidth={2.5} />
+                        <div className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-2xl bg-ikonga-coral/10 hidden md:block">
+                            <Scale size={20} className="text-ikonga-coral" strokeWidth={2.5} />
                         </div>
                         <div className="space-y-1">
                             <p className="text-[10px] md:text-xs uppercase tracking-wider font-black text-slate-400">Poids</p>

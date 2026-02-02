@@ -40,7 +40,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                         name="q"
                         defaultValue={query}
                         placeholder="Rechercher par email ou prénom..."
-                        className="pl-10 h-11 rounded-xl bg-white border-slate-200 focus:ring-ikonga-pink focus:border-ikonga-pink"
+                        className="pl-10 h-11 rounded-xl bg-white border-slate-200 focus:ring-ikonga-coral focus:border-ikonga-coral"
                     />
                 </form>
             </div>

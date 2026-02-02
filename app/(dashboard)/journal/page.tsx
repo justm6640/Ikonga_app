@@ -17,7 +17,7 @@ export default async function JournalPage() {
             {/* Back Link */}
             <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-2 text-slate-400 font-black text-[10px] uppercase tracking-widest mb-8 hover:text-ikonga-pink transition-colors"
+                className="inline-flex items-center gap-2 text-slate-400 font-black text-[10px] uppercase tracking-widest mb-8 hover:text-ikonga-coral transition-colors"
             >
                 <ChevronLeft size={14} /> Retour au tableau de bord
             </Link>
@@ -26,7 +26,7 @@ export default async function JournalPage() {
                 <h1 className="text-3xl font-serif font-black text-slate-900 mb-1 leading-tight">
                     Comment vous sentez-vous aujourd'hui ?
                 </h1>
-                <p className="text-ikonga-pink font-hand text-2xl capitalize">
+                <p className="text-ikonga-coral font-hand text-2xl capitalize">
                     {todayDate}
                 </p>
             </header>

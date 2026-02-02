@@ -18,12 +18,12 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
             className="flex flex-col items-center text-center space-y-8"
         >
             <div className="w-20 h-20 rounded-3xl bg-pink-50 flex items-center justify-center mb-4">
-                <Sparkles className="text-ikonga-pink w-10 h-10 animate-pulse" />
+                <Sparkles className="text-ikonga-coral w-10 h-10 animate-pulse" />
             </div>
 
             <div className="space-y-4 max-w-lg">
                 <h1 className="text-4xl md:text-5xl font-serif font-black text-slate-900 tracking-tighter uppercase leading-tight">
-                    Bienvenue chez <span className="text-ikonga-pink">Ikonga</span>.
+                    Bienvenue chez <span className="text-ikonga-coral">Ikonga</span>.
                 </h1>
                 <p className="text-slate-500 text-lg md:text-xl font-light leading-relaxed">
                     Ton voyage vers une meilleure santé commence ici. Prenons un moment pour configurer ton espace.

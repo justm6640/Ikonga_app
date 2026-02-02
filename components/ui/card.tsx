@@ -9,7 +9,8 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border bg-card text-card-foreground shadow",
+      // IKONGA Charter: 6px border-radius for cards
+      "rounded-card border border-slate-border bg-white text-slate-medium shadow-sm",
       className
     )}
     {...props}
@@ -35,7 +36,11 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("font-semibold leading-none tracking-tight", className)}
+    className={cn(
+      // IKONGA Charter: Use serif font for card titles (they're headings)
+      "font-serif font-semibold leading-none tracking-tight text-slate-dark",
+      className
+    )}
     {...props}
   />
 ))
@@ -47,7 +52,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-slate-medium", className)}
     {...props}
   />
 ))

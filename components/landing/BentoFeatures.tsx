@@ -8,7 +8,7 @@ const FEATURES = [
         title: "Nutrition",
         desc: "Des menus personnalisés et gourmands adaptés à votre métabolisme.",
         icon: Utensils,
-        color: "bg-pink-100 text-ikonga-pink",
+        color: "bg-pink-100 text-ikonga-coral",
         span: "col-span-1 md:col-span-2",
         img: null // Placeholder for potential image decoration
     },

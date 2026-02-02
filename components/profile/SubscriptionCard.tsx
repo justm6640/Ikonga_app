@@ -34,7 +34,7 @@ export function SubscriptionCard({ user, currentPhaseLabel }: SubscriptionCardPr
                 <div className="flex items-center justify-between">
                     <div>
                         <CardTitle className="text-xl font-serif flex items-center gap-2">
-                            <Crown className="w-5 h-5 text-ikonga-pink" />
+                            <Crown className="w-5 h-5 text-ikonga-coral" />
                             Ton Abonnement
                         </CardTitle>
                         <CardDescription>Détails de ton accompagnement</CardDescription>

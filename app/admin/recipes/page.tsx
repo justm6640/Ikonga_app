@@ -57,13 +57,13 @@ export default async function AdminRecipesPage({
                                     <TableRow key={recipe.id} className="group hover:bg-slate-50/50 transition-colors">
                                         <TableCell className="py-4 px-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-ikonga-pink/5 flex items-center justify-center text-ikonga-pink group-hover:bg-white group-hover:shadow-sm transition-all flex-shrink-0">
+                                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-ikonga-coral/5 flex items-center justify-center text-ikonga-coral group-hover:bg-white group-hover:shadow-sm transition-all flex-shrink-0">
                                                     <ChefHat size={18} />
                                                 </div>
                                                 <div className="flex flex-col min-w-0">
                                                     <span className="font-bold text-slate-900 truncate text-sm sm:text-base">{recipe.name}</span>
                                                     <div className="flex gap-2 items-center mt-1">
-                                                        <Badge className="bg-ikonga-pink/5 text-ikonga-pink border-none text-[8px] px-2 h-4 uppercase font-black">
+                                                        <Badge className="bg-ikonga-coral/5 text-ikonga-coral border-none text-[8px] px-2 h-4 uppercase font-black">
                                                             {recipe.phase}
                                                         </Badge>
                                                         <div className="sm:hidden flex items-center gap-1 text-slate-400 text-[9px] font-bold">

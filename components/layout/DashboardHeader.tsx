@@ -33,7 +33,7 @@ export async function DashboardHeader({ user }: DashboardHeaderProps) {
             {/* Left: Greeting */}
             <div>
                 <h2 className="text-2xl font-serif text-foreground">
-                    Hello <span className="text-ikonga-pink">{userName}</span>
+                    Hello <span className="text-ikonga-coral">{userName}</span>
                 </h2>
                 <p className="text-sm text-muted-foreground font-hand hidden sm:block">
                     Prête pour une belle journée ?

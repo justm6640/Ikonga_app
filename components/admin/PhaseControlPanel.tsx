@@ -100,7 +100,7 @@ export function PhaseControlPanel({ user }: PhaseControlPanelProps) {
                             placeholder="Ex: Arrêt maladie, Prolongation de phase, Écart pendant les fêtes..."
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            className="rounded-2xl border-slate-200 focus:ring-ikonga-pink focus:border-ikonga-pink min-h-[100px]"
+                            className="rounded-2xl border-slate-200 focus:ring-ikonga-coral focus:border-ikonga-coral min-h-[100px]"
                         />
                         <Button
                             onClick={handleSaveManualSettings}

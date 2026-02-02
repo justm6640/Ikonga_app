@@ -31,7 +31,7 @@ export function BMRBuilding({ bmr, targetBmr }: BMRBuildingProps) {
                             className={cn(
                                 "h-2 w-full rounded-sm",
                                 isFilled ? "bg-ikonga-gradient shadow-sm" :
-                                    isPartial ? "bg-ikonga-orange/50 overflow-hidden relative" : "bg-slate-50"
+                                    isPartial ? "bg-ikonga-coral/50 overflow-hidden relative" : "bg-slate-50"
                             )}
                         >
                             {isPartial && (

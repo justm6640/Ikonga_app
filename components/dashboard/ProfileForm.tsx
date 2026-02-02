@@ -166,7 +166,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="flex items-center gap-2">
-                                        <Weight size={16} className="text-ikonga-pink" />
+                                        <Weight size={16} className="text-ikonga-coral" />
                                         Poids Cible (kg)
                                     </FormLabel>
                                     <FormControl>

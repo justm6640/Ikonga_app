@@ -63,8 +63,8 @@ export function Footer() {
                         <div className="space-y-4">
                             <h4 className="font-bold text-slate-900 uppercase text-xs tracking-widest">Réseaux</h4>
                             <div className="flex gap-4">
-                                <Instagram className="text-slate-400 cursor-pointer hover:text-ikonga-pink transition-colors" size={20} />
-                                <Facebook className="text-slate-400 cursor-pointer hover:text-ikonga-pink transition-colors" size={20} />
+                                <Instagram className="text-slate-400 cursor-pointer hover:text-ikonga-coral transition-colors" size={20} />
+                                <Facebook className="text-slate-400 cursor-pointer hover:text-ikonga-coral transition-colors" size={20} />
                             </div>
                         </div>
                     </div>

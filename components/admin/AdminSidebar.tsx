@@ -48,7 +48,7 @@ export function AdminSidebar() {
                     </div>
                     <div>
                         <h1 className="text-white font-bold tracking-tight text-lg leading-none">IKONGA</h1>
-                        <p className="text-[10px] uppercase font-black tracking-[0.2em] text-ikonga-pink mt-1">Admin Panel</p>
+                        <p className="text-[10px] uppercase font-black tracking-[0.2em] text-ikonga-coral mt-1">Admin Panel</p>
                     </div>
                 </div>
             </div>
@@ -75,13 +75,13 @@ export function AdminSidebar() {
                             <div className="flex items-center gap-3">
                                 <div className={cn(
                                     "p-2 rounded-xl transition-colors",
-                                    isActive ? "bg-ikonga-pink/20 text-ikonga-pink" : "text-slate-500 group-hover:text-slate-300"
+                                    isActive ? "bg-ikonga-coral/20 text-ikonga-coral" : "text-slate-500 group-hover:text-slate-300"
                                 )}>
                                     <item.icon size={20} />
                                 </div>
                                 <span className="font-semibold text-sm">{item.label}</span>
                             </div>
-                            {isActive && <ChevronRight size={14} className="text-ikonga-pink animate-pulse" />}
+                            {isActive && <ChevronRight size={14} className="text-ikonga-coral animate-pulse" />}
                         </Link>
                     )
                 })}

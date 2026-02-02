@@ -17,18 +17,18 @@ export function Footer() {
                     <div className="space-y-6">
                         <h4 className="text-xs font-bold uppercase tracking-widest text-slate-900">Navigation</h4>
                         <ul className="space-y-4 text-sm text-slate-500">
-                            <li><a href="#method" className="hover:text-ikonga-pink transition-colors">La Méthode</a></li>
-                            <li><a href="#how-it-works" className="hover:text-ikonga-pink transition-colors">Les Phases</a></li>
-                            <li><a href="#testimonials" className="hover:text-ikonga-pink transition-colors">Témoignages</a></li>
+                            <li><a href="#method" className="hover:text-ikonga-coral transition-colors">La Méthode</a></li>
+                            <li><a href="#how-it-works" className="hover:text-ikonga-coral transition-colors">Les Phases</a></li>
+                            <li><a href="#testimonials" className="hover:text-ikonga-coral transition-colors">Témoignages</a></li>
                         </ul>
                     </div>
 
                     <div className="space-y-6">
                         <h4 className="text-xs font-bold uppercase tracking-widest text-slate-900">Légal</h4>
                         <ul className="space-y-4 text-sm text-slate-500">
-                            <li><a href="#" className="hover:text-ikonga-pink transition-colors">CGU</a></li>
-                            <li><a href="#" className="hover:text-ikonga-pink transition-colors">Confidentialité</a></li>
-                            <li><a href="#" className="hover:text-ikonga-pink transition-colors">Mentions Légales</a></li>
+                            <li><a href="#" className="hover:text-ikonga-coral transition-colors">CGU</a></li>
+                            <li><a href="#" className="hover:text-ikonga-coral transition-colors">Confidentialité</a></li>
+                            <li><a href="#" className="hover:text-ikonga-coral transition-colors">Mentions Légales</a></li>
                         </ul>
                     </div>
                 </div>

@@ -32,9 +32,9 @@ export function WeeklyMenuGrid({ weeklyPlan, phase = "DETOX" }: WeeklyMenuGridPr
 
     if (!weeklyPlan || !weeklyPlan.content) {
         return (
-            <Card className="rounded-[2.5rem] border-dashed border-ikonga-pink/20 bg-ikonga-pink/[0.02] shadow-none h-64 flex flex-col items-center justify-center p-8 text-center group hover:bg-ikonga-pink/[0.04] transition-colors">
-                <div className="w-16 h-16 rounded-full bg-ikonga-pink/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <ChefHat className="text-ikonga-pink" size={32} />
+            <Card className="rounded-[2.5rem] border-dashed border-ikonga-coral/20 bg-ikonga-coral/[0.02] shadow-none h-64 flex flex-col items-center justify-center p-8 text-center group hover:bg-ikonga-coral/[0.04] transition-colors">
+                <div className="w-16 h-16 rounded-full bg-ikonga-coral/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <ChefHat className="text-ikonga-coral" size={32} />
                 </div>
                 <h3 className="text-lg font-serif font-bold text-slate-900 uppercase tracking-widest">Menu à venir</h3>
                 <p className="text-sm text-slate-500 mt-2 italic max-w-[200px]">Votre menu personnalisé est en cours de préparation...</p>
@@ -66,8 +66,8 @@ export function WeeklyMenuGrid({ weeklyPlan, phase = "DETOX" }: WeeklyMenuGridPr
     return (
         <div className="space-y-8">
             <div className="flex items-center gap-3 mb-2 px-2">
-                <div className="w-10 h-10 rounded-2xl bg-ikonga-pink/10 flex items-center justify-center">
-                    <Calendar className="text-ikonga-pink" size={20} />
+                <div className="w-10 h-10 rounded-2xl bg-ikonga-coral/10 flex items-center justify-center">
+                    <Calendar className="text-ikonga-coral" size={20} />
                 </div>
                 <div>
                     <h3 className="font-serif font-black text-slate-900 uppercase tracking-tighter text-xl leading-none">
@@ -83,7 +83,7 @@ export function WeeklyMenuGrid({ weeklyPlan, phase = "DETOX" }: WeeklyMenuGridPr
                 {DAYS.map((day, index) => {
                     const dayMenu = content[day.id] || {}
                     const meals = [
-                        { id: "breakfast", label: "Matin", icon: Coffee, text: dayMenu.breakfast, color: "text-ikonga-pink" },
+                        { id: "breakfast", label: "Matin", icon: Coffee, text: dayMenu.breakfast, color: "text-ikonga-coral" },
                         { id: "lunch", label: "Midi", icon: Salad, text: dayMenu.lunch, color: "text-pillar-nutrition" },
                         { id: "snack", label: "Goûter", icon: Apple, text: dayMenu.snack, color: "text-pillar-fitness" },
                         { id: "dinner", label: "Soir", icon: Soup, text: dayMenu.dinner, color: "text-pillar-wellness" },
@@ -100,7 +100,7 @@ export function WeeklyMenuGrid({ weeklyPlan, phase = "DETOX" }: WeeklyMenuGridPr
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <BadgeDay label={day.label} isToday={day.id === new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()} />
-                                        <ChefHat className="text-ikonga-pink opacity-10" size={20} />
+                                        <ChefHat className="text-ikonga-coral opacity-10" size={20} />
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -109,7 +109,7 @@ export function WeeklyMenuGrid({ weeklyPlan, phase = "DETOX" }: WeeklyMenuGridPr
                                                 key={meal.id}
                                                 onClick={() => handleMealClick(meal.text)}
                                                 className={cn(
-                                                    "group p-3 rounded-2xl border border-slate-50 bg-slate-50/30 hover:bg-white hover:border-ikonga-pink/20 hover:shadow-md transition-all duration-300 cursor-pointer relative",
+                                                    "group p-3 rounded-2xl border border-slate-50 bg-slate-50/30 hover:bg-white hover:border-ikonga-coral/20 hover:shadow-md transition-all duration-300 cursor-pointer relative",
                                                     isLoading && "opacity-50 pointer-events-none"
                                                 )}
                                             >
@@ -150,7 +150,7 @@ function BadgeDay({ label, isToday }: { label: string, isToday: boolean }) {
         <div className={cn(
             "px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all",
             isToday
-                ? "bg-ikonga-pink text-white border-ikonga-pink shadow-lg shadow-pink-500/20"
+                ? "bg-ikonga-coral text-white border-ikonga-coral shadow-lg shadow-pink-500/20"
                 : "bg-slate-50 text-slate-400 border-slate-100"
         )}>
             {label} {isToday && "• Aujourd'hui"}

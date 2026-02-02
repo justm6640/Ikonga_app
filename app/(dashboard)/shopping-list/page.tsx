@@ -35,7 +35,7 @@ export default async function ShoppingListPage() {
 
                         {/* Phase Badge */}
                         <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-50 to-orange-50 border border-pink-100 rounded-full shadow-sm shadow-pink-200/50">
-                            <Sparkles size={16} className="text-ikonga-pink" />
+                            <Sparkles size={16} className="text-ikonga-coral" />
                             <span className="text-sm font-semibold text-pink-700 uppercase tracking-wider">
                                 Phase {data.phaseName}
                             </span>
@@ -59,7 +59,7 @@ export default async function ShoppingListPage() {
                     {/* Weekly Menu Overview (Secondary in this view) */}
                     <section className="space-y-8">
                         <div className="flex items-center gap-4 px-2">
-                            <div className="w-1 h-8 bg-ikonga-pink rounded-full" />
+                            <div className="w-1 h-8 bg-ikonga-coral rounded-full" />
                             <h2 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tighter">Aperçu de la semaine</h2>
                         </div>
                         <WeeklyMenuGrid

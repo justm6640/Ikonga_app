@@ -82,7 +82,7 @@ export function MenuVisualizer({ menu, isCompleted, date }: MenuVisualizerProps)
                                     </div>
                                 </div>
                                 <div className="hidden group-hover:block transition-all">
-                                    <ChefHat className="text-ikonga-pink/20" size={24} />
+                                    <ChefHat className="text-ikonga-coral/20" size={24} />
                                 </div>
                             </div>
                         </CardContent>

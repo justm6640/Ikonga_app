@@ -331,11 +331,11 @@ export function AuthForm({ mode }: AuthFormProps) {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-ikonga-pink focus:outline-none p-1 transition-colors duration-200"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-ikonga-coral focus:outline-none p-1 transition-colors duration-200"
                                 tabIndex={-1}
                                 title={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                             >
-                                {showPassword ? <EyeOff size={20} className="text-ikonga-pink" /> : <Eye size={20} />}
+                                {showPassword ? <EyeOff size={20} className="text-ikonga-coral" /> : <Eye size={20} />}
                             </button>
                         </div>
                     </div>

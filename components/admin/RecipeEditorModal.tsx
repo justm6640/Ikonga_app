@@ -165,7 +165,7 @@ export function RecipeEditorModal({ isOpen, onClose, recipe }: RecipeEditorModal
 
                     <div className="pt-6 flex justify-end gap-3">
                         <Button variant="ghost" onClick={onClose} className="rounded-full">Annuler</Button>
-                        <Button onClick={handleSave} disabled={isPending} className="rounded-full bg-ikonga-pink hover:bg-ikonga-pink/90 text-white px-8">
+                        <Button onClick={handleSave} disabled={isPending} className="rounded-full bg-ikonga-coral hover:bg-ikonga-coral/90 text-white px-8">
                             {isPending ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2" />}
                             Sauvegarder
                         </Button>

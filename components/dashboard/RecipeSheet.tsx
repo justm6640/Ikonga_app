@@ -79,14 +79,14 @@ export function RecipeSheet({ isOpen, onClose, recipe }: RecipeSheetProps) {
                         {/* Ingredients */}
                         <div className="space-y-4">
                             <h3 className="text-xl font-serif font-bold text-slate-900 flex items-center gap-2">
-                                <span className="w-8 h-1 bg-ikonga-pink rounded-full" />
+                                <span className="w-8 h-1 bg-ikonga-coral rounded-full" />
                                 Ingrédients
                             </h3>
                             <div className="grid gap-2">
                                 {recipe.ingredients.map((ing: string, i: number) => (
                                     <div key={i} className="flex items-start gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm group">
                                         <div className="mt-1">
-                                            <CheckCircle2 size={18} className="text-slate-300 group-hover:text-ikonga-pink transition-colors" />
+                                            <CheckCircle2 size={18} className="text-slate-300 group-hover:text-ikonga-coral transition-colors" />
                                         </div>
                                         <span className="text-slate-700 font-medium">{ing}</span>
                                     </div>
@@ -97,7 +97,7 @@ export function RecipeSheet({ isOpen, onClose, recipe }: RecipeSheetProps) {
                         {/* Instructions */}
                         <div className="space-y-4 pb-10">
                             <h3 className="text-xl font-serif font-bold text-slate-900 flex items-center gap-2">
-                                <span className="w-8 h-1 bg-ikonga-pink rounded-full" />
+                                <span className="w-8 h-1 bg-ikonga-coral rounded-full" />
                                 Préparation
                             </h3>
                             <div className="space-y-4">

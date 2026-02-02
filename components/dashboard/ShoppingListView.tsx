@@ -101,13 +101,13 @@ export function ShoppingListView({ categories, phaseName }: ShoppingListViewProp
             {/* Premium Action Bar */}
             <div className="flex flex-col sm:flex-row items-center justify-between p-8 bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 gap-6">
                 <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-2xl bg-ikonga-pink text-white flex items-center justify-center shadow-lg shadow-pink-500/30">
+                    <div className="w-14 h-14 rounded-2xl bg-ikonga-coral text-white flex items-center justify-center shadow-lg shadow-pink-500/30">
                         <ShoppingBasket size={28} />
                     </div>
                     <div>
                         <h2 className="text-2xl font-serif font-black text-slate-900 tracking-tighter uppercase leading-none">Panier de Courses</h2>
                         <div className="flex items-center gap-2 mt-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-ikonga-pink animate-pulse" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-ikonga-coral animate-pulse" />
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Semaine active • {phaseName}</p>
                         </div>
                     </div>
@@ -116,7 +116,7 @@ export function ShoppingListView({ categories, phaseName }: ShoppingListViewProp
                 <Button
                     onClick={copyToClipboard}
                     variant="outline"
-                    className="rounded-full px-8 border-slate-200 hover:border-ikonga-pink hover:bg-pink-50 text-slate-600 hover:text-ikonga-pink font-black uppercase tracking-widest text-[10px] h-14 transition-all duration-300 group"
+                    className="rounded-full px-8 border-slate-200 hover:border-ikonga-coral hover:bg-pink-50 text-slate-600 hover:text-ikonga-coral font-black uppercase tracking-widest text-[10px] h-14 transition-all duration-300 group"
                 >
                     <Copy size={16} className="mr-3 group-hover:scale-110 transition-transform" />
                     Copier la liste
@@ -143,7 +143,7 @@ export function ShoppingListView({ categories, phaseName }: ShoppingListViewProp
                                         <div className="flex items-center gap-5">
                                             <div className={cn(
                                                 "p-4 rounded-2xl transition-all duration-500",
-                                                isAllChecked ? "bg-emerald-50 text-emerald-500" : "bg-slate-50 text-slate-400 group-hover:bg-ikonga-pink/10 group-hover:text-ikonga-pink"
+                                                isAllChecked ? "bg-emerald-50 text-emerald-500" : "bg-slate-50 text-slate-400 group-hover:bg-ikonga-coral/10 group-hover:text-ikonga-coral"
                                             )}>
                                                 <Icon size={24} />
                                             </div>
@@ -173,7 +173,7 @@ export function ShoppingListView({ categories, phaseName }: ShoppingListViewProp
                                                         "group flex items-center justify-between p-5 rounded-[2rem] border-2 transition-all duration-300 cursor-pointer",
                                                         isChecked
                                                             ? "bg-slate-50/80 border-transparent opacity-60"
-                                                            : "bg-white border-slate-50 hover:border-ikonga-pink/20 hover:shadow-lg hover:shadow-slate-200/50"
+                                                            : "bg-white border-slate-50 hover:border-ikonga-coral/20 hover:shadow-lg hover:shadow-slate-200/50"
                                                     )}
                                                 >
                                                     <div className="flex items-center gap-5">
@@ -181,7 +181,7 @@ export function ShoppingListView({ categories, phaseName }: ShoppingListViewProp
                                                             id={itemKey}
                                                             checked={isChecked}
                                                             onCheckedChange={() => toggleItem(category.name, item.name)}
-                                                            className="rounded-xl border-slate-200 data-[state=checked]:bg-ikonga-pink data-[state=checked]:border-ikonga-pink w-6 h-6 shadow-sm"
+                                                            className="rounded-xl border-slate-200 data-[state=checked]:bg-ikonga-coral data-[state=checked]:border-ikonga-coral w-6 h-6 shadow-sm"
                                                         />
                                                         <div>
                                                             <p className={cn(
@@ -193,7 +193,7 @@ export function ShoppingListView({ categories, phaseName }: ShoppingListViewProp
                                                             {item.amount && (
                                                                 <span className={cn(
                                                                     "text-[10px] uppercase font-bold tracking-widest mt-0.5 block",
-                                                                    isChecked ? "text-slate-300" : "text-ikonga-pink"
+                                                                    isChecked ? "text-slate-300" : "text-ikonga-coral"
                                                                 )}>
                                                                     {item.amount}
                                                                 </span>

@@ -9,7 +9,15 @@ const Textarea = React.forwardRef<
   return (
     <textarea
       className={cn(
-        "flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        // IKONGA Charter: Textarea styles (similar to input)
+        "flex min-h-[60px] w-full px-4 py-3 rounded-form",
+        "font-sans text-base font-normal leading-[24px]",
+        "border border-slate-border bg-slate-light",
+        "text-[#475569] placeholder:text-[#9CA3AF]",
+        "shadow-form",
+        "transition-colors",
+        "focus:border-focus-blue focus:outline-none focus:shadow-none",
+        "disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       ref={ref}

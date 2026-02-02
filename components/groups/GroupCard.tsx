@@ -48,7 +48,7 @@ export function GroupCard({ name, description, status, unlockDate, onClick }: Gr
                                 </span>
                             )}
                             {isAnticipated && (
-                                <span className="text-[10px] font-black uppercase tracking-wider bg-ikonga-orange/10 text-ikonga-orange px-3 py-1 rounded-full flex items-center gap-1.5">
+                                <span className="text-[10px] font-black uppercase tracking-wider bg-ikonga-coral/10 text-ikonga-coral px-3 py-1 rounded-full flex items-center gap-1.5">
                                     <Sparkles size={10} />
                                     Accès anticipé
                                 </span>
@@ -96,7 +96,7 @@ export function GroupCard({ name, description, status, unlockDate, onClick }: Gr
                         )}
 
                         {isActive && (
-                            <div className="h-10 w-10 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-ikonga-pink group-hover:text-white transition-all duration-300">
+                            <div className="h-10 w-10 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-ikonga-coral group-hover:text-white transition-all duration-300">
                                 <ArrowRight size={20} />
                             </div>
                         )}

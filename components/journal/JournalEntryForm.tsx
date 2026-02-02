@@ -79,7 +79,7 @@ export function JournalEntryForm({ initialData }: JournalEntryFormProps) {
                             className={cn(
                                 "flex-1 flex flex-col items-center gap-2 p-4 rounded-[2rem] transition-all border-2 min-w-[80px]",
                                 mood === m.value
-                                    ? "bg-ikonga-pink text-white border-ikonga-pink shadow-lg shadow-pink-200"
+                                    ? "bg-ikonga-coral text-white border-ikonga-coral shadow-lg shadow-pink-200"
                                     : "bg-white border-slate-100 text-slate-400 hover:border-slate-200"
                             )}
                         >
@@ -108,7 +108,7 @@ export function JournalEntryForm({ initialData }: JournalEntryFormProps) {
                             className={cn(
                                 "flex flex-col items-center gap-2 p-5 rounded-[2rem] transition-all border-2",
                                 digestion === d.value
-                                    ? "bg-ikonga-orange text-white border-ikonga-orange shadow-lg shadow-orange-200"
+                                    ? "bg-ikonga-coral text-white border-ikonga-coral shadow-lg shadow-orange-200"
                                     : "bg-white border-slate-100 text-slate-400 hover:border-slate-200"
                             )}
                         >
@@ -253,11 +253,11 @@ export function JournalEntryForm({ initialData }: JournalEntryFormProps) {
             {/* Notes */}
             <section className="space-y-4">
                 <Label className="text-xl font-serif font-bold text-slate-800 flex items-center gap-2">
-                    <MessageSquare size={22} className="text-ikonga-pink" /> Notes du jour
+                    <MessageSquare size={22} className="text-ikonga-coral" /> Notes du jour
                 </Label>
                 <Textarea
                     placeholder="Un ressenti particulier ? Une victoire aujourd'hui ?"
-                    className="rounded-[2rem] border-slate-100 p-8 min-h-[150px] focus:ring-ikonga-pink bg-slate-50/30 text-slate-700 font-medium leading-relaxed resize-none"
+                    className="rounded-[2rem] border-slate-100 p-8 min-h-[150px] focus:ring-ikonga-coral bg-slate-50/30 text-slate-700 font-medium leading-relaxed resize-none"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                 />

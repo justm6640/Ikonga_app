@@ -47,8 +47,8 @@ export function EvolutionChart({
                 <div className="flex justify-between items-start">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                            <TrendingDown size={14} className="text-ikonga-pink" />
-                            <span className="text-[10px] font-black uppercase tracking-wider text-ikonga-pink">Performances</span>
+                            <TrendingDown size={14} className="text-ikonga-coral" />
+                            <span className="text-[10px] font-black uppercase tracking-wider text-ikonga-coral">Performances</span>
                         </div>
                         <CardTitle className="text-xl font-serif font-black text-slate-900">Courbe des Phases</CardTitle>
                     </div>

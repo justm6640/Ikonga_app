@@ -54,7 +54,7 @@ export function CountdownHero({ daysRemaining, userName }: CountdownHeroProps) {
                                 </h1>
                                 <div className="inline-block">
                                     <div className="bg-white border-2 border-slate-200 px-8 py-4 rounded-3xl shadow-sm">
-                                        <p className="text-5xl md:text-6xl font-black text-ikonga-pink">
+                                        <p className="text-5xl md:text-6xl font-black text-ikonga-coral">
                                             {daysRemaining}
                                         </p>
                                         <p className="text-sm text-slate-500 font-medium uppercase tracking-widest mt-1">
@@ -75,7 +75,7 @@ export function CountdownHero({ daysRemaining, userName }: CountdownHeroProps) {
                                     {isPreparationMode ? (
                                         <>
                                             Tes menus sont prêts ! Tu peux déjà consulter ta{" "}
-                                            <span className="font-bold text-ikonga-pink">liste de courses</span> pour
+                                            <span className="font-bold text-ikonga-coral">liste de courses</span> pour
                                             tout préparer sereinement.
                                         </>
                                     ) : (
@@ -109,7 +109,7 @@ export function CountdownHero({ daysRemaining, userName }: CountdownHeroProps) {
                     <div className="pt-2">
                         <p className="text-xs text-slate-400 font-light">
                             Pas prêt ? Tu peux{" "}
-                            <Link href="/profile" className="underline hover:text-ikonga-pink transition-colors font-medium">
+                            <Link href="/profile" className="underline hover:text-ikonga-coral transition-colors font-medium">
                                 changer ta date
                             </Link>
                             {" "}dans ton profil.

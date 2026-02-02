@@ -26,13 +26,13 @@ export function AnalysisWidget({ analysis }: AnalysisWidgetProps) {
         return (
             <Card className="border-none bg-gradient-to-br from-pink-50 to-purple-50 backdrop-blur-sm shadow-xl mb-6 rounded-[2.5rem] overflow-hidden">
                 <CardContent className="py-16 text-center relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-ikonga-pink/5 to-purple-500/5" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-ikonga-coral/5 to-purple-500/5" />
                     <motion.div
                         animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
                         transition={{ repeat: Infinity, duration: 2 }}
                         className="relative z-10"
                     >
-                        <Sparkles className="h-12 w-12 text-ikonga-pink mx-auto mb-4 animate-glow" />
+                        <Sparkles className="h-12 w-12 text-ikonga-coral mx-auto mb-4 animate-glow" />
                     </motion.div>
                     <p className="text-lg font-serif italic text-slate-600 relative z-10">
                         Rosy analyse ton profil avec attention...
@@ -93,21 +93,21 @@ export function AnalysisWidget({ analysis }: AnalysisWidgetProps) {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-ikonga-pink to-orange-400 p-[3px] shadow-2xl shadow-pink-200/50"
+                className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-ikonga-coral to-orange-400 p-[3px] shadow-2xl shadow-pink-200/50"
             >
                 <div className="bg-white rounded-[2.4rem] p-8 md:p-10 relative overflow-hidden">
                     {/* Decorative elements */}
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-ikonga-pink/5 rounded-full -mr-24 -mt-24 blur-3xl" />
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-ikonga-coral/5 rounded-full -mr-24 -mt-24 blur-3xl" />
                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-400/5 rounded-full -ml-16 -mb-16 blur-2xl" />
 
-                    <Quote className="absolute top-6 left-6 h-8 w-8 text-ikonga-pink/20 fill-ikonga-pink/20" />
+                    <Quote className="absolute top-6 left-6 h-8 w-8 text-ikonga-coral/20 fill-ikonga-coral/20" />
 
                     <div className="relative z-10 space-y-3">
                         <div className="flex items-center gap-2 mb-4">
                             <div className="bg-ikonga-gradient p-2 rounded-xl">
                                 <Sparkles size={18} className="text-white" />
                             </div>
-                            <span className="text-xs font-black uppercase tracking-[0.2em] text-ikonga-pink">Analyse Rosy</span>
+                            <span className="text-xs font-black uppercase tracking-[0.2em] text-ikonga-coral">Analyse Rosy</span>
                         </div>
                         <p className="text-xl md:text-2xl font-serif text-slate-800 leading-relaxed italic">
                             {analysis.introduction}

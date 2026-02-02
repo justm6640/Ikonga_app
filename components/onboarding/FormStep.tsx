@@ -33,10 +33,10 @@ export function FormStep({ onNext }: FormStepProps) {
         >
             <div className="text-center space-y-2">
                 <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                    <ClipboardList className="text-ikonga-pink w-8 h-8" />
+                    <ClipboardList className="text-ikonga-coral w-8 h-8" />
                 </div>
                 <h2 className="text-3xl md:text-4xl font-serif font-black text-slate-900 uppercase tracking-tighter">
-                    Ton <span className="text-ikonga-pink">Profil</span> Santé
+                    Ton <span className="text-ikonga-coral">Profil</span> Santé
                 </h2>
                 <p className="text-slate-500 font-light text-lg">
                     Aide-nous à affiner ton programme en quelques secondes.
@@ -47,7 +47,7 @@ export function FormStep({ onNext }: FormStepProps) {
                 <div className="space-y-4">
                     <Label className="text-[10px] uppercase tracking-widest font-black text-slate-400 ml-1">Quel est ton objectif principal ?</Label>
                     <Select onValueChange={setObjective}>
-                        <SelectTrigger className="h-14 rounded-2xl bg-white border-slate-100 text-lg shadow-sm focus:ring-ikonga-pink">
+                        <SelectTrigger className="h-14 rounded-2xl bg-white border-slate-100 text-lg shadow-sm focus:ring-ikonga-coral">
                             <SelectValue placeholder="Choisir un objectif" />
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
@@ -64,7 +64,7 @@ export function FormStep({ onNext }: FormStepProps) {
                         placeholder="Ex: Noix, Gluten, Lactose..."
                         value={allergies}
                         onChange={(e) => setAllergies(e.target.value)}
-                        className="h-14 rounded-2xl bg-white border-slate-100 text-lg shadow-sm focus:ring-ikonga-pink"
+                        className="h-14 rounded-2xl bg-white border-slate-100 text-lg shadow-sm focus:ring-ikonga-coral"
                     />
                     <p className="text-[10px] text-slate-400 italic ml-1">* Laisse vide si aucune allergie.</p>
                 </div>
@@ -82,7 +82,7 @@ export function FormStep({ onNext }: FormStepProps) {
 
                 <button
                     onClick={onNext}
-                    className="text-slate-400 text-xs uppercase tracking-widest font-black hover:text-ikonga-pink transition-colors underline decoration-slate-200 underline-offset-4"
+                    className="text-slate-400 text-xs uppercase tracking-widest font-black hover:text-ikonga-coral transition-colors underline decoration-slate-200 underline-offset-4"
                 >
                     Passer cette étape
                 </button>

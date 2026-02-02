@@ -70,7 +70,7 @@ export function HowItWorks() {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.8 }}
                         whileInView={{ opacity: 1, scale: 1 }}
-                        className="inline-flex items-center gap-2 bg-pink-50 text-ikonga-pink px-4 py-2 rounded-full mb-6 font-bold text-xs uppercase tracking-widest"
+                        className="inline-flex items-center gap-2 bg-pink-50 text-ikonga-coral px-4 py-2 rounded-full mb-6 font-bold text-xs uppercase tracking-widest"
                     >
                         <Sparkles size={14} /> Le Parcours en 4 Phases
                     </motion.div>
@@ -136,7 +136,7 @@ export function HowItWorks() {
                                                 <span className="text-xs font-black text-slate-300 tracking-tighter text-3xl italic">{phase.id}</span>
                                                 <h3 className="text-3xl font-bold text-slate-950">{phase.name}</h3>
                                             </div>
-                                            <p className="text-xl font-serif text-ikonga-pink tracking-tight italic">{phase.title}</p>
+                                            <p className="text-xl font-serif text-ikonga-coral tracking-tight italic">{phase.title}</p>
                                         </div>
                                         <p className="text-slate-500 leading-relaxed font-sans max-w-sm mx-auto md:mx-0">
                                             {phase.desc}

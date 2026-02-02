@@ -79,7 +79,7 @@ export function RecipeModal({ isOpen, onClose, recipe }: RecipeModalProps) {
                         <Badge className="bg-white/90 backdrop-blur-md text-slate-900 border-none px-3 sm:px-4 py-1 sm:py-1.5 rounded-full font-black uppercase tracking-widest text-[9px] sm:text-[10px] shadow-lg">
                             {recipe.phase || "DETOX"}
                         </Badge>
-                        <Badge className="bg-ikonga-pink text-white border-none px-3 sm:px-4 py-1 sm:py-1.5 rounded-full font-black uppercase tracking-widest text-[9px] sm:text-[10px] shadow-lg shadow-pink-500/20">
+                        <Badge className="bg-ikonga-coral text-white border-none px-3 sm:px-4 py-1 sm:py-1.5 rounded-full font-black uppercase tracking-widest text-[9px] sm:text-[10px] shadow-lg shadow-pink-500/20">
                             <Flame size={10} className="mr-1" />
                             {recipe.calories || 0} kcal
                         </Badge>
@@ -92,11 +92,11 @@ export function RecipeModal({ isOpen, onClose, recipe }: RecipeModalProps) {
                     <DialogHeader className="mb-4 sm:mb-6 space-y-2">
                         <div className="flex items-center gap-3 sm:gap-4 text-slate-400 font-bold uppercase tracking-widest text-[9px] sm:text-[10px]">
                             <div className="flex items-center gap-1.5">
-                                <Clock size={12} className="text-ikonga-pink sm:w-3.5 sm:h-3.5" />
+                                <Clock size={12} className="text-ikonga-coral sm:w-3.5 sm:h-3.5" />
                                 {recipe.prepTime || 15} MIN
                             </div>
                             <div className="flex items-center gap-1.5">
-                                <BarChart3 size={12} className="text-ikonga-pink sm:w-3.5 sm:h-3.5" />
+                                <BarChart3 size={12} className="text-ikonga-coral sm:w-3.5 sm:h-3.5" />
                                 {recipe.difficulty || "MODÉRÉ"}
                             </div>
                         </div>
@@ -129,13 +129,13 @@ export function RecipeModal({ isOpen, onClose, recipe }: RecipeModalProps) {
                                                     "flex items-center gap-4 p-4 rounded-3xl border transition-all cursor-pointer group",
                                                     checkedIngredients[i]
                                                         ? "bg-slate-50 border-slate-100 opacity-60"
-                                                        : "bg-white border-slate-100 hover:border-ikonga-pink/20 hover:shadow-lg hover:shadow-slate-200/50"
+                                                        : "bg-white border-slate-100 hover:border-ikonga-coral/20 hover:shadow-lg hover:shadow-slate-200/50"
                                                 )}
                                             >
                                                 <Checkbox
                                                     checked={checkedIngredients[i]}
                                                     onCheckedChange={() => toggleIngredient(i)}
-                                                    className="rounded-lg border-slate-200 data-[state=checked]:bg-ikonga-pink data-[state=checked]:border-ikonga-pink w-6 h-6"
+                                                    className="rounded-lg border-slate-200 data-[state=checked]:bg-ikonga-coral data-[state=checked]:border-ikonga-coral w-6 h-6"
                                                 />
                                                 <span className={cn(
                                                     "text-sm font-bold text-slate-700 transition-all",
@@ -152,7 +152,7 @@ export function RecipeModal({ isOpen, onClose, recipe }: RecipeModalProps) {
                                 <TabsContent value="instructions" className="mt-0 space-y-8 pb-8 focus-visible:outline-none">
                                     {instructions.map((step: string, i: number) => (
                                         <div key={i} className="flex gap-6 relative group">
-                                            <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-white border-2 border-slate-100 text-slate-900 flex items-center justify-center font-black text-sm shadow-sm group-hover:border-ikonga-pink group-hover:text-ikonga-pink transition-all">
+                                            <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-white border-2 border-slate-100 text-slate-900 flex items-center justify-center font-black text-sm shadow-sm group-hover:border-ikonga-coral group-hover:text-ikonga-coral transition-all">
                                                 {i + 1}
                                             </div>
                                             <div className="pt-2.5 space-y-2">

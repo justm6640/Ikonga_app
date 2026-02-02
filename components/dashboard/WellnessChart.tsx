@@ -68,7 +68,7 @@ export function WellnessChart({ data, analysis }: WellnessChartProps) {
                 <div className="flex items-center justify-between mb-4">
                     <div>
                         <CardTitle className="text-xl font-serif font-bold text-slate-900 flex items-center gap-2">
-                            <Activity className="text-ikonga-pink" size={20} /> Équilibre Life
+                            <Activity className="text-ikonga-coral" size={20} /> Équilibre Life
                         </CardTitle>
                         <p className="text-sm text-slate-400 font-medium">Évolution Bien-être (7j)</p>
                     </div>

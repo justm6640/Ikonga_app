@@ -8,7 +8,7 @@ export default function NewMenuPage() {
             <div className="flex flex-col gap-4">
                 <Link
                     href="/admin/menus"
-                    className="flex items-center gap-2 text-sm text-slate-500 hover:text-ikonga-pink transition-colors w-fit"
+                    className="flex items-center gap-2 text-sm text-slate-500 hover:text-ikonga-coral transition-colors w-fit"
                 >
                     <ChevronLeft size={16} />
                     Retour aux menus

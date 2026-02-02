@@ -60,7 +60,7 @@ export function VideoPlayer({ videoId, videoUrl, isCompleted, title, onComplete 
             {/* Completion Section */}
             <div className="flex flex-col items-center gap-4 py-4">
                 <div className="w-full max-w-sm flex flex-col items-center gap-6">
-                    <div className="w-16 h-1 bg-ikonga-pink/20 rounded-full" />
+                    <div className="w-16 h-1 bg-ikonga-coral/20 rounded-full" />
 
                     <Button
                         onClick={handleToggle}

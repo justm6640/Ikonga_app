@@ -20,16 +20,16 @@ export function FloatingNavbar() {
                 </Link>
 
                 <div className="hidden md:flex items-center gap-10">
-                    <Link href="#method" className="text-sm font-medium text-slate-500 hover:text-ikonga-pink transition-colors">La Méthode</Link>
-                    <Link href="#how-it-works" className="text-sm font-medium text-slate-500 hover:text-ikonga-pink transition-colors">Les Phases</Link>
-                    <Link href="#tarifs" className="text-sm font-medium text-slate-500 hover:text-ikonga-pink transition-colors">Tarifs</Link>
-                    <Link href="#testimonials" className="text-sm font-medium text-slate-500 hover:text-ikonga-pink transition-colors">Témoignages</Link>
+                    <Link href="#method" className="text-sm font-medium text-slate-500 hover:text-ikonga-coral transition-colors">La Méthode</Link>
+                    <Link href="#how-it-works" className="text-sm font-medium text-slate-500 hover:text-ikonga-coral transition-colors">Les Phases</Link>
+                    <Link href="#tarifs" className="text-sm font-medium text-slate-500 hover:text-ikonga-coral transition-colors">Tarifs</Link>
+                    <Link href="#testimonials" className="text-sm font-medium text-slate-500 hover:text-ikonga-coral transition-colors">Témoignages</Link>
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-4">
                     <Link
                         href="/login"
-                        className="text-[10px] sm:text-sm font-bold text-slate-900 hover:text-ikonga-pink transition-colors px-2 sm:px-4 py-2"
+                        className="text-[10px] sm:text-sm font-bold text-slate-900 hover:text-ikonga-coral transition-colors px-2 sm:px-4 py-2"
                     >
                         Connexion
                     </Link>

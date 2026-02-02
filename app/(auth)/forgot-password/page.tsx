@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
                 {/* Visual side panel matching login style */}
                 <div className="absolute inset-0 bg-ikonga-gradient opacity-10" />
                 <div className="flex flex-col items-center justify-center h-full space-y-4 p-12 text-center">
-                    <h1 className="text-6xl font-serif text-ikonga-pink opacity-20">IKONGA</h1>
+                    <h1 className="text-6xl font-serif text-ikonga-coral opacity-20">IKONGA</h1>
                     <p className="text-slate-400 font-medium max-w-sm">
                         "Prendre soin de soi commence par être bienveillant envers soi-même."
                     </p>
