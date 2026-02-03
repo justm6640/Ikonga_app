@@ -18,7 +18,7 @@ interface CalendarData {
         id: string
         date: Date
         workout: { title: string; duration: number }
-        calories?: number
+        calories?: number | null
     }>
     planned: Array<{
         id: string
