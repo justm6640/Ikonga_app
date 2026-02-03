@@ -446,6 +446,7 @@ export async function getPhaseData() {
 
 /**
  * Récupère toutes les recettes avec filtres optionnels.
+ * Si aucune recette n'existe pour la phase, génère automatiquement les recettes à partir des menus.
  */
 export async function getRecipes(filters?: {
     phase?: PhaseType
@@ -454,6 +455,19 @@ export async function getRecipes(filters?: {
 }) {
     const user = await getOrCreateUser()
     if (!user) return []
+
+    const activePhase = filters?.phase || user.phases[0]?.type || "DETOX"
+
+    // Check if we have any recipes for this phase
+    const existingRecipesCount = await prisma.recipe.count({
+        where: { phase: activePhase.toString() }
+    })
+
+    // If no recipes exist for this phase, generate from user's menus
+    if (existingRecipesCount === 0) {
+        console.log(`[getRecipes] No recipes found for phase ${activePhase}. Triggering generation from menus...`)
+        await generateRecipesFromUserMenus(user.id, activePhase.toString())
+    }
 
     const where: any = {}
 
@@ -484,6 +498,65 @@ export async function getRecipes(filters?: {
     })
 
     return recipes
+}
+
+/**
+ * Génère les recettes manquantes à partir des menus de l'utilisateur.
+ */
+async function generateRecipesFromUserMenus(userId: string, phase: string) {
+    try {
+        // Récupérer tous les WeeklyPlans de l'utilisateur pour cette phase
+        const weeklyPlans = await prisma.weeklyPlan.findMany({
+            where: {
+                userId,
+                phase
+            }
+        })
+
+        if (weeklyPlans.length === 0) {
+            console.log(`[generateRecipesFromUserMenus] No weekly plans found for user ${userId}`)
+            return
+        }
+
+        const mealItems: { name: string, mealType: string }[] = []
+
+        const addMeal = (name: string, type: string) => {
+            if (name && name !== "Repas Libre" && !mealItems.some(m => m.name === name)) {
+                mealItems.push({ name, mealType: type })
+            }
+        }
+
+        const extractMealsFromDay = (day: any) => {
+            if (day.breakfast) addMeal(day.breakfast, "BREAKFAST")
+            if (day.lunch) addMeal(day.lunch, "LUNCH")
+            if (day.snack) addMeal(day.snack, "SNACK")
+            if (day.dinner) addMeal(day.dinner, "DINNER")
+        }
+
+        // Extraire les noms de repas de tous les menus
+        for (const plan of weeklyPlans) {
+            const content = plan.content as any
+
+            if (content.days && Array.isArray(content.days)) {
+                content.days.forEach(extractMealsFromDay)
+            } else {
+                // Format alternatif avec les noms de jours
+                const dayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+                dayKeys.forEach(key => {
+                    if (content[key]) extractMealsFromDay(content[key])
+                })
+            }
+        }
+
+        if (mealItems.length > 0) {
+            console.log(`[generateRecipesFromUserMenus] Generating ${mealItems.length} recipes for phase ${phase}`)
+            const { batchGenerateRecipes } = await import("../ai/recipe-generator")
+            await batchGenerateRecipes(mealItems, phase)
+        }
+
+    } catch (error) {
+        console.error("[generateRecipesFromUserMenus] Error:", error)
+    }
 }
 
 /**
