@@ -338,6 +338,8 @@ enum SubscriptionTier {
 
 enum PhaseType {
   DETOX
+  DETOX_VIP
+  ECE
   EQUILIBRE
   CONSOLIDATION
   ENTRETIEN

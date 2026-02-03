@@ -58,13 +58,14 @@ export async function getOrCreateUser() {
     if (!dbUser) {
         console.log(`Self-healing: Creating missing Prisma profile for ${user.email}`)
         try {
+            // Create user without phases first
             dbUser = await prisma.user.create({
                 data: {
                     id: user.id,
                     email: user.email,
                     firstName: user.user_metadata?.first_name || "",
                     lastName: user.user_metadata?.last_name || "",
-                    gender: "FEMALE", // Default based on schema
+                    gender: "FEMALE",
                     subscriptionTier: SubscriptionTier.STANDARD_6
                 },
                 include: {
@@ -72,9 +73,44 @@ export async function getOrCreateUser() {
                     phases: { where: { isActive: true }, take: 1 }
                 }
             })
+
+            // Generate all phases based on subscription tier
+            const { generatePhasesForSubscription } = await import("@/lib/nutrition/phase-generator")
+            await generatePhasesForSubscription(dbUser.id, dbUser.subscriptionTier)
+
+            // Re-fetch user with phases
+            dbUser = await prisma.user.findUnique({
+                where: { id: dbUser.id },
+                include: {
+                    analysis: true,
+                    phases: { where: { isActive: true }, take: 1 }
+                }
+            })
+            console.log(`Created user with subscription-based phases for ${user.email}`)
         } catch (creationError) {
             console.error("Critical error in getOrCreateUser:", creationError)
             return null
+        }
+    }
+
+    // 4. Self-healing: Create phases if user exists but has no active phase
+    if (dbUser && (!dbUser.phases || dbUser.phases.length === 0)) {
+        console.log(`Self-healing: Generating phases for user ${user.email} based on ${dbUser.subscriptionTier}`)
+        try {
+            const { generatePhasesForSubscription } = await import("@/lib/nutrition/phase-generator")
+            await generatePhasesForSubscription(dbUser.id, dbUser.subscriptionTier)
+
+            // Re-fetch user with the new phases
+            dbUser = await prisma.user.findUnique({
+                where: { id: dbUser.id },
+                include: {
+                    analysis: true,
+                    phases: { where: { isActive: true }, take: 1 }
+                }
+            })
+            console.log(`Generated subscription-based phases for existing user ${user.email}`)
+        } catch (phaseError) {
+            console.error("Error generating phases:", phaseError)
         }
     }
 
