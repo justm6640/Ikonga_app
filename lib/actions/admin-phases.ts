@@ -6,6 +6,8 @@ import { PhaseType, SubscriptionTier, SessionStatus } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { PhaseEngine } from "@/lib/engines/phase-engine"
 
+import { NotificationEngine } from "@/lib/engines/notification-engine"
+
 /**
  * INITIALISATION / RÉINITIALISATION DU CALENDRIER
  */
@@ -82,6 +84,16 @@ export async function overridePhase(userId: string, phaseType: PhaseType) {
                 actionType: "PHASE_OVERRIDE",
                 details: { newPhase: phaseType }
             }
+        })
+
+        // 4. Envoyer la notification prioritaire à l'abonné
+        await NotificationEngine.send({
+            userId,
+            title: "🧭 Ta coach a ajusté ton programme",
+            message: "Va voir ce qui change, c’est pour t’aider.",
+            category: "PHASE",
+            priority: "HIGH",
+            type: "COACH"
         })
 
         revalidatePath("/admin/users")

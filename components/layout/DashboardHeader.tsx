@@ -1,14 +1,8 @@
-import { Bell } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
-import prisma from "@/lib/prisma";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StreakCounter } from "@/components/gamification/StreakCounter";
 import { updateStreak } from "@/lib/actions/gamification";
-
 import { User } from "@prisma/client";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
-import { getUserNotifications, getUnreadCount } from "@/lib/actions/notifications";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 interface DashboardHeaderProps {
     user: User;
@@ -19,12 +13,6 @@ export async function DashboardHeader({ user }: DashboardHeaderProps) {
 
     // Trigger streak update on visit (Server Action)
     await updateStreak(user.id);
-
-    // Fetch initial notifications and count
-    const [initialNotifications, unreadCount] = await Promise.all([
-        getUserNotifications(user.id),
-        getUnreadCount(user.id)
-    ]);
 
     const userName = user.firstName || "Rosy";
 
@@ -45,12 +33,8 @@ export async function DashboardHeader({ user }: DashboardHeaderProps) {
                 {/* Streak Counter */}
                 <StreakCounter streak={(user as any).currentStreak || 0} />
 
-                {/* Notifications Bell */}
-                <NotificationBell
-                    userId={user.id}
-                    initialNotifications={initialNotifications as any}
-                    unreadCount={unreadCount}
-                />
+                {/* Notifications Center */}
+                <NotificationCenter />
 
                 {/* User Avatar */}
                 <Avatar className="h-10 w-10 border-2 border-background shadow-sm cursor-pointer hover:opacity-80 transition-opacity">

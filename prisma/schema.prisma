@@ -68,6 +68,7 @@ model User {
   weighIns          WeighIn[]
   onboardingState   OnboardingState?
   onboardingActions OnboardingAction[]
+  notificationPreferences UserNotificationPreference?
 
   @@index([email])
 }
@@ -214,10 +215,36 @@ model Notification {
   title       String
   message     String
   type        NotificationType @default(INFO) 
+  category    NotificationCategory @default(LIFESTYLE)
+  priority    NotificationPriority @default(LOW)
   isRead      Boolean          @default(false)
   link        String?          // Lien optionnel (ex: "/dashboard/weight")
+  metadata    Json?            // Données structurées additionnelles
   
   createdAt   DateTime         @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model UserNotificationPreference {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Catégories activables
+  enablePhases      Boolean  @default(true)
+  enableFollowup    Boolean  @default(true)
+  enableLifestyle   Boolean  @default(true)
+  enableWellness    Boolean  @default(true)
+  enableCommunity   Boolean  @default(true)
+  
+  // Paramètres temporels
+  quietHoursEnabled Boolean  @default(false)
+  quietHoursStart   String?  // ex: "21:00"
+  quietHoursEnd     String?  // ex: "08:00"
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Recipe {
@@ -373,6 +400,21 @@ enum NotificationType {
   WARNING
   ERROR
   COACH // Spécial pour les messages du coach
+}
+
+enum NotificationCategory {
+  PHASE      // Programme & Phases
+  FOLLOWUP   // Pesées & Suivi
+  LIFESTYLE  // Nutrition & Fitness
+  WELLNESS   // Bien-être & Émotions
+  HUMAN      // Coach & Communauté
+}
+
+enum NotificationPriority {
+  HIGH       // Rouge
+  MEDIUM     // Orange
+  LOW        // Jaune
+  GENTLE     // Vert
 }
 
 enum MemberStatus {

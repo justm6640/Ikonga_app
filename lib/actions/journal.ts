@@ -7,6 +7,7 @@ import { Mood, Digestion } from "@prisma/client"
 import { startOfDay, subDays } from "date-fns"
 import { calculateDailyScore } from "@/lib/engines/wellness"
 import { getOrCreateUser } from "./user"
+import { NotificationEngine } from "@/lib/engines/notification-engine"
 
 export async function saveJournalEntry(data: {
     mood?: Mood;
@@ -65,6 +66,29 @@ export async function saveJournalEntry(data: {
 
         revalidatePath("/dashboard")
         revalidatePath("/journal")
+
+        // 4. Déclencher des notifications intelligentes selon l'état
+        if (data.stressLevel && data.stressLevel >= 7) {
+            await NotificationEngine.send({
+                userId: dbUser.id,
+                title: "🧘 Un moment pour toi ?",
+                message: "Ton niveau de stress est élevé aujourd’hui. Et si tu prenais 5 min pour respirer ?",
+                category: "WELLNESS",
+                priority: "MEDIUM",
+                type: "WARNING"
+            })
+        }
+
+        if (data.energyLevel && data.energyLevel <= 3) {
+            await NotificationEngine.send({
+                userId: dbUser.id,
+                title: "🔋 Batteries à plat ?",
+                message: "C’est ok d’être fatiguée. Écoute ton corps, repose-toi ce soir.",
+                category: "WELLNESS",
+                priority: "LOW",
+                type: "INFO"
+            })
+        }
 
         return { success: true, entry }
     } catch (err: any) {

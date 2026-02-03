@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { IdentityCard } from "@/components/profile/IdentityCard"
 import { PhysicalCard } from "@/components/profile/PhysicalCard"
 import { SignOutButton } from "@/components/auth/SignOutButton"
+import { NotificationSettings } from "@/components/notifications/NotificationSettings"
 
 export default async function ProfilePage() {
     const supabase = await createClient()
@@ -42,6 +43,11 @@ export default async function ProfilePage() {
                 <div className="space-y-6">
                     <PhysicalCard user={dbUser} />
                 </div>
+            </div>
+
+            {/* Notification Settings Section */}
+            <div className="max-w-3xl mx-auto">
+                <NotificationSettings />
             </div>
 
             {/* Footer Action */}

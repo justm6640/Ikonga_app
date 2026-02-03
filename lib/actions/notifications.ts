@@ -1,100 +1,120 @@
 "use server"
 
+import { getOrCreateUser } from "./user"
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
-import { NotificationType } from "@prisma/client"
+import { NotificationCategory } from "@prisma/client"
 
 /**
- * Récupère les 20 dernières notifications pour un utilisateur.
+ * RÉCUPÉRATION DES NOTIFICATIONS
  */
-export async function getUserNotifications(userId: string) {
+export async function getUserNotifications() {
     try {
-        return await prisma.notification.findMany({
-            where: { userId },
+        const user = await getOrCreateUser()
+        if (!user) return []
+
+        const notifications = await prisma.notification.findMany({
+            where: { userId: user.id },
             orderBy: { createdAt: 'desc' },
-            take: 20
+            take: 50
         })
+
+        return notifications
     } catch (error) {
-        console.error("[GET_USER_NOTIFICATIONS]", error)
+        console.error("Error fetching notifications:", error)
         return []
     }
 }
 
 /**
- * Renvoie le nombre de notifications non lues.
+ * GESTION STATUT LECTURE
  */
-export async function getUnreadCount(userId: string) {
+export async function markNotificationAsRead(id: string) {
     try {
-        return await prisma.notification.count({
-            where: {
-                userId,
-                isRead: false
-            }
-        })
-    } catch (error) {
-        console.error("[GET_UNREAD_COUNT]", error)
-        return 0
-    }
-}
+        const user = await getOrCreateUser()
+        if (!user) throw new Error("Unauthorized")
 
-/**
- * Marque une notification spécifique comme lue.
- */
-export async function markAsRead(notificationId: string) {
-    try {
         await prisma.notification.update({
-            where: { id: notificationId },
+            where: { id, userId: user.id },
             data: { isRead: true }
         })
-        revalidatePath("/") // Revalidate dashboard/header for the bell icon
+
+        revalidatePath("/")
+        return { success: true }
     } catch (error) {
-        console.error("[MARK_AS_READ]", error)
+        console.error("Error marking notification as read:", error)
+        return { success: false }
     }
 }
 
-/**
- * Marque toutes les notifications d'un utilisateur comme lues.
- */
-export async function markAllAsRead(userId: string) {
+export async function markAllNotificationsAsRead() {
     try {
+        const user = await getOrCreateUser()
+        if (!user) throw new Error("Unauthorized")
+
         await prisma.notification.updateMany({
-            where: {
-                userId,
-                isRead: false
-            },
+            where: { userId: user.id, isRead: false },
             data: { isRead: true }
         })
+
         revalidatePath("/")
+        return { success: true }
     } catch (error) {
-        console.error("[MARK_ALL_AS_READ]", error)
+        console.error("Error marking all as read:", error)
+        return { success: false }
     }
 }
 
 /**
- * Crée une notification pour un utilisateur.
- * Utilité interne pour les autres actions serveurs.
+ * PRÉFÉRENCES
  */
-export async function createNotification(
-    userId: string,
-    title: string,
-    message: string,
-    type: NotificationType = NotificationType.INFO,
-    link?: string
-) {
+export async function getNotificationPreferences() {
     try {
-        const notif = await prisma.notification.create({
-            data: {
-                userId,
-                title,
-                message,
-                type,
-                link
-            }
+        const user = await getOrCreateUser()
+        if (!user) return null
+
+        let prefs = await prisma.userNotificationPreference.findUnique({
+            where: { userId: user.id }
         })
-        revalidatePath("/")
-        return notif
+
+        // Initialisation si inexistant
+        if (!prefs) {
+            prefs = await prisma.userNotificationPreference.create({
+                data: { userId: user.id }
+            })
+        }
+
+        return prefs
     } catch (error) {
-        console.error("[CREATE_NOTIFICATION]", error)
+        console.error("Error fetching preferences:", error)
         return null
+    }
+}
+
+export async function updateNotificationPreferences(data: {
+    enablePhases?: boolean
+    enableFollowup?: boolean
+    enableLifestyle?: boolean
+    enableWellness?: boolean
+    enableCommunity?: boolean
+    quietHoursEnabled?: boolean
+    quietHoursStart?: string
+    quietHoursEnd?: string
+}) {
+    try {
+        const user = await getOrCreateUser()
+        if (!user) throw new Error("Unauthorized")
+
+        await prisma.userNotificationPreference.upsert({
+            where: { userId: user.id },
+            update: data,
+            create: { userId: user.id, ...data }
+        })
+
+        revalidatePath("/profile")
+        return { success: true }
+    } catch (error) {
+        console.error("Error updating preferences:", error)
+        return { success: false }
     }
 }

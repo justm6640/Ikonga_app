@@ -5,7 +5,6 @@ import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { awardBadge } from "./gamification"
 import { NotificationType } from "@prisma/client"
-import { createNotification } from "./notifications"
 
 export type LogWeightResult = {
     status: "success" | "neutral" | "info" | "error" | "confirmation_needed" | "warning";
@@ -161,6 +160,7 @@ export async function saveWeightLog(
 
         // Notification checks (async)
         Promise.all([
+            sendWeighInFeedback(prismaUser.id, weight, lastLog?.weight),
             checkMilestones(prismaUser.id, weight),
             checkGoalAchievement(prismaUser.id, weight)
         ]).catch(err => console.error('Notification check failed:', err));
@@ -345,73 +345,100 @@ export async function getWeightStats() {
     } catch (error) { return null; }
 }
 
-// Phase 7: Notification Logic
-export async function checkAndSendWeighInReminder(userId: string) {
-    try {
-        const lastLog = await prisma.weighIn.findFirst({ where: { userId }, orderBy: { date: 'desc' } });
-        if (!lastLog) return;
-        const diffMs = Date.now() - new Date(lastLog.date).getTime();
-        const daysSince = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        if (daysSince >= 3) {
-            await createNotification(userId, "📊 Rappel Pesée", `Cela fait ${daysSince} jours depuis ta dernière pesée. On reste sur le coup ? 💪`, NotificationType.INFO, "/weigh-in");
-        }
-    } catch (e) { console.error(e); }
-}
+import { NotificationEngine } from "@/lib/engines/notification-engine"
 
-const milestones = [
-    { kg: 5, emoji: "🎉", message: "Premier palier franchi ! -5kg déjà !" },
-    { kg: 10, emoji: "🎊", message: "Double digits ! 10kg de moins, incroyable !" },
-    { kg: 15, emoji: "🌟", message: "15kg perdus ! Tu rayonnes de plus en plus !" },
-    { kg: 20, emoji: "💎", message: "Transformation extraordinaire ! -20kg, tu es un modèle !" },
-    { kg: 25, emoji: "👑", message: "Championne absolue ! -25kg atteints !" }
-];
+// ... (remplacer la section Phase 7 et les méthodes checkMilestones, checkGoalAchievement)
+
+/**
+ * GESTION DES NOTIFICATIONS DE PESÉE (Feedback immédiat)
+ */
+async function sendWeighInFeedback(userId: string, currentWeight: number, previousWeight?: number) {
+    if (!previousWeight) return
+
+    const diff = currentWeight - previousWeight
+    let title = ""
+    let message = ""
+    let priority: any = "LOW"
+    let type: any = "INFO"
+
+    if (diff < -0.1) {
+        title = "✨ Super baisse !"
+        message = "Tu continues de rayonner. Ton corps répond présent."
+        priority = "GENTLE"
+        type = "SUCCESS"
+    } else if (Math.abs(diff) <= 0.1) {
+        title = "👊 Stabilité validée"
+        message = "C'est une excellente nouvelle, ton corps consolide ses acquis."
+        priority = "GENTLE"
+        type = "INFO"
+    } else {
+        title = "🏔️ Un petit palier"
+        message = "Rien de grave, c'est juste une fluctuation. On ajuste doucement."
+        priority = "LOW"
+        type = "WARNING"
+    }
+
+    await NotificationEngine.send({
+        userId,
+        title,
+        message,
+        category: "FOLLOWUP",
+        priority,
+        type,
+        link: "/dashboard/weight"
+    })
+}
 
 async function checkMilestones(userId: string, currentWeight: number) {
     try {
-        const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (!user || !user.startWeight) return;
-        const totalLost = user.startWeight - currentWeight;
+        const user = await prisma.user.findUnique({ where: { id: userId } })
+        if (!user || !user.startWeight) return
+
+        const totalLost = user.startWeight - currentWeight
+        const milestones = [
+            { kg: 5, emoji: "🎉", message: "Premier palier franchi ! -5kg déjà !" },
+            { kg: 10, emoji: "🎊", message: "Double digits ! 10kg de moins, incroyable !" },
+            { kg: 20, emoji: "💎", message: "Transformation extraordinaire !" }
+        ]
+
         for (const m of milestones) {
             if (totalLost >= m.kg) {
-                const existing = await prisma.notification.findFirst({ where: { userId, title: { contains: `${m.kg}kg` } } });
+                const existing = await prisma.notification.findFirst({
+                    where: { userId, title: { contains: `${m.kg}kg` } }
+                })
                 if (!existing) {
-                    await createNotification(userId, `${m.emoji} Milestone : -${m.kg}kg`, m.message, NotificationType.SUCCESS, "/weigh-in");
+                    await NotificationEngine.send({
+                        userId,
+                        title: `${m.emoji} Milestone : -${m.kg}kg`,
+                        message: m.message,
+                        category: "FOLLOWUP",
+                        priority: "MEDIUM",
+                        type: "SUCCESS"
+                    })
                 }
             }
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error(e) }
 }
 
 async function checkGoalAchievement(userId: string, currentWeight: number) {
     try {
-        const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (!user || !user.targetWeight) return;
+        const user = await prisma.user.findUnique({ where: { id: userId } })
+        if (!user || !user.targetWeight) return
         if (Math.abs(currentWeight - user.targetWeight) <= 0.5) {
-            const existing = await prisma.notification.findFirst({ where: { userId, title: "🏆 OBJECTIF ATTEINT !" } });
+            const existing = await prisma.notification.findFirst({
+                where: { userId, title: "🏆 OBJECTIF ATTEINT !" }
+            })
             if (!existing) {
-                await createNotification(userId, "🏆 OBJECTIF ATTEINT !", `Félicitations ! Tu as atteint ton objectif de ${user.targetWeight} kg ! Quel parcours incroyable ! 💖`, NotificationType.SUCCESS, "/weigh-in");
+                await NotificationEngine.send({
+                    userId,
+                    title: "🏆 OBJECTIF ATTEINT !",
+                    message: `Félicitations ! Tu as atteint ton objectif de ${user.targetWeight} kg ! Quel parcours incroyable ! 💖`,
+                    category: "FOLLOWUP",
+                    priority: "HIGH",
+                    type: "SUCCESS"
+                })
             }
         }
-    } catch (e) { console.error(e); }
-}
-
-export async function sendWeeklySummary(userId: string) {
-    try {
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        const logs = await prisma.weighIn.findMany({ where: { userId, date: { gte: weekAgo } }, orderBy: { date: 'asc' } });
-        if (logs.length < 2) return;
-        const weeklyChange = logs[logs.length - 1].weight - logs[0].weight;
-        let message = "";
-        let type: NotificationType = NotificationType.INFO;
-        if (weeklyChange < -0.5) {
-            message = `Une superbe semaine ! ${Math.abs(weeklyChange).toFixed(1)} kg de perdus. Continue comme ça ! 🚀`;
-            type = NotificationType.SUCCESS;
-        } else if (weeklyChange > 0.5) {
-            message = `Semaine un peu plus chargée (+${weeklyChange.toFixed(1)} kg). Pas de panique, on se ressaisit ensemble ! 💪`;
-        } else {
-            message = `Une semaine stable ! La constance est la clé de ta réussite. ✨`;
-        }
-        await createNotification(userId, "📈 Bilan Hebdomadaire", message, type, "/weigh-in");
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error(e) }
 }

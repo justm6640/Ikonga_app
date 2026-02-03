@@ -1,5 +1,6 @@
 import { PrismaClient, PhaseType, SubscriptionTier, SessionStatus } from "@prisma/client"
 import { addDays, differenceInDays } from "date-fns"
+import { NotificationEngine } from "./notification-engine"
 
 const prisma = new PrismaClient()
 
@@ -40,7 +41,6 @@ export class PhaseEngine {
                 }
                 break
             case SubscriptionTier.VIP_12:
-                // VIP 12: 3w Detox + 3w Equilibre
                 sessions = [
                     { sessionNumber: 1, phaseType: PhaseType.DETOX_VIP, durationDays: 21 },
                     { sessionNumber: 2, phaseType: PhaseType.EQUILIBRE, durationDays: 21 },
@@ -49,7 +49,6 @@ export class PhaseEngine {
                 ]
                 break
             case SubscriptionTier.VIP_PLUS_16:
-                // VIP++ 16: 3w Detox + 3w Equilibre (repeated) + 4w Equilibre offered
                 sessions = [
                     { sessionNumber: 1, phaseType: PhaseType.DETOX_VIP, durationDays: 21 },
                     { sessionNumber: 2, phaseType: PhaseType.EQUILIBRE, durationDays: 21 },
@@ -60,7 +59,6 @@ export class PhaseEngine {
                 break
         }
 
-        // Création des entrées dans la DB
         let currentStartDate = startDate
         const phaseSessions = []
 
@@ -77,7 +75,6 @@ export class PhaseEngine {
             currentStartDate = endDate
         }
 
-        // Nettoyage des sessions existantes avant d'ajouter les nouvelles
         await prisma.phaseSession.deleteMany({ where: { userId } })
 
         return await prisma.phaseSession.createMany({
@@ -86,7 +83,7 @@ export class PhaseEngine {
     }
 
     /**
-     * Vérifie si le PISI est atteint (2 pesées consécutives <= PISI à 48h d'écart)
+     * Vérifie si le PISI est atteint
      */
     static async checkPisiStatus(userId: string) {
         const user = await prisma.user.findUnique({
@@ -99,10 +96,7 @@ export class PhaseEngine {
         const [latest, previous] = user.weighIns
         const pisi = user.pisi
 
-        // Condition 1: Les deux pesées sont sous le PISI
         const underPisi = latest.weight <= pisi && previous.weight <= pisi
-
-        // Condition 2: Intervalle suffisant (ex: 48h) pour éviter les fluctuations d'eau
         const dayDiff = differenceInDays(latest.date, previous.date)
         const timeValid = Math.abs(dayDiff) >= 2
 
@@ -110,7 +104,7 @@ export class PhaseEngine {
     }
 
     /**
-     * Calcule la durée de consolidation : 10 jours par kilo perdu
+     * Calcule la durée de consolidation
      */
     static calculateConsolidationDays(startWeight: number, currentWeight: number) {
         const lost = startWeight - currentWeight
@@ -118,22 +112,10 @@ export class PhaseEngine {
     }
 
     /**
-     * Détermine la phase actuelle d'un utilisateur
+     * Détermine la phase actuelle
      */
     static async resolveCurrentPhase(userId: string) {
         const now = new Date()
-
-        // 1. Vérifier si une phase manuelle est active
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { isPhaseManual: true, pisiReachedAt: true, startWeight: true }
-        })
-
-        // 2. Si PISI atteint, on est soit en Consolidation soit en Entretien
-        if (user?.pisiReachedAt) {
-            // Logique de consolidation ici...
-            // Pour simplifier, on cherche la session active
-        }
 
         const activeSession = await prisma.phaseSession.findFirst({
             where: {
@@ -144,5 +126,54 @@ export class PhaseEngine {
         })
 
         return activeSession || null
+    }
+
+    /**
+     * Vérifie et envoie les notifications de phase (J-48h et Jour J)
+     */
+    static async checkAndSendPhaseNotifications(userId: string) {
+        const now = new Date()
+        const startOfToday = new Date(new Date(now).setHours(0, 0, 0, 0))
+        const endOfToday = new Date(new Date(now).setHours(23, 59, 59, 999))
+
+        const startingToday = await prisma.phaseSession.findFirst({
+            where: {
+                userId,
+                startDate: { gte: startOfToday, lte: endOfToday }
+            }
+        })
+
+        if (startingToday) {
+            await NotificationEngine.send({
+                userId,
+                title: `🌱 Bienvenue en phase ${startingToday.phaseType}`,
+                message: "Ton corps est prêt. On avance ensemble.",
+                category: "PHASE",
+                priority: "HIGH",
+                type: "SUCCESS"
+            })
+        }
+
+        const inTwoDays = addDays(new Date(), 2)
+        const startOfInTwoDays = new Date(new Date(inTwoDays).setHours(0, 0, 0, 0))
+        const endOfInTwoDays = new Date(new Date(inTwoDays).setHours(23, 59, 59, 999))
+
+        const approachingPhase = await prisma.phaseSession.findFirst({
+            where: {
+                userId,
+                startDate: { gte: startOfInTwoDays, lte: endOfInTwoDays }
+            }
+        })
+
+        if (approachingPhase) {
+            await NotificationEngine.send({
+                userId,
+                title: "🔔 Ta prochaine phase arrive bientôt",
+                message: `Prépare-toi doucement pour la phase ${approachingPhase.phaseType}. On t'expliquera tout bientôt.`,
+                category: "PHASE",
+                priority: "HIGH",
+                type: "INFO"
+            })
+        }
     }
 }
