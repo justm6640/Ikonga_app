@@ -112,9 +112,9 @@ export async function getNutritionData(dateInput?: string | Date) {
 
                 if (finalMenu) console.log(`[DEBUG] Resolved Level 1 Menu (AI Auto)`)
             }
-        } else if (!weeklyPlan) {
-            // B3. FALLBACK: Trigger Automatic AI Generation if missing
-            console.log(`[DEBUG] No WeeklyPlan found. Triggering GPT generation fallback for ${targetDate.toISOString()}`)
+        } else {
+            // B3. FALLBACK: Trigger Automatic AI Generation if missing OR if plan doesn't cover the target date
+            console.log(`[DEBUG] No WeeklyPlan covers target date. Triggering GPT generation for ${targetDate.toISOString()}`)
 
             const { generateUserWeeklyPlan } = await import("../ai/menu-generator")
             const result = await generateUserWeeklyPlan(user.id, false, targetDate)
