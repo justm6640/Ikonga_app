@@ -476,12 +476,20 @@ export async function getRecipes(filters?: {
         const menuData = await getNutritionData(filters.date)
         if (menuData?.menu) {
             const menu = menuData.menu
+            // Le menu peut contenir des strings ou des objets enrichis (avec name, ingredients, etc.)
+            const extractName = (meal: any): string | null => {
+                if (!meal) return null
+                if (typeof meal === 'string') return meal
+                if (typeof meal === 'object' && meal.name) return meal.name
+                return null
+            }
+
             dayMenuNames = [
-                menu.breakfast,
-                menu.lunch,
-                menu.snack,
-                menu.dinner
-            ].filter(Boolean)
+                extractName(menu.breakfast),
+                extractName(menu.lunch),
+                extractName(menu.snack),
+                extractName(menu.dinner)
+            ].filter((name): name is string => name !== null && name !== undefined)
         }
     }
 
