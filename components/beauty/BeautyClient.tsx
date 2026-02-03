@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { Sparkles, Smile, Shirt, Scissors, ChevronRight, ArrowLeft } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Sparkles, Smile, Shirt, Scissors, ChevronRight, ArrowLeft, Clock, Tags } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BeautyCareView } from "./BeautyCareView"
+import { getBeautyRecommendations } from "@/lib/actions/beauty"
+import { Badge } from "@/components/ui/badge"
 
 interface BeautyClientProps {
     initialProfile?: any
@@ -42,6 +44,15 @@ const PILLARS = [
 
 export function BeautyClient({ initialProfile }: BeautyClientProps) {
     const [activeView, setActiveView] = useState<string | null>(null)
+    const [recommendations, setRecommendations] = useState<any[]>([])
+
+    useEffect(() => {
+        const loadRecs = async () => {
+            const data = await getBeautyRecommendations()
+            setRecommendations(data.slice(0, 3)) // Uniquement les 3 meilleurs
+        }
+        loadRecs()
+    }, [])
 
     const renderView = () => {
         switch (activeView) {
@@ -54,7 +65,12 @@ export function BeautyClient({ initialProfile }: BeautyClientProps) {
             case "HAIR":
                 return <PlaceholderView title="Coiffure & Makeup" onBack={() => setActiveView(null)} />
             default:
-                return <BeautyDashboard onNavigate={setActiveView} />
+                return (
+                    <div className="space-y-8">
+                        <BeautyDashboard onNavigate={setActiveView} />
+                        {recommendations.length > 0 && <BeautyRecommendations recommendations={recommendations} />}
+                    </div>
+                )
         }
     }
 
@@ -80,7 +96,7 @@ function BeautyDashboard({ onNavigate }: { onNavigate: (view: string) => void })
                     <button
                         key={pillar.id}
                         onClick={() => onNavigate(pillar.id)}
-                        className="group relative overflow-hidden bg-white border border-slate-100 rounded-3xl p-6 text-left shadow-sm hover:shadow-xl hover:border-amber-200 transition-all duration-300"
+                        className="group relative overflow-hidden bg-white/60 backdrop-blur-xl border border-white/50 rounded-3xl p-6 text-left shadow-sm hover:shadow-xl hover:border-amber-200 transition-all duration-300"
                     >
                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                             <pillar.icon size={100} className="text-amber-500" />
@@ -112,12 +128,47 @@ function BeautyDashboard({ onNavigate }: { onNavigate: (view: string) => void })
             </div>
 
             {/* Quote / Promise */}
-            <div className="bg-slate-900 rounded-2xl p-6 text-center shadow-lg shadow-slate-200 mt-8">
-                <p className="text-slate-400 text-xs uppercase tracking-widest font-bold mb-2">Philosophie</p>
-                <p className="text-white font-serif text-lg md:text-xl italic">
+            <div className="bg-slate-900 rounded-[2rem] p-8 text-center shadow-lg shadow-slate-200 mt-8 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-amber-500/10 to-transparent pointer-events-none" />
+                <p className="text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black mb-4">Philosophie IKONGA</p>
+                <p className="text-white font-serif text-lg md:text-xl italic leading-relaxed">
                     "On ne se met pas en valeur quand on aura maigri. <br />
                     On se met en valeur pour <span className="text-amber-400">continuer à avancer</span>."
                 </p>
+            </div>
+        </div>
+    )
+}
+
+function BeautyRecommendations({ recommendations }: { recommendations: any[] }) {
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between">
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                    <Sparkles size={16} className="text-amber-500" /> Orienté pour toi
+                </h3>
+            </div>
+            <div className="flex overflow-x-auto pb-4 gap-4 no-scrollbar -mx-4 px-4">
+                {recommendations.map((rec) => (
+                    <div
+                        key={rec.id}
+                        className="flex-shrink-0 w-64 bg-white border border-slate-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                        <Badge className="bg-amber-50 text-amber-600 border-none text-[9px] font-black uppercase mb-3">
+                            {rec.category.replace('_', ' ')}
+                        </Badge>
+                        <h4 className="font-bold text-slate-900 mb-2 line-clamp-1">{rec.title}</h4>
+                        <p className="text-xs text-slate-500 line-clamp-2 mb-4 h-8">{rec.description}</p>
+                        <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                                <Clock size={12} /> {rec.duration || 5} min
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                                <Tags size={12} /> {rec.level}
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     )

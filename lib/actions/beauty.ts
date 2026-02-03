@@ -1,10 +1,14 @@
 "use server"
 
-import { getOrCreateUser } from "./user" // Using existing auth helper
+import { getOrCreateUser } from "./user"
 import prisma from "@/lib/prisma"
-import { SkinType } from "@prisma/client"
+import { SkinType, BeautyCategory, BeautyContentType, BeautyLevel, PhaseType, WorkoutGender, RecommendationStatus } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { BeautyEngine } from "@/lib/engines/beauty-engine"
 
+/**
+ * PROFIL UTILISATEUR
+ */
 export async function getBeautyProfile() {
     try {
         const user = await getOrCreateUser()
@@ -53,11 +57,73 @@ export async function upsertBeautyProfile(data: {
     }
 }
 
+/**
+ * CATALOGUE CONTENUS (ADMIN)
+ */
+export async function createBeautyContent(data: {
+    title: string
+    description: string
+    category: BeautyCategory
+    type: BeautyContentType
+    duration?: number
+    targetPhases: PhaseType[]
+    targetGender: WorkoutGender
+    level: BeautyLevel
+}) {
+    try {
+        const user = await getOrCreateUser()
+        if (user?.role !== "ADMIN") throw new Error("Forbidden")
+
+        const content = await prisma.beautyContent.create({
+            data
+        })
+
+        revalidatePath("/admin/beauty")
+        return { success: true, content }
+    } catch (error) {
+        console.error("Error creating beauty content:", error)
+        return { success: false, error: "Failed to create content" }
+    }
+}
+
+export async function getBeautyLibrary() {
+    try {
+        const contents = await prisma.beautyContent.findMany({
+            orderBy: { createdAt: 'desc' }
+        })
+        return contents
+    } catch (error) {
+        console.error("Error fetching beauty library:", error)
+        return []
+    }
+}
+
+/**
+ * RECOMMANDATIONS UTILISATEUR
+ */
+export async function getBeautyRecommendations() {
+    try {
+        const user = await getOrCreateUser()
+        if (!user) return []
+
+        // 1. Obtenir les recommandations via le moteur
+        const recommended = await BeautyEngine.getRecommendations(user.id)
+
+        // 2. Vérifier si on doit créer des recommandations en DB pour le suivi
+        // Pour l'instant, on retourne simplement les contenus filtrés
+        return recommended
+    } catch (error) {
+        console.error("Error getting recommendations:", error)
+        return []
+    }
+}
+
+/**
+ * RECETTES DIY
+ */
 export async function generateDIYRecipe(ingredients: string) {
     // MOCK AI GENERATION for now
-    // In real implementation, this would call an LLM
-
-    await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate generic delay
+    await new Promise(resolve => setTimeout(resolve, 1500))
 
     const recipes = [
         {
@@ -69,15 +135,9 @@ export async function generateDIYRecipe(ingredients: string) {
             title: "Gommage Doux Sucre & Huile",
             instructions: "Mélangez une cuillère de sucre fin avec un peu d'huile d'olive. Massez doucement en cercles sur peau humide, puis rincez.",
             ingredients: ["Sucre", "Huile d'olive"]
-        },
-        {
-            title: "Cataplasme Apaisant Yaourt",
-            instructions: "Appliquez une couche épaisse de yaourt nature frais sur le visage. Laissez agir 10 min pour calmer les rougeurs.",
-            ingredients: ["Yaourt nature"]
         }
     ]
 
-    // Simple random selection
     return recipes[Math.floor(Math.random() * recipes.length)]
 }
 

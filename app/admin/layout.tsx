@@ -1,5 +1,5 @@
 import { checkAdminAccess } from "@/lib/actions/admin"
-import { Users, BarChart2, BookOpen, Settings, AlertCircle, Shield } from "lucide-react"
+import { Users, BarChart2, BookOpen, Settings, Shield, Sparkles } from "lucide-react"
 import Link from "next/link"
 
 export default async function AdminLayout({
@@ -33,6 +33,10 @@ export default async function AdminLayout({
                     <Link href="/admin/content" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">
                         <BookOpen size={20} />
                         Contenus
+                    </Link>
+                    <Link href="/admin/beauty" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">
+                        <Sparkles size={20} className="text-amber-400" />
+                        Beauté
                     </Link>
                     <Link href="/admin/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">
                         <Settings size={20} />

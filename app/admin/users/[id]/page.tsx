@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma"
 import { notFound } from "next/navigation"
-import { PhaseControlPanel } from "@/components/admin/PhaseControlPanel"
+import { UserPhaseManager } from "@/components/admin/users/UserPhaseManager"
 import { SubscriptionControlPanel } from "@/components/admin/SubscriptionControlPanel"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -23,6 +23,10 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
             phases: {
                 where: { isActive: true },
                 take: 1
+            },
+            weighIns: {
+                orderBy: { date: 'desc' },
+                take: 5
             }
         }
     })
@@ -32,6 +36,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
     }
 
     const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || "?"
+    const lastWeight = user.weighIns[0]?.weight || user.startWeight || 0
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 max-w-5xl mx-auto">
@@ -66,7 +71,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* User Stats/Summary Card */}
-                <Card className="rounded-[2.5rem] border-slate-100 shadow-md">
+                <Card className="rounded-[2.5rem] border-slate-100 shadow-md bg-white">
                     <CardHeader className="p-8 pb-4">
                         <CardTitle className="text-lg font-serif font-bold text-slate-800 flex items-center gap-2">
                             <Info size={18} className="text-ikonga-coral" /> État Actuel
@@ -83,8 +88,8 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                                 <span className="font-bold text-slate-900 uppercase">{user.phases[0]?.type || "Indéterminée"}</span>
                             </div>
                             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                <span className="text-[10px] uppercase font-black text-slate-400 tracking-widest block mb-1">Poids Départ</span>
-                                <span className="font-bold text-slate-900">{user.startWeight ? `${user.startWeight} kg` : "N/A"}</span>
+                                <span className="text-[10px] uppercase font-black text-slate-400 tracking-widest block mb-1">Dernier Poids</span>
+                                <span className="font-bold text-slate-900">{lastWeight} kg</span>
                             </div>
                             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                 <span className="text-[10px] uppercase font-black text-slate-400 tracking-widest block mb-1">PISI (Cible)</span>
@@ -98,9 +103,9 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                 <SubscriptionControlPanel user={user as any} />
             </div>
 
-            {/* Phase Management */}
+            {/* IKONGA Phase Manager - Premium Control */}
             <div className="pt-4">
-                <PhaseControlPanel user={user as any} />
+                <UserPhaseManager userId={user.id} userProfile={{ ...user, lastWeight }} />
             </div>
         </div>
     )

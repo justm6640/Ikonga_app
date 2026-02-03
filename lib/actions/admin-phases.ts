@@ -1,90 +1,94 @@
 "use server"
 
+import { getOrCreateUser } from "./user"
 import prisma from "@/lib/prisma"
-import { PhaseType, SubscriptionTier } from "@prisma/client"
+import { PhaseType, SubscriptionTier, SessionStatus } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { PhaseEngine } from "@/lib/engines/phase-engine"
 
 /**
- * Toggles the manual phase override for a user.
+ * INITIALISATION / RÉINITIALISATION DU CALENDRIER
  */
-export async function toggleManualMode(userId: string, isManual: boolean, reason?: string) {
+export async function initializeUserCalendar(userId: string, tier: SubscriptionTier, startDate: Date) {
     try {
+        const admin = await getOrCreateUser()
+        if (admin?.role !== "ADMIN") throw new Error("Forbidden")
+
+        await PhaseEngine.generateCalendar(userId, tier, startDate)
+
+        // Mettre à jour le tier de l'utilisateur en DB
         await prisma.user.update({
             where: { id: userId },
             data: {
-                isPhaseManual: isManual,
-                manualPhaseReason: reason ?? null
+                subscriptionTier: tier,
+                planStartDate: startDate
             }
         })
 
         revalidatePath(`/admin/users/${userId}`)
         return { success: true }
     } catch (error) {
-        console.error("Error toggling manual mode:", error)
-        return { error: "Erreur lors de la modification du mode manuel" }
+        console.error("Error initializing calendar:", error)
+        return { success: false, error: "Failed to initialize calendar" }
     }
 }
 
 /**
- * Forces a specific phase for a user and enables manual mode.
+ * RÉCUPÉRATION DU CALENDRIER
  */
-export async function forcePhase(userId: string, newPhase: PhaseType) {
+export async function getUserPhaseSessions(userId: string) {
     try {
-        const now = new Date()
-
-        await prisma.$transaction(async (tx) => {
-            // 1. Deactivate current active phase
-            await tx.userPhase.updateMany({
-                where: { userId, isActive: true },
-                data: { isActive: false, actualEndDate: now }
-            })
-
-            // 2. Create new manual phase
-            await tx.userPhase.create({
-                data: {
-                    userId,
-                    type: newPhase,
-                    startDate: now,
-                    isActive: true,
-                    isManualOverride: true,
-                    adminNote: "Forçage manuel par l'administrateur"
-                }
-            })
-
-            // 3. Update user global state
-            await tx.user.update({
-                where: { id: userId },
-                data: {
-                    isPhaseManual: true,
-                    // Note: We don't necessarily update subEndDate here unless requested
-                }
-            })
+        const sessions = await prisma.phaseSession.findMany({
+            where: { userId },
+            orderBy: { sessionNumber: 'asc' }
         })
-
-        revalidatePath(`/admin/users/${userId}`)
-        revalidatePath("/admin/users")
-        return { success: true }
+        return sessions
     } catch (error) {
-        console.error("Error forcing phase:", error)
-        return { error: "Erreur lors du forçage de la phase" }
+        console.error("Error fetching sessions:", error)
+        return []
     }
 }
 
 /**
- * Updates a user's subscription tier.
+ * FORCE LE CHANGEMENT DE PHASE
  */
-export async function updateSubscriptionTier(userId: string, newTier: SubscriptionTier) {
+export async function overridePhase(userId: string, phaseType: PhaseType) {
     try {
-        await prisma.user.update({
-            where: { id: userId },
-            data: { subscriptionTier: newTier }
+        const admin = await getOrCreateUser()
+        if (admin?.role !== "ADMIN") throw new Error("Forbidden")
+
+        // 1. Désactiver les phases actives actuelles de l'utilisateur
+        await prisma.userPhase.updateMany({
+            where: { userId, isActive: true },
+            data: { isActive: false, actualEndDate: new Date() }
         })
 
-        revalidatePath(`/admin/users/${userId}`)
+        // 2. Créer la nouvelle phase forcée
+        await prisma.userPhase.create({
+            data: {
+                userId,
+                type: phaseType,
+                isActive: true,
+                isManualOverride: true,
+                adminNote: "Forcé par l'admin"
+            }
+        })
+
+        // 3. Noter l'action dans les logs admin
+        await prisma.adminLog.create({
+            data: {
+                adminId: admin.id,
+                targetUserId: userId,
+                actionType: "PHASE_OVERRIDE",
+                details: { newPhase: phaseType }
+            }
+        })
+
         revalidatePath("/admin/users")
+        revalidatePath(`/admin/users/${userId}`)
         return { success: true }
     } catch (error) {
-        console.error("Error updating subscription tier:", error)
-        return { error: "Erreur lors de la mise à jour de l'abonnement" }
+        console.error("Error overriding phase:", error)
+        return { success: false }
     }
 }
