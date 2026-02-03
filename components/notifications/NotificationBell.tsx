@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { markAsRead, markAllAsRead } from "@/lib/actions/notifications"
+import { markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/actions/notifications"
 import { Notification, NotificationType } from "@prisma/client"
 
 interface NotificationBellProps {
@@ -37,14 +37,14 @@ export function NotificationBell({ userId, initialNotifications, unreadCount: in
             prev.map(n => n.id === id ? { ...n, isRead: true } : n)
         )
         setUnreadCount(prev => Math.max(0, prev - 1))
-        await markAsRead(id)
+        await markNotificationAsRead(id)
     }
 
     const handleMarkAllAsRead = async () => {
         // Optimistic update
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
         setUnreadCount(0)
-        await markAllAsRead(userId)
+        await markAllNotificationsAsRead()
     }
 
     const getIcon = (type: NotificationType) => {
@@ -68,7 +68,7 @@ export function NotificationBell({ userId, initialNotifications, unreadCount: in
                 <Button variant="ghost" size="icon" className="rounded-full relative hover:bg-slate-100 transition-colors">
                     <Bell size={20} className="text-slate-600" />
                     {unreadCount > 0 && (
-                        <span className="absolute top-2 right-2 flex h-4 w-4 transform translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-ikonga-coral text-[10px] font-bold text-white border-2 border-white animate-in zoom-in-50">
+                        <span className="absolute top-2 right-2 flex h-4 w-4 transform translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-ikonga-gradient text-[10px] font-bold text-white border-2 border-white animate-in zoom-in-50 shadow-sm">
                             {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                     )}
@@ -80,7 +80,7 @@ export function NotificationBell({ userId, initialNotifications, unreadCount: in
                     {unreadCount > 0 && (
                         <button
                             onClick={handleMarkAllAsRead}
-                            className="text-[11px] font-black uppercase tracking-wider text-ikonga-coral hover:opacity-70 transition-opacity"
+                            className="text-[11px] font-black uppercase tracking-wider text-ikonga-orange hover:opacity-70 transition-opacity"
                         >
                             Tout marquer comme lu
                         </button>
@@ -113,7 +113,7 @@ export function NotificationBell({ userId, initialNotifications, unreadCount: in
                                 >
                                     {/* Type Indicator Dot for Coach */}
                                     {notif.type === NotificationType.COACH && (
-                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-ikonga-coral" />
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-ikonga-gradient" />
                                     )}
 
                                     <div className={cn(
@@ -144,7 +144,7 @@ export function NotificationBell({ userId, initialNotifications, unreadCount: in
                                     </div>
 
                                     {!notif.isRead && (
-                                        <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-ikonga-coral" />
+                                        <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-ikonga-gradient shadow-premium" />
                                     )}
                                 </button>
                             ))}

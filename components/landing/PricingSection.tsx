@@ -83,14 +83,14 @@ const VIP_PLAN = {
 
 export function PricingSection() {
     return (
-        <section id="tarifs" className="py-32 bg-[#fafafa] overflow-hidden">
+        <section id="tarifs" className="py-32 bg-white overflow-hidden">
             <div className="container mx-auto px-4">
                 <div className="text-center max-w-3xl mx-auto mb-20">
                     <motion.span
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-xs font-bold uppercase tracking-[0.3em] text-ikonga-coral mb-4 block"
+                        className="text-xs font-bold uppercase tracking-[0.3em] text-ikonga-orange mb-4 block"
                     >
                         Investissez en vous
                     </motion.span>
@@ -115,7 +115,7 @@ export function PricingSection() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: idx * 0.1 }}
-                            className={`relative bg-white rounded-[2.5rem] p-8 border border-slate-100 flex flex-col h-full transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 group ${prog.popular ? 'ring-2 ring-ikonga-coral ring-offset-4 ring-offset-[#fafafa]' : ''}`}
+                            className={`relative bg-white rounded-[2.5rem] p-8 border border-slate-100 flex flex-col h-full transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 group ${prog.popular ? 'ring-2 ring-ikonga-orange ring-offset-4 ring-offset-white' : ''}`}
                         >
                             {prog.popular && (
                                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-ikonga-gradient text-white px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg flex items-center gap-2 whitespace-nowrap z-10">
@@ -145,7 +145,7 @@ export function PricingSection() {
                             <div className="space-y-4 mb-10 flex-grow">
                                 {prog.features.map((feat) => (
                                     <div key={feat} className="flex gap-3 items-start">
-                                        <div className={`mt-1 rounded-full p-0.5 ${prog.popular ? 'bg-ikonga-coral/10 text-ikonga-coral' : 'bg-slate-50 text-slate-400'}`}>
+                                        <div className={`mt-1 rounded-full p-0.5 ${prog.popular ? 'bg-ikonga-orange/10 text-ikonga-orange' : 'bg-slate-50 text-slate-400'}`}>
                                             <Check size={10} strokeWidth={4} />
                                         </div>
                                         <span className="text-xs text-slate-600 font-medium leading-tight">{feat}</span>

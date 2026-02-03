@@ -47,11 +47,11 @@ export function PhaseCard({
         : 0;
 
     return (
-        <Card className="rounded-[2.5rem] border-none shadow-xl bg-gradient-to-br from-ikonga-coral via-ikonga-pink-accent to-ikonga-coral text-white overflow-hidden relative group">
-            {/* Animated Ambient Background - IKONGA Charter */}
-            <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-700">
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-ikonga-pink-accent rounded-full blur-[80px] animate-pulse" />
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-ikonga-coral rounded-full blur-[80px]" />
+        <Card className="rounded-[2.5rem] border-none shadow-premium bg-ikonga-gradient text-white overflow-hidden relative group">
+            {/* Animated Ambient Background - Simplified for Lifestyle Gradient */}
+            <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-700">
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-white rounded-full blur-[100px] animate-pulse" />
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black rounded-full blur-[100px]" />
             </div>
 
             <CardContent className="p-8 relative z-10">
@@ -77,16 +77,16 @@ export function PhaseCard({
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-3 gap-4 mb-8">
-                    <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm">
-                        <p className="text-[8px] font-black uppercase text-white/60 tracking-widest mb-1.5 text-center">Actuel</p>
+                    <div className="p-4 bg-white/15 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm">
+                        <p className="text-[8px] font-black uppercase text-white/70 tracking-widest mb-1.5 text-center">Actuel</p>
                         <p className="text-xl font-black text-center text-white">{safeCurrentWeight.toFixed(1)}<span className="text-[10px] text-white/50 ml-0.5">kg</span></p>
                     </div>
-                    <div className="p-4 bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 shadow-md">
-                        <p className="text-[8px] font-black uppercase text-white/90 tracking-widest mb-1.5 text-center">Perte</p>
+                    <div className="p-4 bg-white/25 backdrop-blur-md rounded-2xl border border-white/20 shadow-md">
+                        <p className="text-[8px] font-black uppercase text-white/95 tracking-widest mb-1.5 text-center">Perte</p>
                         <p className="text-xl font-black text-white text-center">{safeWeightLost.toFixed(1)}<span className="text-[10px] ml-0.5 opacity-60">kg</span></p>
                     </div>
-                    <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm">
-                        <p className="text-[8px] font-black uppercase text-white/60 tracking-widest mb-1.5 text-center">Reste</p>
+                    <div className="p-4 bg-white/15 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm">
+                        <p className="text-[8px] font-black uppercase text-white/70 tracking-widest mb-1.5 text-center">Reste</p>
                         <p className="text-xl font-black text-center text-white">{(safeCurrentWeight - safePisi).toFixed(1)}<span className="text-[10px] text-white/50 ml-0.5">kg</span></p>
                     </div>
                 </div>
@@ -123,7 +123,7 @@ export function PhaseCard({
                             </div>
                             <span className="text-xs font-black text-white">{Math.round(weightProgress)}%</span>
                         </div>
-                        <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                        <div className="h-2 bg-white/15 rounded-full overflow-hidden">
                             <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${weightProgress}%` }}

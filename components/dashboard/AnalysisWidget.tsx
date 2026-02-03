@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card"
-import { AnalysisResult } from "@/lib/ai/generator"
+import { AnalysisResult } from "@/lib/validators/analysis"
 import {
     Sparkles,
     Salad,
@@ -93,21 +93,21 @@ export function AnalysisWidget({ analysis }: AnalysisWidgetProps) {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-ikonga-coral to-orange-400 p-[3px] shadow-2xl shadow-pink-200/50"
+                className="relative overflow-hidden rounded-[2.5rem] bg-ikonga-gradient p-[3px] shadow-premium"
             >
                 <div className="bg-white rounded-[2.4rem] p-8 md:p-10 relative overflow-hidden">
                     {/* Decorative elements */}
                     <div className="absolute top-0 right-0 w-48 h-48 bg-ikonga-coral/5 rounded-full -mr-24 -mt-24 blur-3xl" />
                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-400/5 rounded-full -ml-16 -mb-16 blur-2xl" />
 
-                    <Quote className="absolute top-6 left-6 h-8 w-8 text-ikonga-coral/20 fill-ikonga-coral/20" />
+                    <Quote className="absolute top-6 left-6 h-8 w-8 text-ikonga-orange/20 fill-ikonga-orange/20" />
 
                     <div className="relative z-10 space-y-3">
                         <div className="flex items-center gap-2 mb-4">
                             <div className="bg-ikonga-gradient p-2 rounded-xl">
                                 <Sparkles size={18} className="text-white" />
                             </div>
-                            <span className="text-xs font-black uppercase tracking-[0.2em] text-ikonga-coral">Analyse Rosy</span>
+                            <span className="text-xs font-black uppercase tracking-[0.2em] text-ikonga-orange">Analyse Rosy</span>
                         </div>
                         <p className="text-xl md:text-2xl font-serif text-slate-800 leading-relaxed italic">
                             {analysis.introduction}

@@ -13,6 +13,9 @@ const buttonVariants = cva(
         // Lifestyle: Primary CTA with Gradient & Premium Shadow
         default:
           "bg-ikonga-gradient text-white shadow-premium hover:shadow-premium-hover hover:scale-[1.02] active:scale-[0.98] border-0 rounded-button transition-all duration-300",
+        // Lifestyle: Secondary with soft Gradient look or Brand color
+        secondary:
+          "bg-ikonga-gradient opacity-90 text-white shadow-md hover:opacity-100 hover:scale-[1.02] active:scale-[0.98] rounded-button transition-all duration-300",
         // Lifestyle: Outline with Dark Slate
         outline:
           "border-2 border-ikonga-dark text-ikonga-dark bg-transparent hover:bg-ikonga-dark hover:text-white rounded-button transition-all duration-300",
@@ -21,9 +24,6 @@ const buttonVariants = cva(
         // Destructive
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 rounded-button",
-        // Secondary
-        secondary:
-          "bg-ikonga-lilac text-ikonga-dark shadow-sm hover:bg-ikonga-orange/10 rounded-button",
         // Link variant
         link: "text-ikonga-orange underline-offset-4 hover:underline",
       },

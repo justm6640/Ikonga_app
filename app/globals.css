@@ -10,8 +10,8 @@
     /* #FA8662 */
     --ikonga-dark: 0 0% 18%;
     /* #2D2D2D */
-    --ikonga-light: 24 100% 98%;
-    /* #FFF9F5 - Ivory Background */
+    --ikonga-light: 0 0% 100%;
+    /* #FFFFFF - Pure White Background */
     --ikonga-lilac: 255 100% 95%;
     /* #ECE6FF */
     --ikonga-mint: 143 46% 94%;
@@ -42,8 +42,8 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 24 20% 90%;
-    --input: 24 20% 90%;
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
     --ring: var(--ikonga-orange);
 
     --radius: 0.75rem;

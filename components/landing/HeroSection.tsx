@@ -5,7 +5,7 @@ import { ArrowRight, Sparkles } from "lucide-react"
 
 export function HeroSection() {
     return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#fafafa] pt-32 pb-20 px-4">
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white pt-32 pb-20 px-4">
             {/* Breathing Gradient Blob */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none overflow-hidden sm:overflow-visible">
                 <motion.div
@@ -139,7 +139,7 @@ export function HeroSection() {
                             </div>
 
                             <div className="mt-auto pb-6">
-                                <div className="h-16 w-full bg-ikonga-gradient rounded-3xl flex items-center justify-center text-white font-bold shadow-lg shadow-pink-500/20">
+                                <div className="h-16 w-full bg-ikonga-gradient rounded-3xl flex items-center justify-center text-white font-bold shadow-premium">
                                     Mon programme du jour
                                 </div>
                             </div>
