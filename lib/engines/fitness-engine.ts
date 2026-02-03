@@ -1,10 +1,11 @@
 
-import { User, PhaseType, WorkoutType, WorkoutIntensity, WorkoutGender } from "@prisma/client"
+import { User, PhaseType, WorkoutType, WorkoutIntensity, WorkoutGender, WorkoutCategory } from "@prisma/client"
 import prisma from "@/lib/prisma"
 import { differenceInWeeks, startOfDay } from "date-fns"
 
 /**
  * Moteur de recommandation Fitness IKONGA
+ * Gère les recommandations par phase avec ratios cardio/renforcement évolutifs
  */
 export class FitnessEngine {
 
@@ -36,8 +37,8 @@ export class FitnessEngine {
             allowedPhases: { has: phaseType }
         }
 
-        // --- Règle 1: Phase DETOX ---
-        if (phaseType === PhaseType.DETOX) {
+        // --- Règle 1: Phase DETOX / DETOX_VIP ---
+        if (phaseType === PhaseType.DETOX || phaseType === PhaseType.DETOX_VIP) {
             // DETOX Logic: 
             // - Interdit HIIT
             // - 70% Cardio Doux / 30% Récupération (Mobilité/Stretching)
@@ -55,14 +56,45 @@ export class FitnessEngine {
                     }
                 }) || await prisma.workout.findFirst({ where: { ...baseFilter, intensity: WorkoutIntensity.LOW } })
             } else {
-                // 30% Mobilité / Récupération (Yoga, Stretching - mapped to Yoga type roughly or low strength)
+                // 30% Mobilité / Récupération (Yoga, Recovery)
                 return await prisma.workout.findFirst({
                     where: {
                         ...baseFilter,
-                        type: { in: [WorkoutType.YOGA] },
+                        type: { in: [WorkoutType.YOGA, WorkoutType.RECOVERY] },
                         intensity: WorkoutIntensity.LOW
                     }
                 }) || await prisma.workout.findFirst({ where: { ...baseFilter, intensity: WorkoutIntensity.LOW } })
+            }
+        }
+
+        // --- Règle 2: Phase ECE (Équilibre Culinaire Équilibré) ---
+        // Similaire à EQUILIBRE mais plus progressif
+        if (phaseType === PhaseType.ECE) {
+            const isEarlyPhase = weeksSinceStart < 2
+            const roll = Math.random()
+
+            if (isEarlyPhase) {
+                // 60% Cardio, 40% Strength
+                if (roll < 0.6) {
+                    return await prisma.workout.findFirst({
+                        where: { ...baseFilter, type: { in: [WorkoutType.CARDIO, WorkoutType.DANCE] } }
+                    }) || await prisma.workout.findFirst({ where: baseFilter })
+                } else {
+                    return await prisma.workout.findFirst({
+                        where: { ...baseFilter, type: WorkoutType.STRENGTH }
+                    }) || await prisma.workout.findFirst({ where: baseFilter })
+                }
+            } else {
+                // 40% Cardio, 60% Strength
+                if (roll < 0.4) {
+                    return await prisma.workout.findFirst({
+                        where: { ...baseFilter, type: { in: [WorkoutType.CARDIO, WorkoutType.DANCE] } }
+                    }) || await prisma.workout.findFirst({ where: baseFilter })
+                } else {
+                    return await prisma.workout.findFirst({
+                        where: { ...baseFilter, type: WorkoutType.STRENGTH }
+                    }) || await prisma.workout.findFirst({ where: baseFilter })
+                }
             }
         }
 
