@@ -452,6 +452,7 @@ export async function getRecipes(filters?: {
     phase?: PhaseType
     mealType?: string
     search?: string
+    date?: string  // ISO date string - si fourni, récupère les recettes du menu de ce jour
 }) {
     const user = await getOrCreateUser()
     if (!user) return []
@@ -467,6 +468,21 @@ export async function getRecipes(filters?: {
     if (existingRecipesCount === 0) {
         console.log(`[getRecipes] No recipes found for phase ${activePhase}. Triggering generation from menus...`)
         await generateRecipesFromUserMenus(user.id, activePhase.toString())
+    }
+
+    // Si une date est fournie, récupérer les noms des repas du menu de ce jour
+    let dayMenuNames: string[] = []
+    if (filters?.date) {
+        const menuData = await getNutritionData(filters.date)
+        if (menuData?.menu) {
+            const menu = menuData.menu
+            dayMenuNames = [
+                menu.breakfast,
+                menu.lunch,
+                menu.snack,
+                menu.dinner
+            ].filter(Boolean)
+        }
     }
 
     const where: any = {}
@@ -486,6 +502,13 @@ export async function getRecipes(filters?: {
         where.name = {
             contains: filters.search,
             mode: 'insensitive'
+        }
+    }
+
+    // Filter by day menu names if date is provided
+    if (dayMenuNames.length > 0) {
+        where.name = {
+            in: dayMenuNames
         }
     }
 

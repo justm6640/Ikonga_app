@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { Search, ChevronDown } from "lucide-react"
+import { useState, useTransition, useEffect } from "react"
+import { Search, ChevronDown, Calendar } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import {
     DropdownMenu,
@@ -10,6 +10,8 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { getRecipes } from "@/lib/actions/nutrition"
+import { format, addDays } from "date-fns"
+import { fr } from "date-fns/locale"
 
 interface RecipesViewProps {
     initialRecipes: any[]
@@ -22,10 +24,43 @@ export function RecipesView({ initialRecipes, currentPhase, onRecipeClick }: Rec
     const [search, setSearch] = useState("")
     const [selectedPhase, setSelectedPhase] = useState("Toutes")
     const [selectedMoment, setSelectedMoment] = useState("Tous")
+    const [selectedDay, setSelectedDay] = useState("Aujourd'hui") // Par défaut = menu du jour
     const [isPending, startTransition] = useTransition()
 
-    const phases = ["Toutes", "DETOX", "EQUILIBRE", "CONSOLIDATION", "ENTRETIEN"]
+    const phases = ["Toutes", "DETOX", "DETOX_VIP", "ECE", "EQUILIBRE", "CONSOLIDATION", "ENTRETIEN"]
     const moments = ["Tous", "BREAKFAST", "SNACK", "LUNCH", "DINNER"]
+    const days = ["Aujourd'hui", "Demain", "Cette semaine", "Toutes"]
+
+    // Charger les recettes du jour au montage
+    useEffect(() => {
+        handleDayChange("Aujourd'hui")
+    }, [])
+
+    const getDateFromDay = (day: string): string | undefined => {
+        const today = new Date()
+        switch (day) {
+            case "Aujourd'hui":
+                return today.toISOString()
+            case "Demain":
+                return addDays(today, 1).toISOString()
+            case "Cette semaine":
+            case "Toutes":
+            default:
+                return undefined
+        }
+    }
+
+    const getDayLabel = (day: string) => {
+        const today = new Date()
+        switch (day) {
+            case "Aujourd'hui":
+                return `Aujourd'hui (${format(today, "d MMM", { locale: fr })})`
+            case "Demain":
+                return `Demain (${format(addDays(today, 1), "d MMM", { locale: fr })})`
+            default:
+                return day
+        }
+    }
 
     const handleFilterChange = () => {
         startTransition(async () => {
@@ -109,6 +144,40 @@ export function RecipesView({ initialRecipes, currentPhase, onRecipeClick }: Rec
                 filters.search = search
             }
 
+            // Ajouter le filtre date si un jour spécifique est sélectionné
+            const dateFilter = getDateFromDay(selectedDay)
+            if (dateFilter) {
+                filters.date = dateFilter
+            }
+
+            const results = await getRecipes(filters)
+            setRecipes(results)
+        })
+    }
+
+    const handleDayChange = (day: string) => {
+        setSelectedDay(day)
+        startTransition(async () => {
+            const filters: any = {}
+
+            if (selectedPhase !== "Toutes") {
+                filters.phase = selectedPhase
+            }
+
+            if (selectedMoment !== "Tous") {
+                filters.mealType = selectedMoment
+            }
+
+            if (search) {
+                filters.search = search
+            }
+
+            // Ajouter le filtre date
+            const dateFilter = getDateFromDay(day)
+            if (dateFilter) {
+                filters.date = dateFilter
+            }
+
             const results = await getRecipes(filters)
             setRecipes(results)
         })
@@ -138,8 +207,35 @@ export function RecipesView({ initialRecipes, currentPhase, onRecipeClick }: Rec
             </div>
 
             {/* Filters */}
-            <div className="flex gap-3">
-                <div className="flex-1">
+            <div className="flex flex-wrap gap-3">
+                {/* Filtre par Jour - EN PREMIER */}
+                <div className="flex-1 min-w-[120px]">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="w-full h-10 px-4 rounded-xl border border-orange-200 bg-orange-50 flex items-center justify-between hover:bg-orange-100 transition-colors">
+                                <div className="flex items-center gap-2">
+                                    <Calendar size={14} className="text-orange-500" />
+                                    <span className="text-xs font-bold uppercase tracking-wider text-orange-600">JOUR</span>
+                                    <span className="text-sm font-bold text-slate-900">{selectedDay}</span>
+                                </div>
+                                <ChevronDown size={16} className="text-orange-400" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-56">
+                            {days.map((day) => (
+                                <DropdownMenuItem
+                                    key={day}
+                                    onClick={() => handleDayChange(day)}
+                                    className="cursor-pointer font-bold text-sm"
+                                >
+                                    {getDayLabel(day)}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
+                <div className="flex-1 min-w-[100px]">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className="w-full h-10 px-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between hover:bg-slate-50 transition-colors">
@@ -164,7 +260,7 @@ export function RecipesView({ initialRecipes, currentPhase, onRecipeClick }: Rec
                     </DropdownMenu>
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 min-w-[100px]">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className="w-full h-10 px-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between hover:bg-slate-50 transition-colors">
