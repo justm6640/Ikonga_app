@@ -4,111 +4,57 @@
 
 @layer base {
   :root {
-    /* ==================== IKONGA CHARTER COLORS ==================== */
-    /* Brand Colors */
-    --ikonga-coral: 8 75% 69%;
-    /* #fa8662 - Primary */
-    --ikonga-pink-accent: 338 100% 67%;
-    /* #ff559c - Hover/Active */
+    /* ==================== IKONGA LIFESTYLE 2.0 ==================== */
+    /* Brand Colors (HSL) */
+    --ikonga-orange: 14 94% 69%;
+    /* #FA8662 */
+    --ikonga-dark: 0 0% 18%;
+    /* #2D2D2D */
+    --ikonga-light: 24 100% 98%;
+    /* #FFF9F5 - Ivory Background */
+    --ikonga-lilac: 255 100% 95%;
+    /* #ECE6FF */
+    --ikonga-mint: 143 46% 94%;
+    /* #E7F6ED */
 
-    /* Slate Scale */
-    --slate-dark: 217 33% 17%;
-    /* #1e293b - Headings */
-    --slate-medium: 215 25% 27%;
-    /* #334155 - Body text */
-    --slate-light: 210 40% 98%;
-    /* #F0F5FA - Backgrounds */
-    --slate-border: 214 32% 91%;
-    /* #D1D5DB - Borders */
-
-    /* Utility Colors */
-    --focus-blue: 210 89% 44%;
-    /* #046BD2 - Focus states */
-    --footer-dark: 0 0% 13%;
-    /* #222222 - Footer */
-
-    /* ==================== SHADCN/UI COLORS ==================== */
-    --background: 0 0% 98%;
-    /* #FAFAFA */
-    --foreground: 217 33% 17%;
-    /* #1e293b - Using slate-dark */
+    /* Shadcn/UI Mappings */
+    --background: var(--ikonga-light);
+    --foreground: var(--ikonga-dark);
 
     --card: 0 0% 100%;
-    /* #FFFFFF */
-    --card-foreground: 215 25% 27%;
-    /* #334155 - Using slate-medium */
+    --card-foreground: var(--ikonga-dark);
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 27%;
+    --popover-foreground: var(--ikonga-dark);
 
-    /* Primary = IKONGA Coral */
-    --primary: 8 75% 69%;
-    /* #fa8662 */
-    --primary-foreground: 0 0% 0%;
-    /* #000000 - Black text on coral */
+    --primary: var(--ikonga-orange);
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 98%;
-    /* Light background */
-    --secondary-foreground: 217 33% 17%;
+    --secondary: 255 100% 95%;
+    --secondary-foreground: var(--ikonga-dark);
 
-    --muted: 210 40% 98%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 24 100% 95%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 210 40% 98%;
-    --accent-foreground: 217 33% 17%;
+    --accent: 24 100% 95%;
+    --accent-foreground: var(--ikonga-dark);
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    /* #D1D5DB - Using slate-border */
-    --input: 214 32% 91%;
-    --ring: 8 75% 69%;
-    /* Match primary (coral) */
+    --border: 24 20% 90%;
+    --input: 24 20% 90%;
+    --ring: var(--ikonga-orange);
 
-    --radius: 0.25rem;
-    /* 4px - Charter standard */
-
-    /* Chart colors (keep existing) */
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-
-    /* ==================== FORM COLORS ==================== */
-    --form-input-text: 215 20% 38%;
-    /* #475569 */
-    --form-placeholder: 220 9% 65%;
-    /* #9CA3AF */
+    --radius: 0.75rem;
+    /* 12px for cards */
   }
 
   .dark {
-    /* Dark Mode placeholders - mapped to reasonable defaults or User requested overrides if handled later */
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 335 78% 59%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Manual dark mode skip for now, focusing on Lifestyle warmth */
+    --background: 0 0% 10%;
+    --foreground: 0 0% 98%;
+    /* ... keep existing for dark mode if needed ... */
   }
 }
 
@@ -121,34 +67,63 @@
     @apply bg-background text-foreground;
   }
 
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif uppercase tracking-[0.5px];
+  }
+
   html {
     scroll-behavior: smooth;
   }
 
-  /* Custom Scrollbar for Premium Feel */
+  /* Custom Scrollbar Premium */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-slate-50;
-    border-radius: 100vh;
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gradient-to-b from-ikonga-pink-accent to-ikonga-coral;
-    border-radius: 100vh;
+    @apply bg-ikonga-orange/30 rounded-full hover:bg-ikonga-orange/50 transition-colors;
+  }
+}
+
+@layer components {
+
+  /* Signature Script Utility */
+  .script-accent {
+    font-family: var(--font-hand) !important;
+    @apply text-ikonga-orange normal-case inline-block;
+    font-size: 1.5em;
+    transform: rotate(-2deg);
   }
 
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-ikonga-pink;
+  /* Card Signature Effect */
+  .card-signature {
+    @apply relative bg-white p-[3px] rounded-[22px] bg-ikonga-gradient z-10;
+  }
+
+  .card-signature-inner {
+    @apply bg-white rounded-[19px] h-full w-full;
+  }
+
+  /* Badge POPULAIRE for cards */
+  .badge-popular {
+    @apply absolute -top-3 left-1/2 -translate-x-1/2 bg-ikonga-gradient text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider z-20;
   }
 }
 
 @layer utilities {
+  .text-gradient {
+    @apply bg-ikonga-gradient bg-clip-text text-transparent;
+  }
 
-  /* Hide scrollbar but keep functionality */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -156,10 +131,5 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
-  }
-
-  /* Text gradient utility */
-  .text-gradient {
-    @apply bg-gradient-to-r from-ikonga-coral to-ikonga-pink-accent bg-clip-text text-transparent;
   }
 }

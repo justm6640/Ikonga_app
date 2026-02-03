@@ -10,22 +10,22 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Charter: Primary (filled) - coral bg, black text
+        // Lifestyle: Primary CTA with Gradient & Premium Shadow
         default:
-          "bg-ikonga-coral text-black shadow-form hover:bg-ikonga-pink-accent border-0 rounded-button",
-        // Charter: Outline - coral border, rounded-full
+          "bg-ikonga-gradient text-white shadow-premium hover:shadow-premium-hover hover:scale-[1.02] active:scale-[0.98] border-0 rounded-button transition-all duration-300",
+        // Lifestyle: Outline with Dark Slate
         outline:
-          "border-2 border-ikonga-coral text-ikonga-coral bg-transparent hover:bg-ikonga-pink-accent hover:text-black hover:border-ikonga-pink-accent rounded-pill",
+          "border-2 border-ikonga-dark text-ikonga-dark bg-transparent hover:bg-ikonga-dark hover:text-white rounded-button transition-all duration-300",
         // Ghost variant for subtle actions
-        ghost: "hover:bg-slate-light hover:text-slate-dark",
-        // Destructive (keep standard)
+        ghost: "hover:bg-ikonga-lilac hover:text-ikonga-dark rounded-button",
+        // Destructive
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 rounded-button",
-        // Secondary (using charter colors)
+        // Secondary
         secondary:
-          "bg-slate-light text-slate-dark shadow-sm hover:bg-slate-border rounded-button",
+          "bg-ikonga-lilac text-ikonga-dark shadow-sm hover:bg-ikonga-orange/10 rounded-button",
         // Link variant
-        link: "text-ikonga-coral underline-offset-4 hover:underline hover:text-ikonga-pink-accent",
+        link: "text-ikonga-orange underline-offset-4 hover:underline",
       },
       size: {
         // Charter: Desktop padding - 15px 30px

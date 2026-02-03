@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Poppins, Dancing_Script } from "next/font/google";
+import { DM_Serif_Display, Poppins, Allura } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -7,20 +7,21 @@ const dmSerif = DM_Serif_Display({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-serif",
-  display: "swap",  // Prevent FOIT
+  display: "swap",
 });
 
 const poppins = Poppins({
-  weight: ["400", "500", "600"],  // Charter: normal, medium, semibold
+  weight: ["400", "500", "600"],
   subsets: ["latin"],
   variable: "--font-sans",
-  display: "swap",  // Prevent FOIT
+  display: "swap",
 });
 
-const dancingScript = Dancing_Script({
+const allura = Allura({
+  weight: "400",
   subsets: ["latin"],
   variable: "--font-hand",
-  display: "swap",  // Prevent FOIT
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -36,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${dmSerif.variable} ${poppins.variable} ${dancingScript.variable} font-sans antialiased`}
+        className={`${dmSerif.variable} ${poppins.variable} ${allura.variable} font-sans antialiased`}
       >
         {children}
         <Toaster position="top-center" richColors />

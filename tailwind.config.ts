@@ -24,45 +24,41 @@ const config: Config = {
 				bold: '700',     // Strong emphasis
 			},
 			backgroundImage: {
-				// Update gradient to use charter colors
-				'ikonga-gradient': 'linear-gradient(90deg, #fa8662 0%, #ff559c 100%)'
+				'ikonga-gradient': 'linear-gradient(90deg, #F79A32 0%, #E5488A 100%)'
 			},
 			fontSize: {
 				// IKONGA Charter Typography Scale
-				'h1': ['2.25rem', { lineHeight: '1.4' }],      // 36px desktop
-				'h1-mobile': ['1.875rem', { lineHeight: '1.4' }], // 30px mobile
-				'h2': ['1.875rem', { lineHeight: '1.3' }],     // 30px desktop
-				'h2-mobile': ['1.5625rem', { lineHeight: '1.3' }], // 25px mobile
-				'h3': ['1.5rem', { lineHeight: '1.3' }],       // 24px desktop
-				'h3-mobile': ['1.25rem', { lineHeight: '1.3' }],  // 20px mobile
-				'h4': ['1.25rem', { lineHeight: '1.2' }],      // 20px
-				'h5': ['1.125rem', { lineHeight: '1.2' }],     // 18px
-				'h6': ['1rem', { lineHeight: '1.25' }],        // 16px
-				'body': ['1rem', { lineHeight: '1.65' }],      // 16px
-				'label': ['0.875rem', { lineHeight: '1.43' }], // 14px
-				'small': ['0.625rem', { lineHeight: '1' }],    // 10px (copyright)
+				'h1': ['2.25rem', { lineHeight: '1.4', letterSpacing: '0.5px' }],
+				'h1-mobile': ['1.75rem', { lineHeight: '1.4', letterSpacing: '0.5px' }],
+				'h2': ['1.875rem', { lineHeight: '1.3', letterSpacing: '0.5px' }],
+				'h3': ['1.5rem', { lineHeight: '1.3', letterSpacing: '0.5px' }],
+				'body': ['1rem', { lineHeight: '1.65' }],
+				'label': ['0.875rem', { lineHeight: '1.43' }],
+				'small': ['0.625rem', { lineHeight: '1' }],
 			},
 			boxShadow: {
-				// IKONGA Charter Shadows
 				'form': '0px 1px 2px 0px rgba(0, 0, 0, 0.05)',
 				'badge': '1px 1px 3px 0px rgba(0, 0, 0, 0.3)',
+				'premium': '0 4px 15px rgba(247, 154, 50, 0.3)',
+				'premium-hover': '0 10px 20px rgba(229, 72, 138, 0.4)',
 			},
 			colors: {
-				// IKONGA Charter Colors (Website)
-				'ikonga-coral': '#fa8662',        // Primary brand color
-				'ikonga-pink-accent': '#ff559c',  // Hover/active states
+				// IKONGA Lifestyle 2.0 Colors
+				'ikonga-orange': '#FA8662',
+				'ikonga-coral': '#FA8662',
+				'ikonga-dark': '#2D2D2D',
+				'ikonga-light': '#FFF9F5',
+				'ikonga-lilac': '#ECE6FF',
+				'ikonga-mint': '#E7F6ED',
 
-				// Slate Scale (Charter)
-				'slate-dark': '#1e293b',          // Headings, important text
-				'slate-medium': '#334155',        // Body text
-				'slate-light': '#F0F5FA',         // Secondary backgrounds
-				'slate-border': '#D1D5DB',        // Borders, separators
-				'focus-blue': '#046BD2',          // Focus states
-				'footer-dark': '#222222',         // Footer background
+				// Slate Scale (Legacy preservation)
+				'slate-dark': '#2D2D2D',
+				'slate-medium': '#334155',
+				'slate-light': '#F0F5FA',
+				'slate-border': '#E2E8F0',
 
-				// Deprecated (backwards compatibility)
-				'ikonga-orange': '#F79A32',       // @deprecated Use ikonga-coral
-				'ikonga-pink': '#E5488A',         // @deprecated Use ikonga-pink-accent
+				background: 'hsl(var(--background))',
+				foreground: 'hsl(var(--foreground))',
 
 				// Pillar Colors (Keep existing)
 				'pillar-nutrition': {
@@ -81,8 +77,6 @@ const config: Config = {
 					DEFAULT: '#FCE4EC',
 					foreground: '#C2185B'
 				},
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
@@ -127,9 +121,9 @@ const config: Config = {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)',
 				// IKONGA Charter Radius
-				'button': '4px',           // Standard buttons
+				'button': '50px',           // Style Pilule Lifestyle
 				'form': '4px',             // Form elements (inputs, selects, etc.)
-				'card': '6px',             // Cards, articles
+				'card': '12px',            // Plus arrondi pour Lifestyle
 				'pill': '9999px',          // Outline buttons (fully rounded)
 				'badge': '99px',           // Badges, counters
 				'avatar': '100%',          // Avatars (circle)
