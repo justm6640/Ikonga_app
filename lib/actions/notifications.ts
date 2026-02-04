@@ -3,7 +3,8 @@
 import { getOrCreateUser } from "./user"
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
-import { NotificationCategory } from "@prisma/client"
+import { NotificationCategory, NotificationType, NotificationPriority } from "@prisma/client"
+import { NotificationEngine } from "@/lib/engines/notification-engine"
 
 /**
  * RÉCUPÉRATION DES NOTIFICATIONS
@@ -116,5 +117,34 @@ export async function updateNotificationPreferences(data: {
     } catch (error) {
         console.error("Error updating preferences:", error)
         return { success: false }
+    }
+}
+
+/**
+ * CRÉATION D'UNE NOTIFICATION
+ * Wrapper pour NotificationEngine.send
+ */
+export async function createNotification(
+    userId: string,
+    title: string,
+    message: string,
+    type: NotificationType = "INFO",
+    link?: string,
+    category: NotificationCategory = "LIFESTYLE",
+    priority: NotificationPriority = "LOW"
+) {
+    try {
+        return await NotificationEngine.send({
+            userId,
+            title,
+            message,
+            category,
+            priority,
+            type,
+            link
+        })
+    } catch (error) {
+        console.error("[CREATE_NOTIFICATION_ERROR]", error)
+        return { success: false, error: "Failed to create notification" }
     }
 }
