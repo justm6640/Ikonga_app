@@ -10,11 +10,14 @@ interface WelcomeScreenProps {
 }
 
 export function WelcomeScreen({ onContinue, welcomeMessage }: WelcomeScreenProps) {
-    const defaultMessage = `Bienvenue chez IKONGA.
-Je vais t'accompagner pas à pas dans ce parcours.
-Tu n'as rien à réussir aujourd'hui, juste à commencer.
-Je suis là pour toi. 🌸
-— Coach IKONGA`
+    const defaultMessage = `Bienvenue chez IKONGA. 🌸
+    
+    Je vais t’accompagner pas à pas dans ce parcours de transformation.
+    
+    Tu n’as rien à réussir aujourd’hui, juste à commencer.
+    Sache que ton abonnement définit notre durée ensemble, tandis que les phases (Détox, Équilibre, Consolidation, Entretien) organisent ton évolution.
+
+    Je suis là pour toi.`
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-amber-50/30 to-slate-50 px-4">
@@ -96,8 +99,8 @@ Je suis là pour toi. 🌸
                 >
                     <Button
                         onClick={onContinue}
-                        size="lg"
-                        className="px-12 py-6 rounded-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-white font-bold text-base shadow-xl shadow-slate-300 transition-all hover:scale-105 group"
+                        size="default"
+                        className="px-12 py-7 rounded-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-white font-bold text-lg shadow-xl shadow-slate-300 transition-all hover:scale-105 group h-auto"
                     >
                         Commencer mon parcours
                         <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />

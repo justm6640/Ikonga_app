@@ -10,47 +10,25 @@ interface OnboardingSlidesProps {
     onComplete: () => void
 }
 
+import { calculateIMC, calculatePISI } from "@/lib/engines/calculators"
+
 const SLIDES = [
     {
         title: "Bienvenue sur IKONGA",
         description: "La santé et le bien-être retrouvés, en harmonie avec les repas traditionnels de chez toi, du fitness et un nouveau mode de vie sain.",
-        image: "/images/onboarding/slide-1.jpg", // Massage/wellness image
+        image: "/images/onboarding/slide-1.jpg",
         gradient: "from-slate-900/80 via-slate-800/70 to-transparent"
     },
     {
-        title: "Nutrition & Sport réunis pour ta transformation",
+        title: "Nutrition & Sport réunis",
         description: "Des repas variés et savoureux, des entraînements adaptés, et une méthode complète pour perdre du poids sans te priver.",
-        image: "/images/onboarding/slide-2.png", // Healthy food image
+        image: "/images/onboarding/slide-2.png",
         gradient: "from-emerald-900/70 via-emerald-800/60 to-transparent"
     },
     {
-        title: "Bien-être & Beauté au cœur de ta routine",
-        description: "Un esprit apaisé, un corps choyé et des soins adaptés pour révéler ta plus belle version.",
-        image: "/images/onboarding/slide-3.png", // Essential oils image
-        gradient: "from-pink-900/70 via-pink-800/60 to-transparent"
-    },
-    {
-        title: "Un coaching premium rien que pour toi",
-        description: "Un accompagnement personnalisé avec une coach dédiée, pour t'aider à dépasser tes limites et transformer ton quotidien.",
-        image: "/images/onboarding/slide-4.png", // Sport/fitness image
-        gradient: "from-amber-900/70 via-amber-800/60 to-transparent"
-    },
-    {
-        title: "Une communauté bienveillante",
-        description: "Rejoins des milliers de femmes qui se soutiennent, partagent leurs victoires et avancent ensemble vers leurs objectifs.",
-        image: "/images/onboarding/slide-5.jpg", // Community/group image
-        gradient: "from-purple-900/70 via-purple-800/60 to-transparent"
-    },
-    {
-        title: "Des résultats durables et visibles",
-        description: "Pas de régimes miracles, mais une transformation en profondeur avec des résultats qui restent dans le temps.",
-        image: "/images/onboarding/slide-6.jpg", // Before/after or success image
-        gradient: "from-blue-900/70 via-blue-800/60 to-transparent"
-    },
-    {
         title: "Prête pour ta transformation ?",
-        description: "Ton nouveau mode de vie commence maintenant.",
-        image: "/images/onboarding/slide-7.png", // Gym/transformation image
+        description: "Ton nouveau mode de vie commence maintenant. Pas de régimes miracles, mais une transformation en profondeur.",
+        image: "/images/onboarding/slide-7.png",
         gradient: "from-slate-900/80 via-slate-800/70 to-transparent"
     }
 ]
@@ -140,8 +118,6 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                     IKONGA APP
                                 </span>
                             </div>
-
-                            {/* Removed Skip Button */}
                         </div>
 
                         {/* Main Content */}
@@ -162,6 +138,24 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                             >
                                 {slide.description}
                             </motion.p>
+
+                            {isLastSlide && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.5 }}
+                                    className="pt-6 grid grid-cols-2 gap-4"
+                                >
+                                    <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-3xl">
+                                        <p className="text-white/60 text-xs uppercase tracking-widest font-bold mb-1">Analyse</p>
+                                        <p className="text-white font-serif italic text-lg">"Prête pour le changement"</p>
+                                    </div>
+                                    <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-3xl">
+                                        <p className="text-white/60 text-xs uppercase tracking-widest font-bold mb-1">Status</p>
+                                        <p className="text-white font-serif italic text-lg">Éligible DÉTOX</p>
+                                    </div>
+                                </motion.div>
+                            )}
                         </div>
 
                         {/* Bottom Section */}

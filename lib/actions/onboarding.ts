@@ -64,21 +64,34 @@ export async function submitOnboarding(data: QuestionnaireData) {
                 }
             });
 
-            // B. Create Initial Phase (DETOX)
+            // B. Création des 4 Phases (DETOX, ÉQUILIBRE, CONSOLIDATION, ENTRETIEN)
             const startDate = data.programStartDate || new Date();
-            const existingPhase = await tx.userPhase.findFirst({
-                where: { userId: prismaUser!.id, isActive: true, type: "DETOX" }
+
+            // On vérifie si les phases existent déjà pour éviter les doublons
+            const existingPhases = await tx.userPhase.findMany({
+                where: { userId: prismaUser!.id }
             });
 
-            if (!existingPhase) {
-                await tx.userPhase.create({
-                    data: {
-                        userId: prismaUser!.id,
-                        type: "DETOX",
-                        startDate: startDate,
-                        plannedEndDate: addDays(startDate, 14),
-                        isActive: true
-                    }
+            if (existingPhases.length === 0) {
+                // Phase 1: DETOX (14 jours)
+                const detoxEnd = addDays(startDate, 14);
+                // Phase 2: ÉQUILIBRE (28 jours par défaut, peut être ajusté par le coach)
+                const equilibreStart = detoxEnd;
+                const equilibreEnd = addDays(equilibreStart, 28);
+                // Phase 3: CONSOLIDATION (28 jours par défaut)
+                const consolidationStart = equilibreEnd;
+                const consolidationEnd = addDays(consolidationStart, 28);
+                // Phase 4: ENTRETIEN (Jusqu'à la fin de l'abonnement ou 1 an)
+                const entretienStart = consolidationEnd;
+                const entretienEnd = addDays(entretienStart, 365);
+
+                await tx.userPhase.createMany({
+                    data: [
+                        { userId: prismaUser!.id, type: "DETOX", startDate: startDate, plannedEndDate: detoxEnd, isActive: true },
+                        { userId: prismaUser!.id, type: "EQUILIBRE", startDate: equilibreStart, plannedEndDate: equilibreEnd, isActive: false },
+                        { userId: prismaUser!.id, type: "CONSOLIDATION", startDate: consolidationStart, plannedEndDate: consolidationEnd, isActive: false },
+                        { userId: prismaUser!.id, type: "ENTRETIEN", startDate: entretienStart, plannedEndDate: entretienEnd, isActive: false },
+                    ]
                 });
             }
 
@@ -120,15 +133,25 @@ export async function submitOnboarding(data: QuestionnaireData) {
             }
         });
 
-        // 5. Finalize Onboarding & Generate First Menu
+        // 5. Finalize Onboarding & Generate First Menu & Send Coach Message
         const { generateUserWeeklyPlan } = await import("@/lib/ai/menu-generator");
+        const { createNotification } = await import("./notifications");
 
         await Promise.all([
             prisma.user.update({
                 where: { id: prismaUser!.id },
                 data: { hasCompletedOnboarding: true }
             }),
-            generateUserWeeklyPlan(prismaUser!.id)
+            generateUserWeeklyPlan(prismaUser!.id),
+            createNotification(
+                prismaUser!.id,
+                "Bienvenue chez IKONGA ! 🌸",
+                "Je vais t’accompagner pas à pas. Tu n’as rien à réussir aujourd’hui, juste à commencer.",
+                "INFO",
+                "/dashboard",
+                "HUMAN",
+                "HIGH"
+            )
         ]);
 
         revalidatePath("/dashboard")
