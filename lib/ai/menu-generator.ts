@@ -8,6 +8,12 @@ const openai = new OpenAI({
 });
 
 /**
+ * Simple in-memory lock to prevent parallel generations in the same process.
+ * In a serverless environment, this helps for concurrent requests to the same instance.
+ */
+const generationLocks = new Set<string>();
+
+/**
  * Generates a personalized weekly meal plan using GPT-4o-mini.
  */
 export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: boolean = false, startDateOverride?: Date) {
@@ -36,6 +42,12 @@ export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: b
         } else {
             targetWeekStart = startOfWeek(today, { weekStartsOn: 1 });
         }
+    }
+
+    const lockKey = `${userId}-${targetWeekStart.getTime()}`;
+    if (generationLocks.has(lockKey)) {
+        console.log(`[MenuGenerator] Generation already in progress for ${lockKey}. Skipping.`);
+        return { success: true, skipped: true };
     }
 
     // Safeguard check: Does a plan or custom menu coverage already exist?
@@ -125,6 +137,8 @@ export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: b
   `;
 
     try {
+        generationLocks.add(lockKey);
+
         const completion = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
@@ -196,9 +210,10 @@ export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: b
         }
 
         return { success: true, plan };
-
     } catch (error) {
         console.error(`Erreur Menu (User ${userId}):`, error);
         return { success: false, error: "Erreur IA" };
+    } finally {
+        generationLocks.delete(lockKey);
     }
 }

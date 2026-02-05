@@ -282,83 +282,106 @@ export async function getWeekData(weekNumber: number = 1) {
 
     const phaseStartDate = startOfDay(activePhase.startDate)
     const weekStartDate = addDays(phaseStartDate, (weekNumber - 1) * 7)
+    const weekEndDate = addDays(weekStartDate, 6)
 
-    // Check if WeeklyPlan exists
+    // 1. Check if WeeklyPlan exists
     let weeklyPlan = await prisma.weeklyPlan.findFirst({
-        where: {
-            userId: user.id,
-            weekStart: weekStartDate
-        }
+        where: { userId: user.id, weekStart: weekStartDate }
     })
 
-    // If NO plan exists, GENERATE one automatically
+    // 2. If NO plan exists, GENERATE one
     if (!weeklyPlan) {
-        console.log(`Generating new AI WeeklyPlan for User ${user.id} - Week ${weekNumber}`)
+        console.log(`[getWeekData] Generating AI WeeklyPlan for User ${user.id} - Week ${weekNumber}`)
         const { generateUserWeeklyPlan } = await import("../ai/menu-generator")
         const result = await generateUserWeeklyPlan(user.id, false, weekStartDate)
-
         if (result.success && result.plan) {
             weeklyPlan = result.plan
         } else {
-            return null // Fail gracefully
+            return null
         }
     }
 
+    // 3. Batch fetch Custom Menus and Daily Logs for the week
+    const [customMenus, dailyLogs] = await Promise.all([
+        prisma.userCustomMenu.findMany({
+            where: {
+                userId: user.id,
+                date: { gte: weekStartDate, lte: weekEndDate }
+            }
+        }),
+        prisma.dailyLog.findMany({
+            where: {
+                userId: user.id,
+                date: { gte: weekStartDate, lte: weekEndDate }
+            }
+        })
+    ])
+
+    const customMenusMap = new Map(customMenus.map(m => [startOfDay(m.date).getTime(), m.content]))
+    const logsMap = new Set(dailyLogs.filter(l => l.nutritionDone).map(l => startOfDay(l.date).getTime()))
+
+    // 4. Batch fetch relevant Recipes for the week
+    const content = weeklyPlan.content as any
+    const allRecipeNames = new Set<string>()
+    const extractNames = (d: any) => {
+        if (d.breakfast) allRecipeNames.add(d.breakfast)
+        if (d.lunch) allRecipeNames.add(d.lunch)
+        if (d.snack) allRecipeNames.add(d.snack)
+        if (d.dinner) allRecipeNames.add(d.dinner)
+    }
+
+    if (content.days && Array.isArray(content.days)) {
+        content.days.forEach(extractNames)
+    } else {
+        const dayNames = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+        dayNames.forEach(k => { if (content[k]) extractNames(content[k]) })
+    }
+
+    const recipes = await prisma.recipe.findMany({
+        where: {
+            name: { in: Array.from(allRecipeNames) },
+            phase: weeklyPlan.phase
+        }
+    })
+    const recipesMap = new Map(recipes.map(r => [r.name, r]))
+
+    // 5. Build days data
     const daysData = []
     for (let i = 0; i < 7; i++) {
         const currentDate = addDays(weekStartDate, i)
-        // Check if override exists (UserCustomMenu)
-        const customMenu = await prisma.userCustomMenu.findUnique({
-            where: { userId_date: { userId: user.id, date: currentDate } }
-        })
+        const dateTime = currentDate.getTime()
 
-        let menuForDay = null
-
-        if (customMenu) {
-            menuForDay = customMenu.content
-        } else if (weeklyPlan && weeklyPlan.content) {
-            const content = weeklyPlan.content as any
-            // Find day in generated content (assuming it's an array or indexed by dayIndex 0-6)
+        // Resolve menu
+        let rawMenu = customMenusMap.get(dateTime)
+        if (!rawMenu) {
             const dayIndex = i
+            const dayNames = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+            const targetDayName = dayNames[dayIndex]
             if (content.days && Array.isArray(content.days)) {
-                const dayData = content.days.find((d: any) => d.dayIndex === dayIndex)
-                if (dayData) {
-                    menuForDay = {
-                        breakfast: dayData.breakfast,
-                        lunch: dayData.lunch,
-                        snack: dayData.snack,
-                        dinner: dayData.dinner
-                    }
-                }
+                rawMenu = content.days.find((d: any) => d.dayIndex === dayIndex) || content.days[dayIndex]
+            } else {
+                rawMenu = content[targetDayName]
             }
         }
 
-        // Enrich with Recipe Details (calling existing logic helper if needed, or largely duplicating the enrichment logic for now for speed)
-        // Actually, getNutritionData already does this enrichment. 
-        // OPTIMIZATION: We could just return the raw names here and let the frontend fetch details or enrich here.
-        // Existing helper `getNutritionData` calls DB for each recipe.
-        // Let's keep it simple: we reconstruct expected return format.
-        // For efficiency, we should probably batch fetch recipes here if we wanted to be perfect.
-        // But `getWeekData` in the original file called `getNutritionData` 7 times.
-        // That logic was:
-        /*
-          const menuData = await getNutritionData(currentDate)
-          daysData.push({ ... menu: menuData?.menu ... })
-        */
-        // Since `getNutritionData` ALSO falls back to WeeklyPlan, we can just ensure the WeeklyPlan EXISTS (which we did above) and then let `getNutritionData` do its job!
-        // So actually, I don't need to manually parse the plan here if `getNutritionData` handles it.
-        // I just need to make sure the plan exists.
-
-        // Let's revert to calling getNutritionData, now that we know a plan exists!
-        const menuData = await getNutritionData(currentDate)
-
-        const dayNumber = Math.floor((currentDate.getTime() - phaseStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        // Enrich menu
+        const enrichedMenu: any = {}
+        if (rawMenu) {
+            const menuObj = rawMenu as any
+            ['breakfast', 'lunch', 'dinner', 'snack'].forEach(meal => {
+                const name = menuObj[meal]
+                if (name) {
+                    const recipe = recipesMap.get(name)
+                    enrichedMenu[meal] = recipe || { id: `custom-${Math.random()}`, name, isCustom: true }
+                }
+            })
+        }
 
         daysData.push({
-            dayNumber,
+            dayNumber: Math.floor((dateTime - phaseStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
             date: currentDate,
-            menu: menuData?.menu || null,
-            isCompleted: menuData?.isCompleted || false
+            menu: enrichedMenu,
+            isCompleted: logsMap.has(dateTime)
         })
     }
 

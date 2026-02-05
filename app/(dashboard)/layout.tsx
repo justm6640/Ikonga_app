@@ -2,6 +2,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { AdminFAB } from "@/components/layout/AdminFAB";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
+import { startOfWeek, nextMonday, isFriday, isWeekend, addDays, differenceInCalendarDays } from 'date-fns';
 import { getOrCreateUser } from "@/lib/actions/user";
 import { SubscriptionProvider } from "@/components/providers/SubscriptionProvider";
 import { redirect } from "next/navigation";
@@ -27,6 +28,20 @@ export default async function DashboardLayout({
     if (!user.hasCompletedOnboarding && role !== 'ADMIN') {
         console.log(`[DashboardLayout] User ${user.id} hasn't completed onboarding - redirecting`);
         redirect("/onboarding");
+    }
+
+    // 🔒 NEW: Access Lock JJ-2
+    // If currentDate < (startDate - 2 days), redirect to /waiting
+    // Except for ADMIN users
+    if (role !== 'ADMIN' && user.startDate) {
+        const today = new Date();
+        const startDate = new Date(user.startDate);
+        const daysUntilStart = differenceInCalendarDays(startDate, today);
+
+        if (daysUntilStart > 2) {
+            console.log(`[DashboardLayout] Access locked: ${daysUntilStart} days until start. Redirecting to /waiting`);
+            redirect("/waiting");
+        }
     }
 
     return (
