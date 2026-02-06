@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import {
     LineChart,
     Line,
@@ -38,8 +39,30 @@ export function EvolutionChart({
     subscriptionEndIndex,
     bmiThresholds
 }: EvolutionChartProps) {
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+
     const minY = Math.min(pisi, ...data.map(d => d.projection)) - 5;
     const maxY = Math.max(...data.map(d => d.projection)) + 5;
+
+    if (!isMounted) {
+        return (
+            <Card className="rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">
+                <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2">
+                        <TrendingDown size={14} className="text-ikonga-coral animate-pulse" />
+                        <CardTitle className="text-xl font-serif font-black text-slate-900">Courbe des Phases</CardTitle>
+                    </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                    <div className="h-80 w-full bg-slate-50/50 animate-pulse rounded-3xl" />
+                </CardContent>
+            </Card>
+        )
+    }
 
     return (
         <Card className="rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">

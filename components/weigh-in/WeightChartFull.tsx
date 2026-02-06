@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import {
     Area,
     AreaChart,
@@ -11,11 +11,10 @@ import {
     YAxis,
     ReferenceLine,
 } from "recharts"
-import { format, subDays, isAfter, isBefore, startOfDay } from "date-fns"
+import { format, subDays, isAfter } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Calendar as CalendarIcon, Filter, TrendingDown } from "lucide-react"
+import { Calendar as CalendarIcon, TrendingDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 
@@ -32,6 +31,11 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
     const [showCustomDates, setShowCustomDates] = useState(false)
     const [customStart, setCustomStart] = useState<string>("")
     const [customEnd, setCustomEnd] = useState<string>("")
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
 
     // Filter and sort data
     const filteredData = useMemo(() => {
@@ -75,6 +79,26 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
             )
         }
         return null
+    }
+
+    if (!isMounted) {
+        return (
+            <Card className="rounded-[2.5rem] border-none shadow-xl bg-white/70 backdrop-blur-xl overflow-hidden">
+                <CardHeader className="p-8 pb-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-orange-400 flex items-center justify-center text-white shadow-lg shadow-pink-200 animate-pulse">
+                            <TrendingDown size={24} />
+                        </div>
+                        <div>
+                            <CardTitle className="text-2xl font-black text-slate-900 tracking-tight">Courbe de Poids</CardTitle>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-8">
+                    <div className="h-[300px] md:h-[400px] w-full bg-slate-50/50 animate-pulse rounded-3xl" />
+                </CardContent>
+            </Card>
+        )
     }
 
     return (
