@@ -99,8 +99,9 @@ export async function submitOnboarding(data: QuestionnaireData) {
                     startWeight: data.startWeight,
                     targetWeight: finalTargetWeight,
                     pisi: pisi,
-                    startDate: data.programStartDate || new Date(),
+                    startDate: data.programStartDate || new Date(), // This IS the start date chosen in form
                     currentPhaseId: detoxPhaseId, // Set current phase to DETOX
+                    hasCompletedOnboarding: true,
                 }
             });
 
