@@ -93,3 +93,102 @@ export async function createContentItem(data: any) {
         }
     })
 }
+
+export async function getNewSubscribers() {
+    try {
+        await checkAdminAccess();
+        const { subDays } = await import("date-fns");
+        const sevenDaysAgo = subDays(new Date(), 7);
+
+        const users = await prisma.user.findMany({
+            where: {
+                OR: [
+                    { hasCompletedOnboarding: false },
+                    { createdAt: { gte: sevenDaysAgo } }
+                ],
+                role: { not: Role.ADMIN }
+            },
+            include: {
+                analysis: true,
+                phases: {
+                    orderBy: { startDate: 'asc' }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        // Calculate basic metrics for each user
+        return users.map(user => {
+            const height = user.heightCm || 0;
+            const weight = user.startWeight || 0;
+            const imc = height > 0 ? (weight / ((height / 100) ** 2)) : 0;
+
+            return {
+                id: user.id,
+                email: user.email,
+                name: `${user.firstName} ${user.lastName}`.trim() || user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                imc: parseFloat(imc.toFixed(1)),
+                pisi: user.pisi || 0,
+                startDate: user.startDate,
+                hasCompletedOnboarding: user.hasCompletedOnboarding,
+                createdAt: user.createdAt,
+                subscriptionTier: user.subscriptionTier,
+                currentPhase: user.phases.find(p => p.isActive)?.type || "En attente"
+            };
+        });
+    } catch (error) {
+        console.error("Error fetching new subscribers:", error);
+        return [];
+    }
+}
+
+export async function adjustUserPhase(userId: string, phaseType: string, startDate: Date, note?: string) {
+    try {
+        await checkAdminAccess();
+
+        // 1. Deactivate current active phase
+        await prisma.userPhase.updateMany({
+            where: { userId, isActive: true },
+            data: { isActive: false, actualEndDate: new Date() }
+        });
+
+        // 2. Create or update new phase
+        const newPhase = await prisma.userPhase.create({
+            data: {
+                userId,
+                type: phaseType as any,
+                startDate,
+                isActive: true,
+                isManualOverride: true,
+                adminNote: note
+            }
+        });
+
+        // 3. Update user currentPhaseId
+        await prisma.user.update({
+            where: { id: userId },
+            data: { currentPhaseId: newPhase.id }
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error adjusting user phase:", error);
+        return { success: false, error: "Erreur lors de l'ajustement de la phase" };
+    }
+}
+
+export async function updateCoachNote(userId: string, note: string) {
+    try {
+        await checkAdminAccess();
+        await prisma.user.update({
+            where: { id: userId },
+            data: { adminNote: note }
+        });
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating coach note:", error);
+        return { success: false, error: "Erreur lors de la mise à jour de la note" };
+    }
+}

@@ -35,6 +35,12 @@ async function main() {
             name: "Chef Détox",
             description: "3 jours de menus suivis rigoureusement.",
             icon: "🥗"
+        },
+        {
+            code: "PISI_ACHIEVED",
+            name: "PISI Atteint",
+            description: "Tu as atteint ton Poids de Santé Idéal !",
+            icon: "🏆"
         }
     ]
 

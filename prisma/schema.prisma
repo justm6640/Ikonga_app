@@ -55,6 +55,7 @@ model User {
   badges            UserBadge[]
   phases            UserPhase[]      @relation("UserPhases")
   currentPhase      UserPhase?       @relation("CurrentPhase", fields: [currentPhaseId], references: [id])
+  adminNote         String?          // Notes internes du coach
   weeklyPlans       WeeklyPlan[]
   wellnessLogs      WellnessLog[]
   workoutLogs       WorkoutLog[]

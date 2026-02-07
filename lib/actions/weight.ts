@@ -162,7 +162,8 @@ export async function saveWeightLog(
         Promise.all([
             sendWeighInFeedback(prismaUser.id, weight, lastLog?.weight),
             checkMilestones(prismaUser.id, weight),
-            checkGoalAchievement(prismaUser.id, weight)
+            checkGoalAchievement(prismaUser.id, weight),
+            checkPISIAchievement(prismaUser.id, weight)
         ]).catch(err => console.error('Notification check failed:', err));
 
         revalidatePath("/dashboard");
@@ -441,4 +442,23 @@ async function checkGoalAchievement(userId: string, currentWeight: number) {
             }
         }
     } catch (e) { console.error(e) }
+}
+
+async function checkPISIAchievement(userId: string, currentWeight: number) {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { pisi: true }
+        })
+        if (!user || user.pisi === null || user.pisi === undefined) return
+
+        // PISI can be 0 if not calculated yet
+        if (user.pisi === 0) return
+
+        // Tolerance of 100g to account for rounding or slight variations
+        if (currentWeight <= user.pisi + 0.1) {
+            const { handlePISIAchievement } = await import("./phases")
+            await handlePISIAchievement(userId)
+        }
+    } catch (e) { console.error("[checkPISIAchievement] Error:", e) }
 }

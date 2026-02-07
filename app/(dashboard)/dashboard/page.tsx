@@ -13,6 +13,9 @@ import { DailyJournalCard } from "@/components/dashboard/DailyJournalCard";
 import { TrackingGrid } from "@/components/dashboard/TrackingGrid";
 import { ComingSoonGrid } from "@/components/dashboard/ComingSoonGrid";
 import { CountdownHero } from "@/components/dashboard/CountdownHero";
+import { PhaseProgress } from "@/components/phases/PhaseProgress";
+import { UpcomingPhaseBanner } from "@/components/phases/UpcomingPhaseBanner";
+import { getUserAccessiblePhasesSync } from "@/lib/utils/phase-access-sync";
 
 export default async function DashboardPage() {
     // 1. Fetch User (Self-healing)
@@ -112,6 +115,24 @@ export default async function DashboardPage() {
                     startWeight={dbUser.startWeight || currentWeight}
                     pisi={dbUser.pisi || 0}
                 />
+
+                {/* BLOCK 2: Phase Timeline & Upcoming Banner */}
+                {(() => {
+                    const accessible = getUserAccessiblePhasesSync(dbUser);
+                    return (
+                        <>
+                            {accessible.upcoming && (
+                                <UpcomingPhaseBanner upcomingPhase={accessible.upcoming} />
+                            )}
+                            <PhaseProgress
+                                current={accessible.current}
+                                upcoming={accessible.upcoming}
+                                past={accessible.past}
+                                all={accessible.all}
+                            />
+                        </>
+                    );
+                })()}
 
                 {/* BLOCK 3: Weight Chart */}
                 <WeightMiniChart

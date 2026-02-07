@@ -31,15 +31,16 @@ export default async function DashboardLayout({
     }
 
     // 🔒 NEW: Access Lock JJ-2
-    // If currentDate < (startDate - 2 days), redirect to /waiting
+    // If currentDate < (startDate - 48H), redirect to /waiting
     // Except for ADMIN users
     if (role !== 'ADMIN' && user.startDate) {
-        const today = new Date();
+        const { subHours, isBefore } = await import('date-fns');
+        const now = new Date();
         const startDate = new Date(user.startDate);
-        const daysUntilStart = differenceInCalendarDays(startDate, today);
+        const unlockDate = subHours(startDate, 48);
 
-        if (daysUntilStart > 2) {
-            console.log(`[DashboardLayout] Access locked: ${daysUntilStart} days until start. Redirecting to /waiting`);
+        if (isBefore(now, unlockDate)) {
+            console.log(`[DashboardLayout] Access locked until ${unlockDate.toISOString()}. Redirecting to /waiting`);
             redirect("/waiting");
         }
     }
