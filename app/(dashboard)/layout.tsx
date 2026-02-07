@@ -37,13 +37,9 @@ export default async function DashboardLayout({
         const { subHours, isBefore } = await import('date-fns');
         const now = new Date();
 
-        // Priority: DETOX phase start date > user profile start date > now
-        const detoxPhase = user.phases?.find(p => p.type === 'DETOX');
-        const referenceDate = detoxPhase?.startDate
-            ? new Date(detoxPhase.startDate)
-            : (user.startDate ? new Date(user.startDate) : new Date());
-
-        const unlockDate = subHours(referenceDate, 48);
+        // Priority: Only use user.startDate as per user request
+        const startDate = user.startDate ? new Date(user.startDate) : new Date();
+        const unlockDate = subHours(startDate, 48);
 
         if (isBefore(now, unlockDate)) {
             console.log(`[DashboardLayout] Access locked until ${unlockDate.toISOString()}. Redirecting to /waiting`);
