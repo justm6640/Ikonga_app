@@ -22,7 +22,10 @@ export async function getOrCreateUser() {
         where: { id: user.id },
         include: {
             analysis: true,
-            phases: { where: { isActive: true }, take: 1 }
+            phases: {
+                where: { type: "DETOX" },
+                take: 1
+            }
         }
     })
 
