@@ -1,16 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface OnboardingSlidesProps {
     onComplete: () => void
 }
-
-import { calculateIMC, calculatePISI } from "@/lib/engines/calculators"
 
 const SLIDES = [
     {
@@ -33,11 +31,27 @@ const SLIDES = [
     }
 ]
 
+const AUTO_SLIDE_DELAY = 5000 // 5 seconds
+
 export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
     const [currentSlide, setCurrentSlide] = useState(0)
     const [direction, setDirection] = useState(0)
+    const [isPaused, setIsPaused] = useState(false)
+
+    // Auto-slide progression
+    useEffect(() => {
+        if (isPaused || currentSlide === SLIDES.length - 1) return
+
+        const timer = setTimeout(() => {
+            setDirection(1)
+            setCurrentSlide(prev => prev + 1)
+        }, AUTO_SLIDE_DELAY)
+
+        return () => clearTimeout(timer)
+    }, [currentSlide, isPaused])
 
     const handleNext = () => {
+        setIsPaused(true)
         if (currentSlide === SLIDES.length - 1) {
             onComplete()
         } else {
@@ -47,6 +61,7 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
     }
 
     const handlePrev = () => {
+        setIsPaused(true)
         if (currentSlide > 0) {
             setDirection(-1)
             setCurrentSlide(prev => prev - 1)
@@ -118,6 +133,17 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                     IKONGA APP
                                 </span>
                             </div>
+
+                            {/* Skip Button */}
+                            <Button
+                                onClick={handleSkip}
+                                variant="ghost"
+                                size="sm"
+                                className="rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white font-bold"
+                            >
+                                <X size={16} className="mr-1" />
+                                Passer
+                            </Button>
                         </div>
 
                         {/* Main Content */}
@@ -138,24 +164,6 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                             >
                                 {slide.description}
                             </motion.p>
-
-                            {isLastSlide && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: 0.5 }}
-                                    className="pt-6 grid grid-cols-2 gap-4"
-                                >
-                                    <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-3xl">
-                                        <p className="text-white/60 text-xs uppercase tracking-widest font-bold mb-1">Analyse</p>
-                                        <p className="text-white font-serif italic text-lg">"Prête pour le changement"</p>
-                                    </div>
-                                    <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-3xl">
-                                        <p className="text-white/60 text-xs uppercase tracking-widest font-bold mb-1">Status</p>
-                                        <p className="text-white font-serif italic text-lg">Éligible DÉTOX</p>
-                                    </div>
-                                </motion.div>
-                            )}
                         </div>
 
                         {/* Bottom Section */}
@@ -166,6 +174,7 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                     <button
                                         key={idx}
                                         onClick={() => {
+                                            setIsPaused(true)
                                             setDirection(idx > currentSlide ? 1 : -1)
                                             setCurrentSlide(idx)
                                         }}
@@ -199,8 +208,6 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                     {isLastSlide ? "Commencer l'aventure" : "Suivant"}
                                 </Button>
                             </div>
-
-                            {/* Removed Skip Link */}
                         </div>
                     </div>
                 </motion.div>

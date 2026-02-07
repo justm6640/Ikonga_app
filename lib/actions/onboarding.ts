@@ -51,26 +51,15 @@ export async function submitOnboarding(data: QuestionnaireData) {
         const finalTargetWeight = data.targetWeight || pisi;
 
         await prisma.$transaction(async (tx) => {
-            // A. Update User Profile (keep firstName, lastName, gender, birthDate from signup)
-            await tx.user.update({
-                where: { id: prismaUser!.id },
-                data: {
-                    // firstName, lastName, gender, birthDate already set from signup - don't overwrite
-                    heightCm: data.heightCm,
-                    startWeight: data.startWeight,
-                    targetWeight: finalTargetWeight,
-                    pisi: pisi,
-                    startDate: data.programStartDate || new Date(),
-                }
-            });
-
-            // B. Création des 4 Phases (DETOX, ÉQUILIBRE, CONSOLIDATION, ENTRETIEN)
+            // A. Création des 4 Phases d'abord (DETOX, ÉQUILIBRE, CONSOLIDATION, ENTRETIEN)
             const startDate = data.programStartDate || new Date();
 
             // On vérifie si les phases existent déjà pour éviter les doublons
             const existingPhases = await tx.userPhase.findMany({
                 where: { userId: prismaUser!.id }
             });
+
+            let detoxPhaseId: string | undefined;
 
             if (existingPhases.length === 0) {
                 // Phase 1: DETOX (14 jours)
@@ -85,7 +74,7 @@ export async function submitOnboarding(data: QuestionnaireData) {
                 const entretienStart = consolidationEnd;
                 const entretienEnd = addDays(entretienStart, 365);
 
-                await tx.userPhase.createMany({
+                const createdPhases = await tx.userPhase.createManyAndReturn({
                     data: [
                         { userId: prismaUser!.id, type: "DETOX", startDate: startDate, plannedEndDate: detoxEnd, isActive: true },
                         { userId: prismaUser!.id, type: "EQUILIBRE", startDate: equilibreStart, plannedEndDate: equilibreEnd, isActive: false },
@@ -93,7 +82,27 @@ export async function submitOnboarding(data: QuestionnaireData) {
                         { userId: prismaUser!.id, type: "ENTRETIEN", startDate: entretienStart, plannedEndDate: entretienEnd, isActive: false },
                     ]
                 });
+
+                // Récupérer l'ID de la phase DETOX
+                detoxPhaseId = createdPhases.find(p => p.type === "DETOX")?.id;
+            } else {
+                // Si les phases existent déjà, récupérer la phase DETOX active
+                detoxPhaseId = existingPhases.find(p => p.type === "DETOX")?.id;
             }
+
+            // B. Update User Profile (keep firstName, lastName, gender, birthDate from signup)
+            await tx.user.update({
+                where: { id: prismaUser!.id },
+                data: {
+                    // firstName, lastName, gender, birthDate already set from signup - don't overwrite
+                    heightCm: data.heightCm,
+                    startWeight: data.startWeight,
+                    targetWeight: finalTargetWeight,
+                    pisi: pisi,
+                    startDate: data.programStartDate || new Date(),
+                    currentPhaseId: detoxPhaseId, // Set current phase to DETOX
+                }
+            });
 
             // C. Daily Log (Initial Weight) - Normalized to midnight
             const today = new Date();
