@@ -251,34 +251,18 @@ export function AuthForm({ mode }: AuthFormProps) {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="heightCm">Taille (cm)</Label>
-                                    <Input
-                                        id="heightCm"
-                                        name="heightCm"
-                                        type="number"
-                                        placeholder="165"
-                                        min="100"
-                                        max="250"
-                                        required
-                                        className="h-11 rounded-xl"
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="startWeight">Poids de départ (kg)</Label>
-                                    <Input
-                                        id="startWeight"
-                                        name="startWeight"
-                                        type="number"
-                                        step="0.1"
-                                        placeholder="70"
-                                        min="30"
-                                        max="300"
-                                        required
-                                        className="h-11 rounded-xl"
-                                    />
-                                </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="heightCm">Taille (cm)</Label>
+                                <Input
+                                    id="heightCm"
+                                    name="heightCm"
+                                    type="number"
+                                    placeholder="165"
+                                    min="100"
+                                    max="250"
+                                    required
+                                    className="h-11 rounded-xl"
+                                />
                             </div>
 
                             <div className="grid gap-2">

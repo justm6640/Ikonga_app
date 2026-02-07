@@ -22,7 +22,6 @@ const SignUpSchema = EmailSchema.extend({
     birthDate: z.string().optional(),
     phone: z.string().optional(),
     heightCm: z.coerce.number().min(100).max(250).optional(),
-    startWeight: z.coerce.number().min(30).max(300).optional(),
     startDate: z.string().optional(),
 })
 
@@ -68,7 +67,6 @@ export async function signup(prevState: any, formData: FormData) {
         birthDate: formData.get("birthDate") as string || undefined,
         phone: formData.get("phone") as string || undefined,
         heightCm: formData.get("heightCm") as string || undefined,
-        startWeight: formData.get("startWeight") as string || undefined,
         startDate: formData.get("startDate") as string || undefined,
     }
 
@@ -80,7 +78,7 @@ export async function signup(prevState: any, formData: FormData) {
         return { success: false, error: firstError || "Données invalides" }
     }
 
-    const { email, password, firstName, lastName, gender, birthDate, phone, heightCm, startWeight, startDate } = validatedFields.data
+    const { email, password, firstName, lastName, gender, birthDate, phone, heightCm, startDate } = validatedFields.data
 
     // B. Inscription Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -114,7 +112,6 @@ export async function signup(prevState: any, formData: FormData) {
                     birthDate: birthDate ? new Date(birthDate) : undefined,
                     phoneNumber: phone || undefined,
                     heightCm: heightCm || undefined,
-                    startWeight: startWeight || undefined,
                     startDate: new Date(), // User stated startDate is creation date
                     planStartDate: startDate ? new Date(startDate) : new Date(), // Cure start date from form
                     hasCompletedOnboarding: false, // Explicitly set to false
