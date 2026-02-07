@@ -10,9 +10,12 @@ export default async function WaitingPage() {
         redirect("/login");
     }
 
-    // Access is granted 48H before startDate (user choice)
-    const startDate = user.startDate ? new Date(user.startDate) : new Date();
-    const unlockDate = subHours(startDate, 48);
+    // Access is granted 48H before planStartDate (Cure Start Date)
+    const targetDate = user.planStartDate
+        ? new Date(user.planStartDate)
+        : (user.startDate ? new Date(user.startDate) : new Date());
+
+    const unlockDate = subHours(targetDate, 48);
     const now = new Date();
 
     // If already unlocked, redirect to dashboard

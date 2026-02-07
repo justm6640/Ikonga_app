@@ -31,15 +31,19 @@ export default async function DashboardLayout({
     }
 
     // 🔒 NEW: Access Lock JJ-2
-    // If currentDate < (DETOX startDate - 48H), redirect to /waiting
+    // If currentDate < (planStartDate - 48H), redirect to /waiting
     // Except for ADMIN users
     if (role !== 'ADMIN') {
         const { subHours, isBefore } = await import('date-fns');
         const now = new Date();
 
-        // Priority: Only use user.startDate as per user request
-        const startDate = user.startDate ? new Date(user.startDate) : new Date();
-        const unlockDate = subHours(startDate, 48);
+        // Priority: Use planStartDate as the "Cure Start Date"
+        // Fallback to startDate or now if missing
+        const targetDate = user.planStartDate
+            ? new Date(user.planStartDate)
+            : (user.startDate ? new Date(user.startDate) : new Date());
+
+        const unlockDate = subHours(targetDate, 48);
 
         if (isBefore(now, unlockDate)) {
             console.log(`[DashboardLayout] Access locked until ${unlockDate.toISOString()}. Redirecting to /waiting`);

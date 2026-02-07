@@ -115,7 +115,8 @@ export async function signup(prevState: any, formData: FormData) {
                     phoneNumber: phone || undefined,
                     heightCm: heightCm || undefined,
                     startWeight: startWeight || undefined,
-                    startDate: startDate ? new Date(startDate) : new Date(), // Use provided date or default to now
+                    startDate: new Date(), // User stated startDate is creation date
+                    planStartDate: startDate ? new Date(startDate) : new Date(), // Cure start date from form
                     hasCompletedOnboarding: false, // Explicitly set to false
                 }
             })
