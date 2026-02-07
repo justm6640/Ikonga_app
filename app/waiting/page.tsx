@@ -10,13 +10,9 @@ export default async function WaitingPage() {
         redirect("/login");
     }
 
-    // Access is granted 48H before DETOX startDate
-    const detoxPhase = user.phases?.find((p: any) => p.type === 'DETOX');
-    const referenceDate = detoxPhase?.startDate
-        ? new Date(detoxPhase.startDate)
-        : (user.startDate ? new Date(user.startDate) : new Date());
-
-    const unlockDate = subHours(referenceDate, 48);
+    // Access is granted 48H before startDate (user choice)
+    const startDate = user.startDate ? new Date(user.startDate) : new Date();
+    const unlockDate = subHours(startDate, 48);
     const now = new Date();
 
     // If already unlocked, redirect to dashboard
