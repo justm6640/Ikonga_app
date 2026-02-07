@@ -1,4 +1,4 @@
-import { differenceInDays, isBefore, addDays } from "date-fns"
+import { differenceInDays, isBefore, addDays, startOfDay } from "date-fns"
 
 /**
  * Synchronous version of phase access logic to avoid multiple DB calls in dashboard.
@@ -8,8 +8,8 @@ export function getUserAccessiblePhasesSync(user: any) {
     const phases = user.phases || []
     const today = new Date()
 
-    // 1. Current Phase (marked as active)
-    const currentPhase = phases.find((p: any) => p.isActive) || null
+    // 1. Current Phase (marked as active AND started)
+    const currentPhase = phases.find((p: any) => p.isActive && !isBefore(today, startOfDay(new Date(p.startDate)))) || null
 
     // 2. Upcoming Phase (Next one if within 2 days)
     const upcomingPhase = phases.find((p: any) => {

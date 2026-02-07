@@ -29,7 +29,7 @@ export default async function DashboardPage() {
         where: { id: prismaUser.id },
         include: {
             dailyLogs: { orderBy: { date: 'desc' } },
-            phases: { orderBy: { startDate: 'desc' }, take: 1 }
+            phases: { orderBy: { startDate: 'desc' } } // Fetch all phases to determine correct active one
         }
     });
 
@@ -72,8 +72,12 @@ export default async function DashboardPage() {
     const lastLog = dbUser.dailyLogs.find(l => l.weight !== null);
     const currentWeight = lastLog?.weight || dbUser.startWeight || 0;
 
-    // Phase Info
-    const activePhase = dbUser.phases[0];
+    // Phase Info - Smart Selection
+    const accessiblePhases = getUserAccessiblePhasesSync(dbUser);
+
+    // Priority: 1. Current Running Phase, 2. Last Completed Phase (gap), 3. Fallback
+    const activePhase = accessiblePhases.current || (accessiblePhases.past.length > 0 ? accessiblePhases.past[0] : dbUser.phases[0]);
+
     const activePhaseType = activePhase?.type || "DETOX";
     const phaseStartDate = activePhase?.startDate || dbUser.startDate;
     const isCoachOverridden = activePhase?.adminNote ? true : false;
