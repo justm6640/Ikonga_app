@@ -8,6 +8,7 @@ interface SubscriptionContextType {
     tier: SubscriptionTier | null;
     role: Role | null;
     hasAccess: (feature: Feature) => boolean;
+    isBeforeCureStart: boolean;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
@@ -15,11 +16,13 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 export function SubscriptionProvider({
     children,
     tier,
-    role
+    role,
+    isBeforeCureStart = false
 }: {
     children: ReactNode;
     tier: SubscriptionTier | null;
     role: Role | null;
+    isBeforeCureStart?: boolean;
 }) {
     const hasAccess = (feature: Feature) => {
         if (role === 'ADMIN') return true;
@@ -27,7 +30,7 @@ export function SubscriptionProvider({
     };
 
     return (
-        <SubscriptionContext.Provider value={{ tier, role, hasAccess }}>
+        <SubscriptionContext.Provider value={{ tier, role, hasAccess, isBeforeCureStart }}>
             {children}
         </SubscriptionContext.Provider>
     );

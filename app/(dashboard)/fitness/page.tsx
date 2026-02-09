@@ -15,6 +15,12 @@ export default async function FitnessPage() {
     const user = await getOrCreateUser()
     if (!user) redirect("/auth/sign-in")
 
+    // 🔒 Pre-Cure Access Control: Redirect if before cure start date
+    const { isBeforeCureStart } = await import('@/lib/utils/access-control')
+    if (user.role !== 'ADMIN' && isBeforeCureStart(user.planStartDate)) {
+        redirect("/dashboard")
+    }
+
     const data = await getFitnessHubData()
 
     // If data is null, we construct a partial object to allow rendering the "No workout" state within the main layout

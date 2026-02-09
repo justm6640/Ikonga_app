@@ -34,6 +34,12 @@ export default async function WeighInPage(props: {
 
     if (!dbUser) return <div>Utilisateur introuvable</div>
 
+    // 🔒 Pre-Cure Access Control: Redirect if before cure start date
+    const { isBeforeCureStart } = await import('@/lib/utils/access-control')
+    if (dbUser.role !== 'ADMIN' && isBeforeCureStart(dbUser.planStartDate)) {
+        redirect("/dashboard")
+    }
+
     // BLOCAGE: Si le programme n'a pas commencé, on redirige vers le dashboard
     const today = startOfDay(new Date());
     const programStart = startOfDay(new Date(dbUser.startDate));

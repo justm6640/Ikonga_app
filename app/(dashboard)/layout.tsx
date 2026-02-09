@@ -51,8 +51,13 @@ export default async function DashboardLayout({
         }
     }
 
+    // 🔒 NEW: Calculate if we are before cure start (for section locking)
+    // This is used to gray out sections that are not yet accessible
+    const { isBeforeCureStart: checkBeforeCureStart } = await import('@/lib/utils/access-control');
+    const isBeforeCureStartFlag = role !== 'ADMIN' && checkBeforeCureStart(user.planStartDate);
+
     return (
-        <SubscriptionProvider tier={tier} role={role}>
+        <SubscriptionProvider tier={tier} role={role} isBeforeCureStart={isBeforeCureStartFlag}>
             <div className="flex h-screen bg-background overflow-hidden font-sans">
                 {/* Sidebar - Desktop Only */}
                 <Sidebar />

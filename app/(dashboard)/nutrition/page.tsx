@@ -7,6 +7,12 @@ export default async function NutritionPage() {
     const user = await getOrCreateUser()
     if (!user) redirect("/login")
 
+    // 🔒 Pre-Cure Access Control: Redirect if before cure start date
+    const { isBeforeCureStart } = await import('@/lib/utils/access-control')
+    if (user.role !== 'ADMIN' && isBeforeCureStart(user.planStartDate)) {
+        redirect("/dashboard")
+    }
+
     const [nutritionData, phaseDays] = await Promise.all([
         getNutritionData(),
         getPhaseDays()
