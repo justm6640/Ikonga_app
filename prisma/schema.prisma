@@ -42,8 +42,10 @@ model User {
   
   // Extended Profile for Menu Gen
   allergies        String[]        // e.g. ["Gluten", "Peanuts"]
+  intolerances     String[]        @default([]) // e.g. ["Lactose", "FODMAPs"]
   dietaryUsage     String?         // e.g. "Vegetarian", "Halal"
   countryOrigin    String?         // e.g. "France", "Senegal"
+  freeComment      String?         // Commentaire libre de l'utilisateur
   
   channels          ChannelMember[]
   contentLogs       ContentLog[]

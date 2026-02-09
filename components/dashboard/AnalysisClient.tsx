@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { AnalysisForm } from "@/components/dashboard/AnalysisForm"
+import { AnalysisFormSlides } from "@/components/dashboard/AnalysisFormSlides"
 import { Button } from "@/components/ui/button"
 import { RefreshCw, Edit } from "lucide-react"
 import { AnalysisResult, AnalysisFormData } from "@/lib/validators/analysis"
@@ -25,12 +25,13 @@ export function AnalysisClient({ initialAnalysis, existingFormData }: AnalysisCl
 
     if (isEditing) {
         return (
-            <AnalysisForm
+            <AnalysisFormSlides
                 existingData={lastFormData ?? existingFormData}
                 onCancel={analysis ? () => setIsEditing(false) : undefined}
-                onAnalysisGenerated={(result, submittedData) => {
-                    setAnalysis(result)
-                    setLastFormData(submittedData)
+                onComplete={(formData) => {
+                    console.log("Form submitted:", formData)
+                    // TODO: Call server action to generate analysis
+                    setLastFormData(formData)
                     setIsEditing(false)
                 }}
             />

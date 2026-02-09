@@ -21,6 +21,7 @@ export const questionnaireSchema = z.object({
 
     // 2. NUTRITION
     allergies: z.array(z.string()).min(1, "Sélectionne au moins une option."),
+    intolerances: z.array(z.string()).optional(),
     refusedFoods: z.array(z.string()).min(1, "Sélectionne au moins une option."),
     eatingHabits: z.array(z.string()).min(1, "Sélectionne au moins une option."),
     mealsPerDay: z.string().min(1, "Requis."),
@@ -63,6 +64,7 @@ export const questionnaireSchema = z.object({
     whyJoin: z.array(z.string()).min(1, "Sélectionne au moins une option."),
     engagementLevel: z.string().min(1, "Requis."),
     additionalNotes: z.string().optional(),
+    freeComment: z.string().optional(),
     programStartDate: z.date().optional(),
 });
 
@@ -75,7 +77,7 @@ export const step1GeneralSchema = questionnaireSchema.pick({
 });
 
 export const step2NutritionSchema = questionnaireSchema.pick({
-    allergies: true, refusedFoods: true, eatingHabits: true,
+    allergies: true, intolerances: true, refusedFoods: true, eatingHabits: true,
     mealsPerDay: true, kitchenEquipment: true, nutritionGoals: true, favoriteFoods: true
 });
 
