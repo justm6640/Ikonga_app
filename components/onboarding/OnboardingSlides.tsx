@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface OnboardingSlidesProps {
-    onComplete: () => void
+    onComplete?: () => void
 }
 
 const SLIDES = [
@@ -38,42 +38,19 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
     const [direction, setDirection] = useState(0)
     const [isPaused, setIsPaused] = useState(false)
 
-    // Auto-slide progression
+    // Auto-slide progression (Looping)
     useEffect(() => {
-        if (isPaused || currentSlide === SLIDES.length - 1) return
+        if (isPaused) return
 
         const timer = setTimeout(() => {
             setDirection(1)
-            setCurrentSlide(prev => prev + 1)
+            setCurrentSlide(prev => (prev + 1) % SLIDES.length)
         }, AUTO_SLIDE_DELAY)
 
         return () => clearTimeout(timer)
     }, [currentSlide, isPaused])
 
-    const handleNext = () => {
-        setIsPaused(true)
-        if (currentSlide === SLIDES.length - 1) {
-            onComplete()
-        } else {
-            setDirection(1)
-            setCurrentSlide(prev => prev + 1)
-        }
-    }
-
-    const handlePrev = () => {
-        setIsPaused(true)
-        if (currentSlide > 0) {
-            setDirection(-1)
-            setCurrentSlide(prev => prev - 1)
-        }
-    }
-
-    const handleSkip = () => {
-        onComplete()
-    }
-
     const slide = SLIDES[currentSlide]
-    const isLastSlide = currentSlide === SLIDES.length - 1
 
     const variants = {
         enter: (direction: number) => ({
@@ -93,7 +70,7 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
     }
 
     return (
-        <div className="relative min-h-screen w-full overflow-hidden bg-black">
+        <div className="relative min-h-screen w-full overflow-hidden bg-black font-sans">
             <AnimatePresence initial={false} custom={direction} mode="wait">
                 <motion.div
                     key={currentSlide}
@@ -133,17 +110,6 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                     IKONGA APP
                                 </span>
                             </div>
-
-                            {/* Skip Button */}
-                            <Button
-                                onClick={handleSkip}
-                                variant="ghost"
-                                size="sm"
-                                className="rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white font-bold"
-                            >
-                                <X size={16} className="mr-1" />
-                                Passer
-                            </Button>
                         </div>
 
                         {/* Main Content */}
@@ -152,7 +118,7 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="text-3xl sm:text-4xl md:text-6xl font-serif font-black text-white leading-[1.1] md:leading-tight"
+                                className="text-4xl sm:text-5xl md:text-7xl font-serif font-black text-white leading-[1.1] md:leading-tight"
                             >
                                 {slide.title}
                             </motion.h1>
@@ -160,14 +126,14 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3 }}
-                                className="text-sm sm:text-base md:text-xl text-white/90 leading-relaxed max-w-xl"
+                                className="text-base sm:text-lg md:text-2xl text-white/90 leading-relaxed max-w-xl font-light"
                             >
                                 {slide.description}
                             </motion.p>
                         </div>
 
                         {/* Bottom Section */}
-                        <div className="space-y-6 pb-2 md:pb-0 mb-safe">
+                        <div className="space-y-8 pb-4 md:pb-0 mb-safe">
                             {/* Progress Indicators */}
                             <div className="flex items-center justify-center gap-2">
                                 {SLIDES.map((_, idx) => (
@@ -181,31 +147,28 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                         className={cn(
                                             "h-1.5 md:h-2 rounded-full transition-all",
                                             idx === currentSlide
-                                                ? "w-6 md:w-8 bg-gradient-to-r from-orange-500 to-pink-500"
-                                                : "w-1.5 md:w-2 bg-white/30 hover:bg-white/50"
+                                                ? "w-8 md:w-10 bg-gradient-to-r from-orange-500 to-pink-500"
+                                                : "w-2 md:w-2.5 bg-white/30 hover:bg-white/50"
                                         )}
                                     />
                                 ))}
                             </div>
 
-                            {/* Navigation Buttons */}
-                            <div className="flex items-center gap-4">
-                                {currentSlide > 0 && (
-                                    <Button
-                                        onClick={handlePrev}
-                                        variant="ghost"
-                                        size="icon"
-                                        className="rounded-full w-12 h-12 md:w-14 md:h-14 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white shrink-0"
-                                    >
-                                        <ChevronLeft size={24} />
-                                    </Button>
-                                )}
+                            {/* Authentication Buttons (REPLACES NAVIGATION) */}
+                            <div className="flex flex-col sm:flex-row items-center gap-4">
+                                <Button
+                                    asChild
+                                    className="w-full sm:flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-pink-600 hover:from-orange-600 hover:via-pink-600 hover:to-pink-700 text-white font-black text-lg shadow-2xl shadow-pink-500/50 transition-all hover:scale-[1.02] active:scale-95 border-none"
+                                >
+                                    <a href="/signup">S'inscrire gratuitement</a>
+                                </Button>
 
                                 <Button
-                                    onClick={handleNext}
-                                    className="flex-1 h-12 md:h-14 rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-pink-600 hover:from-orange-600 hover:via-pink-600 hover:to-pink-700 text-white font-bold text-sm md:text-base shadow-2xl shadow-pink-500/50 transition-all hover:scale-105 active:scale-95"
+                                    asChild
+                                    variant="outline"
+                                    className="w-full sm:w-auto px-10 h-14 md:h-16 rounded-full bg-white/10 backdrop-blur-md border-white/30 text-white font-bold text-lg hover:bg-white/20 transition-all"
                                 >
-                                    {isLastSlide ? "Commencer l'aventure" : "Suivant"}
+                                    <a href="/login">Se connecter</a>
                                 </Button>
                             </div>
                         </div>

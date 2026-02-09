@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { awardBadge } from "./gamification"
 import { NotificationType } from "@prisma/client"
+import { startOfDay as getStartOfDay } from "date-fns"
 
 export type LogWeightResult = {
     status: "success" | "neutral" | "info" | "error" | "confirmation_needed" | "warning";
@@ -93,8 +94,20 @@ export async function saveWeightLog(
 
         if (!prismaUser) throw new Error("Utilisateur Prisma introuvable");
 
-        const startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
+        // VALIDATION: Block weigh-ins before start date
+        const weighInDate = getStartOfDay(new Date(date));
+        const programStartDate = getStartOfDay(new Date(prismaUser.startDate));
+
+        if (weighInDate < programStartDate) {
+            return {
+                message: "Le programme n'a pas encore commencé. Patience ! ⏳", // Fixed property name 'message' was sufficient, motivationalMessage optional
+                status: "error", // Or "warning" if you prefer soft block, but user asked to BLOCK
+                motivationalMessage: "Patience, ça commence bientôt ! 🚀"
+            };
+        }
+
+        const startOfDay = weighInDate;
+
         const endOfDay = new Date(date);
         endOfDay.setHours(23, 59, 59, 999);
 

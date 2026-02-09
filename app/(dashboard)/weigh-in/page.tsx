@@ -7,6 +7,9 @@ import { getWeightHistory } from "@/lib/actions/weight"
 import { Scale, TrendingDown, Target, Award, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
+import { redirect } from "next/navigation"
+import { startOfDay, isBefore } from "date-fns"
+
 export default async function WeighInPage(props: {
     searchParams: Promise<{ page?: string; limit?: string }>;
 }) {
@@ -30,6 +33,14 @@ export default async function WeighInPage(props: {
     });
 
     if (!dbUser) return <div>Utilisateur introuvable</div>
+
+    // BLOCAGE: Si le programme n'a pas commencé, on redirige vers le dashboard
+    const today = startOfDay(new Date());
+    const programStart = startOfDay(new Date(dbUser.startDate));
+
+    if (isBefore(today, programStart)) {
+        redirect('/dashboard');
+    }
 
     // Fetch Paginated History using server action
     const historyData = await getWeightHistory(page, limit);
