@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 interface OnboardingSlidesProps {
     onComplete?: () => void
+    mode?: 'landing' | 'onboarding'
 }
 
 const SLIDES = [
@@ -20,20 +21,20 @@ const SLIDES = [
     {
         title: "Nutrition & Sport réunis",
         description: "Des repas variés et savoureux, des entraînements adaptés, et une méthode complète pour perdre du poids sans te priver.",
-        image: "/images/onboarding/slide-2.png",
+        image: "/images/onboarding/slide-1.jpg",
         gradient: "from-emerald-900/70 via-emerald-800/60 to-transparent"
     },
     {
         title: "Prête pour ta transformation ?",
         description: "Ton nouveau mode de vie commence maintenant. Pas de régimes miracles, mais une transformation en profondeur.",
-        image: "/images/onboarding/slide-7.png",
+        image: "/images/onboarding/slide-1.jpg",
         gradient: "from-slate-900/80 via-slate-800/70 to-transparent"
     }
 ]
 
 const AUTO_SLIDE_DELAY = 5000 // 5 seconds
 
-export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
+export function OnboardingSlides({ onComplete, mode = 'landing' }: OnboardingSlidesProps) {
     const [currentSlide, setCurrentSlide] = useState(0)
     const [direction, setDirection] = useState(0)
     const [isPaused, setIsPaused] = useState(false)
@@ -50,7 +51,30 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
         return () => clearTimeout(timer)
     }, [currentSlide, isPaused])
 
+    const handleNext = () => {
+        setIsPaused(true)
+        if (currentSlide === SLIDES.length - 1) {
+            onComplete?.()
+        } else {
+            setDirection(1)
+            setCurrentSlide(prev => prev + 1)
+        }
+    }
+
+    const handlePrev = () => {
+        setIsPaused(true)
+        if (currentSlide > 0) {
+            setDirection(-1)
+            setCurrentSlide(prev => prev - 1)
+        }
+    }
+
+    const handleSkip = () => {
+        onComplete?.()
+    }
+
     const slide = SLIDES[currentSlide]
+    const isLastSlide = currentSlide === SLIDES.length - 1
 
     const variants = {
         enter: (direction: number) => ({
@@ -110,6 +134,19 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                     IKONGA APP
                                 </span>
                             </div>
+
+                            {/* Skip Button (Onboarding Mode Only) */}
+                            {mode === 'onboarding' && (
+                                <Button
+                                    onClick={handleSkip}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white font-bold"
+                                >
+                                    <X size={16} className="mr-1" />
+                                    Passer
+                                </Button>
+                            )}
                         </div>
 
                         {/* Main Content */}
@@ -154,23 +191,45 @@ export function OnboardingSlides({ onComplete }: OnboardingSlidesProps) {
                                 ))}
                             </div>
 
-                            {/* Authentication Buttons (REPLACES NAVIGATION) */}
-                            <div className="flex flex-col sm:flex-row items-center gap-4">
-                                <Button
-                                    asChild
-                                    className="w-full sm:flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-pink-600 hover:from-orange-600 hover:via-pink-600 hover:to-pink-700 text-white font-black text-lg shadow-2xl shadow-pink-500/50 transition-all hover:scale-[1.02] active:scale-95 border-none"
-                                >
-                                    <a href="/signup">S'inscrire gratuitement</a>
-                                </Button>
+                            {/* ACTION BUTTONS (Conditional based on mode) */}
+                            {mode === 'landing' ? (
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                    <Button
+                                        asChild
+                                        className="w-full sm:flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-pink-600 hover:from-orange-600 hover:via-pink-600 hover:to-pink-700 text-white font-black text-lg shadow-2xl shadow-pink-500/50 transition-all hover:scale-[1.02] active:scale-95 border-none"
+                                    >
+                                        <a href="/signup">S'inscrire gratuitement</a>
+                                    </Button>
 
-                                <Button
-                                    asChild
-                                    variant="outline"
-                                    className="w-full sm:w-auto px-10 h-14 md:h-16 rounded-full bg-white/10 backdrop-blur-md border-white/30 text-white font-bold text-lg hover:bg-white/20 transition-all"
-                                >
-                                    <a href="/login">Se connecter</a>
-                                </Button>
-                            </div>
+                                    <Button
+                                        asChild
+                                        variant="outline"
+                                        className="w-full sm:w-auto px-10 h-14 md:h-16 rounded-full bg-white/10 backdrop-blur-md border-white/30 text-white font-bold text-lg hover:bg-white/20 transition-all"
+                                    >
+                                        <a href="/login">Se connecter</a>
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-4">
+                                    {currentSlide > 0 && (
+                                        <Button
+                                            onClick={handlePrev}
+                                            variant="ghost"
+                                            size="icon"
+                                            className="rounded-full w-12 h-12 md:w-14 md:h-14 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white shrink-0"
+                                        >
+                                            <ChevronLeft size={24} />
+                                        </Button>
+                                    )}
+
+                                    <Button
+                                        onClick={handleNext}
+                                        className="flex-1 h-12 md:h-14 rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-pink-600 hover:from-orange-600 hover:via-pink-600 hover:to-pink-700 text-white font-bold text-sm md:text-base shadow-2xl shadow-pink-500/50 transition-all hover:scale-105 active:scale-95"
+                                    >
+                                        {isLastSlide ? "Commencer l'aventure" : "Suivant"}
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </motion.div>

@@ -48,7 +48,7 @@ export function OnboardingClient() {
                                 </p>
                             </div>
                         ) : (
-                            <OnboardingSlides onComplete={handleStartJourney} />
+                            <OnboardingSlides onComplete={handleStartJourney} mode="onboarding" />
                         )}
                     </motion.div>
                 </AnimatePresence>

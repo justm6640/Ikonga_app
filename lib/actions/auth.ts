@@ -39,11 +39,34 @@ export async function login(prevState: any, formData: FormData) {
     })
 
     if (error) {
-        console.error("[AUTH_ACTION] Login error:", error.message)
+        console.error("[AUTH_ACTION] Login error details:", {
+            message: error.message,
+            status: error.status,
+            code: error.code
+        })
         return { success: false, error: "Identifiants invalides ou compte non vérifié." }
     }
 
     console.log("[AUTH_ACTION] Login successful for user:", data.user?.id)
+
+    // 🔧 AUTO-FIX: Check if user needs onboarding completion
+    // This prevents the infinite redirect loop between /dashboard and /onboarding
+    try {
+        const dbUser = await prisma.user.findUnique({
+            where: { id: data.user.id },
+            select: { hasCompletedOnboarding: true }
+        })
+
+        if (dbUser && !dbUser.hasCompletedOnboarding) {
+            console.log("[AUTH_ACTION] User has not completed onboarding - auto-completing now")
+            const { skipOnboarding } = await import("./onboarding")
+            await skipOnboarding()
+            console.log("[AUTH_ACTION] Onboarding auto-completed successfully")
+        }
+    } catch (onboardingError) {
+        console.error("[AUTH_ACTION] Error during onboarding auto-completion:", onboardingError)
+        // Continue anyway - this is non-critical
+    }
 
     revalidatePath("/", "layout")
     console.log("[AUTH_ACTION] Redirecting to /dashboard")
@@ -94,6 +117,11 @@ export async function signup(prevState: any, formData: FormData) {
     })
 
     if (authError) {
+        console.error("[AUTH_ACTION] Signup Error Details:", {
+            message: authError.message,
+            status: authError.status,
+            code: authError.code
+        })
         return { success: false, error: authError.message }
     }
 

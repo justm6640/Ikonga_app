@@ -13,7 +13,7 @@ export default async function HomePage() {
   // Guests see the onboarding slides as the first point of entry
   return (
     <main className="relative bg-black selection:bg-pink-100 selection:text-pink-600 font-sans antialiased overflow-x-hidden">
-      <OnboardingSlides />
+      <OnboardingSlides mode="landing" />
     </main>
   )
 }
