@@ -1,7 +1,7 @@
 "use client"
 
 interface AnalysisSlideTipsProps {
-    type: "welcome" | "basics" | "allergies" | "intolerances" | "habits" | "goals" | "comment" | "summary"
+    type: "welcome" | "basics" | "allergies" | "intolerances" | "habits" | "goals" | "comment" | "summary" | "wellness" | "fitness" | "beauty"
 }
 
 const TIPS = {
@@ -24,6 +24,18 @@ const TIPS = {
     habits: {
         icon: "🍽️",
         message: "Pas de jugement ici ! Ces infos nous aident à personnaliser tes menus."
+    },
+    wellness: {
+        icon: "🧘‍♀️",
+        message: "Sois honnête sur ton niveau de stress et sommeil, ces infos aideront Rosy à personnaliser tes conseils."
+    },
+    fitness: {
+        icon: "💪",
+        message: "Pas besoin d'être une athlète ! Dis-nous simplement où tu en es aujourd'hui."
+    },
+    beauty: {
+        icon: "✨",
+        message: "La beauté c'est se sentir bien dans sa peau, peu importe ta routine actuelle."
     },
     goals: {
         icon: "🎯",

@@ -28,10 +28,9 @@ export function AnalysisClient({ initialAnalysis, existingFormData }: AnalysisCl
             <AnalysisFormSlides
                 existingData={lastFormData ?? existingFormData}
                 onCancel={analysis ? () => setIsEditing(false) : undefined}
-                onComplete={(formData) => {
-                    console.log("Form submitted:", formData)
-                    // TODO: Call server action to generate analysis
-                    setLastFormData(formData)
+                onComplete={(result, submittedData) => {
+                    setAnalysis(result)
+                    setLastFormData(submittedData)
                     setIsEditing(false)
                 }}
             />

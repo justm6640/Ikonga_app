@@ -1,35 +1,58 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronLeft, ChevronRight, Check } from "lucide-react"
+import { ChevronLeft, ChevronRight, Check, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
 import { AnalysisSlideTips } from "@/components/dashboard/AnalysisSlideTips"
+import { AnalysisFormData, AnalysisResult } from "@/lib/validators/analysis"
+import { generateAndSaveAnalysis } from "@/lib/actions/analysis"
+import { toast } from "sonner"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 interface AnalysisFormSlidesProps {
-    existingData?: any
-    onComplete: (formData: any) => void
+    existingData?: Partial<AnalysisFormData>
+    onComplete: (result: AnalysisResult, submittedData: AnalysisFormData) => void
     onCancel?: () => void
 }
 
 export function AnalysisFormSlides({ existingData, onComplete, onCancel }: AnalysisFormSlidesProps) {
     const [currentSlide, setCurrentSlide] = useState(0)
-    const [formData, setFormData] = useState({
-        startWeight: existingData?.startWeight || "",
-        heightCm: existingData?.heightCm || "",
-        countryOrigin: existingData?.countryOrigin || "",
+    const [isPending, startTransition] = useTransition()
+
+    const [formData, setFormData] = useState<Partial<AnalysisFormData>>({
         allergies: existingData?.allergies || [],
         intolerances: existingData?.intolerances || [],
-        targetWeight: existingData?.targetWeight || "",
-        freeComment: existingData?.freeComment || "",
+        aliments_refuses: existingData?.aliments_refuses || [],
+        nb_repas_jour: existingData?.nb_repas_jour || "3",
+        grignotage: existingData?.grignotage || "Jamais",
+        stress: existingData?.stress || 5,
+        sommeil: existingData?.sommeil || 5,
+        activite_physique: existingData?.activite_physique || "Modéré",
+        douleurs: existingData?.douleurs || "",
+        disponibilite_jours: existingData?.disponibilite_jours || "30min",
+        motivation: existingData?.motivation || "Moyenne",
+        temps_pour_soi: existingData?.temps_pour_soi || "Parfois",
+        routine_beaute: existingData?.routine_beaute || "Basique",
+        relation_au_corps: existingData?.relation_au_corps || "Neutre",
+        objectif: existingData?.objectif || "",
+        commentaire_libre: existingData?.commentaire_libre || "",
+        autres_infos: existingData?.autres_infos || "",
     })
 
     const totalSlides = 8
 
-    const updateFormData = (field: string, value: any) => {
+    const updateFormData = (field: keyof AnalysisFormData, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }))
     }
 
@@ -37,9 +60,27 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
         if (currentSlide < totalSlides - 1) {
             setCurrentSlide(prev => prev + 1)
         } else {
-            // Last slide - submit
-            onComplete(formData)
+            // Last slide - submit and generate analysis
+            handleSubmit()
         }
+    }
+
+    const handleSubmit = () => {
+        startTransition(async () => {
+            try {
+                const result = await generateAndSaveAnalysis(formData as AnalysisFormData)
+
+                if (result.success && result.data) {
+                    toast.success("Analyse générée avec succès ! ✨")
+                    onComplete(result.data, formData as AnalysisFormData)
+                } else {
+                    toast.error(result.error || "Une erreur est survenue")
+                }
+            } catch (error) {
+                console.error("Submit error:", error)
+                toast.error("Une erreur est survenue lors de la génération de l'analyse")
+            }
+        })
     }
 
     const handlePrev = () => {
@@ -54,9 +95,9 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
         }
     }
 
-    const toggleArrayItem = (field: string, item: string) => {
+    const toggleArrayItem = (field: keyof AnalysisFormData, item: string) => {
         setFormData(prev => {
-            const currentArray = prev[field as keyof typeof prev] as string[]
+            const currentArray = (prev[field] as string[]) || []
             const newArray = currentArray.includes(item)
                 ? currentArray.filter(i => i !== item)
                 : [...currentArray, item]
@@ -78,158 +119,325 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
             <AnalysisSlideTips type="welcome" />
         </div>,
 
-        // Slide 1: Informations de base
-        <div key="basics" className="space-y-6">
-            <h2 className="text-2xl font-serif font-bold text-slate-900">
-                Informations de base 📊
-            </h2>
-            <div className="space-y-4">
-                <div>
-                    <Label htmlFor="startWeight">Poids de départ (kg) *</Label>
-                    <Input
-                        id="startWeight"
-                        type="number"
-                        value={formData.startWeight}
-                        onChange={(e) => updateFormData("startWeight", e.target.value)}
-                        placeholder="Ex: 75"
-                        className="mt-2"
-                    />
-                </div>
-                <div>
-                    <Label htmlFor="heightCm">Taille (cm) *</Label>
-                    <Input
-                        id="heightCm"
-                        type="number"
-                        value={formData.heightCm}
-                        onChange={(e) => updateFormData("heightCm", e.target.value)}
-                        placeholder="Ex: 165"
-                        className="mt-2"
-                    />
-                </div>
-                <div>
-                    <Label htmlFor="countryOrigin">Pays de résidence *</Label>
-                    <Input
-                        id="countryOrigin"
-                        type="text"
-                        value={formData.countryOrigin}
-                        onChange={(e) => updateFormData("countryOrigin", e.target.value)}
-                        placeholder="Ex: France"
-                        className="mt-2"
-                    />
-                </div>
-            </div>
-            <AnalysisSlideTips type="basics" />
-        </div>,
-
-        // Slide 2: Allergies
+        // Slide 1: Allergies & Intolérances
         <div key="allergies" className="space-y-6">
             <h2 className="text-2xl font-serif font-bold text-slate-900">
-                Allergies 🥜
+                Allergies & Intolérances 🥜🍃
             </h2>
-            <p className="text-sm text-slate-600">Sélectionne toutes celles qui te concernent</p>
-            <div className="grid grid-cols-2 gap-3">
-                {["Gluten", "Lactose", "Fruits à coque", "Œufs", "Poisson", "Crustacés", "Sésame", "Aucune"].map(allergy => (
-                    <button
-                        key={allergy}
-                        onClick={() => toggleArrayItem("allergies", allergy)}
-                        className={`p-4 rounded-2xl border-2 transition-all ${formData.allergies.includes(allergy)
-                            ? "border-ikonga-coral bg-ikonga-coral/10 text-ikonga-coral font-bold"
-                            : "border-slate-200 hover:border-slate-300"
-                            }`}
-                    >
-                        {allergy}
-                    </button>
-                ))}
+
+            <div className="space-y-4">
+                <div>
+                    <Label className="text-base font-medium mb-3 block">Allergies</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                        {["Gluten", "Lactose", "Fruits à coque", "Œufs", "Poisson", "Crustacés", "Aucune"].map(allergy => (
+                            <button
+                                key={allergy}
+                                type="button"
+                                onClick={() => toggleArrayItem("allergies", allergy)}
+                                className={`p-3 rounded-xl border-2 transition-all text-sm ${formData.allergies?.includes(allergy)
+                                        ? "border-ikonga-coral bg-ikonga-coral/10 text-ikonga-coral font-bold"
+                                        : "border-slate-200 hover:border-slate-300"
+                                    }`}
+                            >
+                                {allergy}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div>
+                    <Label className="text-base font-medium mb-3 block">Intolérances</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                        {["Lactose", "Gluten", "FODMAPs", "Fructose", "Aucune"].map(intolerance => (
+                            <button
+                                key={intolerance}
+                                type="button"
+                                onClick={() => toggleArrayItem("intolerances", intolerance)}
+                                className={`p-3 rounded-xl border-2 transition-all text-sm ${formData.intolerances?.includes(intolerance)
+                                        ? "border-ikonga-coral bg-ikonga-coral/10 text-ikonga-coral font-bold"
+                                        : "border-slate-200 hover:border-slate-300"
+                                    }`}
+                            >
+                                {intolerance}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
+
             <AnalysisSlideTips type="allergies" />
         </div>,
 
-        // Slide 3: Intolérances
-        <div key="intolerances" className="space-y-6">
+        // Slide 2: Nutrition
+        <div key="nutrition" className="space-y-6">
             <h2 className="text-2xl font-serif font-bold text-slate-900">
-                Intolérances 🍃
+                Alimentation 🍽️
             </h2>
-            <p className="text-sm text-slate-600">Différentes des allergies, elles concernent ton confort digestif</p>
-            <div className="grid grid-cols-2 gap-3">
-                {["Lactose", "Gluten", "FODMAPs", "Fructose", "Histamine", "Aucune"].map(intolerance => (
-                    <button
-                        key={intolerance}
-                        onClick={() => toggleArrayItem("intolerances", intolerance)}
-                        className={`p-4 rounded-2xl border-2 transition-all ${formData.intolerances.includes(intolerance)
-                            ? "border-ikonga-coral bg-ikonga-coral/10 text-ikonga-coral font-bold"
-                            : "border-slate-200 hover:border-slate-300"
-                            }`}
-                    >
-                        {intolerance}
-                    </button>
-                ))}
-            </div>
-            <AnalysisSlideTips type="intolerances" />
-        </div>,
 
-        // Slide 4: Habitudes alimentaires (placeholder)
-        <div key="habits" className="space-y-6">
-            <h2 className="text-2xl font-serif font-bold text-slate-900">
-                Habitudes alimentaires 🍽️
-            </h2>
-            <p className="text-slate-600">
-                Cette section sera complétée avec les champs du questionnaire existant
-            </p>
+            <div className="space-y-4">
+                <div>
+                    <Label>Combien de repas par jour ?</Label>
+                    <Select value={formData.nb_repas_jour} onValueChange={(val) => updateFormData("nb_repas_jour", val)}>
+                        <SelectTrigger className="mt-2">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="1">1 repas</SelectItem>
+                            <SelectItem value="2">2 repas</SelectItem>
+                            <SelectItem value="3">3 repas</SelectItem>
+                            <SelectItem value="3+grignotage">3+ grignotages</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div>
+                    <Label>Grignotage ?</Label>
+                    <Select value={formData.grignotage} onValueChange={(val) => updateFormData("grignotage", val)}>
+                        <SelectTrigger className="mt-2">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Jamais">Jamais</SelectItem>
+                            <SelectItem value="Parfois (stress)">Parfois (stress)</SelectItem>
+                            <SelectItem value="Souvent">Souvent</SelectItem>
+                            <SelectItem value="Tout le temps">Tout le temps</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div>
+                    <Label className="text-base font-medium mb-3 block">Aliments refusés (optionnel)</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                        {["Viande rouge", "Porc", "Alcool", "Légumineuses", "Produits laitiers"].map(food => (
+                            <button
+                                key={food}
+                                type="button"
+                                onClick={() => toggleArrayItem("aliments_refuses", food)}
+                                className={`p-3 rounded-xl border-2 transition-all text-sm ${formData.aliments_refuses?.includes(food)
+                                        ? "border-ikonga-coral bg-ikonga-coral/10 text-ikonga-coral font-bold"
+                                        : "border-slate-200 hover:border-slate-300"
+                                    }`}
+                            >
+                                {food}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
             <AnalysisSlideTips type="habits" />
         </div>,
 
-        // Slide 5: Objectifs
+        // Slide 3: Wellness
+        <div key="wellness" className="space-y-6">
+            <h2 className="text-2xl font-serif font-bold text-slate-900">
+                Bien-être 🧘‍♀️
+            </h2>
+
+            <div className="space-y-6">
+                <div>
+                    <Label>Niveau de stress (1-10)</Label>
+                    <div className="mt-4 px-2">
+                        <Slider
+                            value={[formData.stress || 5]}
+                            onValueChange={([val]) => updateFormData("stress", val)}
+                            max={10}
+                            min={1}
+                            step={1}
+                        />
+                        <div className="text-center mt-2 text-2xl font-bold text-ikonga-coral">
+                            {formData.stress}/10
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <Label>Qualité du sommeil (1-10)</Label>
+                    <div className="mt-4 px-2">
+                        <Slider
+                            value={[formData.sommeil || 5]}
+                            onValueChange={([val]) => updateFormData("sommeil", val)}
+                            max={10}
+                            min={1}
+                            step={1}
+                        />
+                        <div className="text-center mt-2 text-2xl font-bold text-ikonga-coral">
+                            {formData.sommeil}/10
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <AnalysisSlideTips type="wellness" />
+        </div>,
+
+        // Slide 4: Fitness
+        <div key="fitness" className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900">
+                Activité Physique 💪
+            </h2>
+
+            <div className="space-y-4">
+                <div>
+                    <Label>Niveau d'activité actuel</Label>
+                    <Select value={formData.activite_physique} onValueChange={(val) => updateFormData("activite_physique", val)}>
+                        <SelectTrigger className="mt-2">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Sédentaire">Sédentaire</SelectItem>
+                            <SelectItem value="Léger">Léger</SelectItem>
+                            <SelectItem value="Modéré">Modéré</SelectItem>
+                            <SelectItem value="Intense">Intense</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div>
+                    <Label>Disponibilité par jour</Label>
+                    <Select value={formData.disponibilite_jours} onValueChange={(val) => updateFormData("disponibilite_jours", val)}>
+                        <SelectTrigger className="mt-2">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="15min">15 minutes</SelectItem>
+                            <SelectItem value="30min">30 minutes</SelectItem>
+                            <SelectItem value="1h">1 heure</SelectItem>
+                            <SelectItem value="Illimité">Illimité</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div>
+                    <Label htmlFor="douleurs">Douleurs ou limitations (optionnel)</Label>
+                    <Input
+                        id="douleurs"
+                        value={formData.douleurs}
+                        onChange={(e) => updateFormData("douleurs", e.target.value)}
+                        placeholder="Ex: Mal de dos, genoux fragiles..."
+                        className="mt-2"
+                    />
+                </div>
+            </div>
+
+            <AnalysisSlideTips type="fitness" />
+        </div>,
+
+        // Slide 5: Lifestyle & Beauty
+        <div key="lifestyle" className="space-y-6">
+            <h2 className="text-2xl font-serif font-bold text-slate-900">
+                Lifestyle & Beauté ✨
+            </h2>
+
+            <div className="space-y-4">
+                <div>
+                    <Label>Temps pour toi</Label>
+                    <Select value={formData.temps_pour_soi} onValueChange={(val) => updateFormData("temps_pour_soi", val)}>
+                        <SelectTrigger className="mt-2">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Jamais">Jamais</SelectItem>
+                            <SelectItem value="Rarement">Rarement</SelectItem>
+                            <SelectItem value="Parfois">Parfois</SelectItem>
+                            <SelectItem value="Régulièrement">Régulièrement</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div>
+                    <Label>Routine beauté</Label>
+                    <Select value={formData.routine_beaute} onValueChange={(val) => updateFormData("routine_beaute", val)}>
+                        <SelectTrigger className="mt-2">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Inexistante">Inexistante</SelectItem>
+                            <SelectItem value="Basique">Basique</SelectItem>
+                            <SelectItem value="Complète">Complète</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div>
+                    <Label>Relation au corps</Label>
+                    <Select value={formData.relation_au_corps} onValueChange={(val) => updateFormData("relation_au_corps", val)}>
+                        <SelectTrigger className="mt-2">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Mauvaise">Mauvaise</SelectItem>
+                            <SelectItem value="Difficile">Difficile</SelectItem>
+                            <SelectItem value="Neutre">Neutre</SelectItem>
+                            <SelectItem value="Bonne">Bonne</SelectItem>
+                            <SelectItem value="Excellente">Excellente</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            <AnalysisSlideTips type="beauty" />
+        </div>,
+
+        // Slide 6: Motivation & Objectifs
         <div key="goals" className="space-y-6">
             <h2 className="text-2xl font-serif font-bold text-slate-900">
-                Objectifs 🎯
+                Objectifs & Motivation 🎯
             </h2>
-            <div>
-                <Label htmlFor="targetWeight">Poids cible (kg)</Label>
-                <Input
-                    id="targetWeight"
-                    type="number"
-                    value={formData.targetWeight}
-                    onChange={(e) => updateFormData("targetWeight", e.target.value)}
-                    placeholder="Ex: 65"
-                    className="mt-2"
-                />
+
+            <div className="space-y-4">
+                <div>
+                    <Label>Objectif principal *</Label>
+                    <Select value={formData.objectif} onValueChange={(val) => updateFormData("objectif", val)}>
+                        <SelectTrigger className="mt-2">
+                            <SelectValue placeholder="Sélectionne ton objectif" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Perte de poids">Perte de poids</SelectItem>
+                            <SelectItem value="Santé">Santé</SelectItem>
+                            <SelectItem value="Énergie">Énergie</SelectItem>
+                            <SelectItem value="Confiance">Confiance en moi</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div>
+                    <Label>Niveau de motivation</Label>
+                    <Select value={formData.motivation} onValueChange={(val) => updateFormData("motivation", val)}>
+                        <SelectTrigger className="mt-2">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Faible">Faible</SelectItem>
+                            <SelectItem value="Moyenne">Moyenne</SelectItem>
+                            <SelectItem value="Élevée">Élevée</SelectItem>
+                            <SelectItem value="Maximale">Maximale</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
+
             <AnalysisSlideTips type="goals" />
         </div>,
 
-        // Slide 6: Commentaire libre
+        // Slide 7: Commentaire libre & Récapitulatif
         <div key="comment" className="space-y-6">
             <h2 className="text-2xl font-serif font-bold text-slate-900">
                 Commentaire libre 💭
             </h2>
+
             <div>
-                <Label htmlFor="freeComment">Quelque chose d'important à nous dire ?</Label>
+                <Label htmlFor="commentaire_libre">Quelque chose d'important à nous dire ?</Label>
                 <Textarea
-                    id="freeComment"
-                    value={formData.freeComment}
-                    onChange={(e) => updateFormData("freeComment", e.target.value)}
+                    id="commentaire_libre"
+                    value={formData.commentaire_libre}
+                    onChange={(e) => updateFormData("commentaire_libre", e.target.value)}
                     placeholder="Y a-t-il quelque chose d'important que nous devrions savoir ? (Contraintes horaires, préférences spécifiques, etc.)"
                     className="mt-2 min-h-[150px]"
                 />
             </div>
-            <AnalysisSlideTips type="comment" />
-        </div>,
 
-        // Slide 7: Récapitulatif
-        <div key="summary" className="space-y-6">
-            <h2 className="text-2xl font-serif font-bold text-slate-900">
-                Récapitulatif ✨
-            </h2>
-            <div className="space-y-3 p-6 bg-slate-50 rounded-2xl">
-                <div><strong>Poids de départ:</strong> {formData.startWeight} kg</div>
-                <div><strong>Taille:</strong> {formData.heightCm} cm</div>
-                <div><strong>Pays:</strong> {formData.countryOrigin}</div>
-                <div><strong>Allergies:</strong> {formData.allergies.join(", ") || "Aucune"}</div>
-                <div><strong>Intolérances:</strong> {formData.intolerances.join(", ") || "Aucune"}</div>
-                <div><strong>Poids cible:</strong> {formData.targetWeight || "Non défini"} kg</div>
-                {formData.freeComment && <div><strong>Commentaire:</strong> {formData.freeComment}</div>}
-            </div>
-            <AnalysisSlideTips type="summary" />
+            <AnalysisSlideTips type="comment" />
         </div>,
     ]
 
@@ -261,10 +469,10 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
                             key={index}
                             onClick={() => handleSlideClick(index)}
                             className={`w-2 h-2 rounded-full transition-all ${index === currentSlide
-                                ? "bg-ikonga-coral w-6"
-                                : index < currentSlide
-                                    ? "bg-ikonga-coral/50 cursor-pointer hover:bg-ikonga-coral/70"
-                                    : "bg-slate-300"
+                                    ? "bg-ikonga-coral w-6"
+                                    : index < currentSlide
+                                        ? "bg-ikonga-coral/50 cursor-pointer hover:bg-ikonga-coral/70"
+                                        : "bg-slate-300"
                                 }`}
                         />
                     ))}
@@ -293,13 +501,14 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
                             variant="ghost"
                             onClick={handlePrev}
                             className="gap-2"
+                            disabled={isPending}
                         >
                             <ChevronLeft size={20} />
                             Précédent
                         </Button>
                     )}
                     {onCancel && currentSlide === 0 && (
-                        <Button variant="ghost" onClick={onCancel}>
+                        <Button variant="ghost" onClick={onCancel} disabled={isPending}>
                             Annuler
                         </Button>
                     )}
@@ -308,8 +517,14 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
                 <Button
                     onClick={handleNext}
                     className="gap-2 bg-ikonga-gradient hover:opacity-90"
+                    disabled={isPending}
                 >
-                    {currentSlide === totalSlides - 1 ? (
+                    {isPending ? (
+                        <>
+                            <Loader2 size={20} className="animate-spin" />
+                            Génération...
+                        </>
+                    ) : currentSlide === totalSlides - 1 ? (
                         <>
                             <Check size={20} />
                             Générer mon analyse
