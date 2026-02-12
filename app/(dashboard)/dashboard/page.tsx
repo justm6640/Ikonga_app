@@ -15,8 +15,6 @@ import { ComingSoonGrid } from "@/components/dashboard/ComingSoonGrid";
 import { CountdownHero } from "@/components/dashboard/CountdownHero";
 import { UpcomingPhaseBanner } from "@/components/phases/UpcomingPhaseBanner";
 import { getUserAccessiblePhasesSync } from "@/lib/utils/phase-access-sync";
-import { isBeforeCureStart } from "@/lib/utils/access-control";
-import { DashboardClient } from "@/components/dashboard/DashboardClient";
 
 export default async function DashboardPage() {
     // 1. Fetch User (Self-healing)
@@ -84,93 +82,84 @@ export default async function DashboardPage() {
     const phaseStartDate = activePhase?.startDate || dbUser.startDate;
     const isCoachOverridden = activePhase?.adminNote ? true : false;
 
-    // Check if user is in pre-cure period (before planStartDate)
-    const userIsBeforeCureStart = isBeforeCureStart(dbUser.planStartDate);
-
     return (
-        <DashboardClient
-            isBeforeCureStart={userIsBeforeCureStart}
-            planStartDate={dbUser.planStartDate}
-            userId={dbUser.id}
-        >
-            <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-                <div className="max-w-xl mx-auto pb-32 px-4 sm:px-6 space-y-6 sm:space-y-8 relative">
-                    {/* Decorative background blurs */}
-                    <div className="fixed top-20 right-0 w-72 h-72 bg-ikonga-coral/5 rounded-full blur-3xl -z-10" />
-                    <div className="fixed bottom-40 left-0 w-96 h-96 bg-orange-400/5 rounded-full blur-2xl -z-10" />
-                    <div className="fixed bottom-40 left-0 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl -z-10" />
+        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+            <div className="max-w-xl mx-auto pb-32 px-4 sm:px-6 space-y-6 sm:space-y-8 relative">
+                {/* Decorative background blurs */}
+                <div className="fixed top-20 right-0 w-72 h-72 bg-ikonga-coral/5 rounded-full blur-3xl -z-10" />
+                <div className="fixed bottom-40 left-0 w-96 h-96 bg-orange-400/5 rounded-full blur-2xl -z-10" />
+                <div className="fixed bottom-40 left-0 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl -z-10" />
 
-                    {/* BLOCK 0: Profile Completion CTA if skipped */}
-                    {!dbUser.hasCompletedOnboarding && (
-                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 p-4 rounded-3xl mb-2 flex items-center justify-between group animate-in fade-in slide-in-from-bottom-2 duration-500">
-                            <div className="flex items-center gap-3">
-                                <div className="bg-amber-100 p-2 rounded-xl">
-                                    <Sparkles size={16} className="text-amber-600" />
-                                </div>
-                                <p className="text-amber-900 text-sm font-medium">
-                                    Personnalise ton programme à 100%
-                                </p>
+                {/* BLOCK 0: Profile Completion CTA if skipped */}
+                {!dbUser.hasCompletedOnboarding && (
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 p-4 rounded-3xl mb-2 flex items-center justify-between group animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-amber-100 p-2 rounded-xl">
+                                <Sparkles size={16} className="text-amber-600" />
                             </div>
-                            <Link href="/onboarding" className="text-amber-700 text-xs font-black uppercase tracking-wider hover:text-amber-900 transition-colors flex items-center gap-1">
-                                Finir mon profil <ArrowRight size={14} />
-                            </Link>
+                            <p className="text-amber-900 text-sm font-medium">
+                                Personnalise ton programme à 100%
+                            </p>
                         </div>
-                    )}
-
-                    {/* BLOCK 1: Phase Card */}
-                    <PhaseCard
-                        phaseName={activePhaseType}
-                        currentDay={differenceInCalendarDays(today, new Date(phaseStartDate)) + 1}
-                        totalDays={21}
-                        planName="Standard 12"
-                        currentWeight={currentWeight}
-                        weightLost={dbUser.startWeight ? dbUser.startWeight - currentWeight : 0}
-                        startWeight={dbUser.startWeight || currentWeight}
-                        pisi={dbUser.pisi || 0}
-                    />
-
-                    {/* BLOCK 2: Phase Timeline & Upcoming Banner */}
-                    {(() => {
-                        const accessible = getUserAccessiblePhasesSync(dbUser);
-                        return (
-                            <>
-                                {accessible.upcoming && (
-                                    <UpcomingPhaseBanner upcomingPhase={accessible.upcoming} />
-                                )}
-                                {accessible.upcoming && (
-                                    <UpcomingPhaseBanner upcomingPhase={accessible.upcoming} />
-                                )}
-                            </>
-                        );
-                    })()}
-
-                    {/* BLOCK 3: Weight Chart */}
-                    <WeightMiniChart
-                        data={recentWeightLogs}
-                        currentWeight={currentWeight}
-                        startWeight={dbUser.startWeight || 0}
-                        pisi={dbUser.pisi || 0}
-                    />
-
-                    {/* BLOCK 4: 4 Pillars */}
-                    <section className="space-y-4">
-                        <h2 className="text-xl font-serif font-black text-slate-900 ml-1">Tes Piliers</h2>
-                        <PillarsGrid />
-                    </section>
-
-                    {/* BLOCK 5: Journal CTA */}
-                    <div className="mt-8">
-                        <DailyJournalCard />
+                        <Link href="/onboarding" className="text-amber-700 text-xs font-black uppercase tracking-wider hover:text-amber-900 transition-colors flex items-center gap-1">
+                            Finir mon profil <ArrowRight size={14} />
+                        </Link>
                     </div>
+                )}
 
-                    {/* BLOCK 6: Tracking Grid */}
-                    <TrackingGrid />
+                {/* BLOCK 1: Phase Card */}
+                <PhaseCard
+                    phaseName={activePhaseType}
+                    currentDay={differenceInCalendarDays(today, new Date(phaseStartDate)) + 1}
+                    totalDays={21}
+                    planName="Standard 12"
+                    currentWeight={currentWeight}
+                    weightLost={dbUser.startWeight ? dbUser.startWeight - currentWeight : 0}
+                    startWeight={dbUser.startWeight || currentWeight}
+                    pisi={dbUser.pisi || 0}
+                />
 
-                    {/* BLOCK 7: Coming Soon */}
-                    <ComingSoonGrid />
+                {/* BLOCK 2: Phase Timeline & Upcoming Banner */}
+                {(() => {
+                    const accessible = getUserAccessiblePhasesSync(dbUser);
+                    return (
+                        <>
+                            {accessible.upcoming && (
+                                <UpcomingPhaseBanner upcomingPhase={accessible.upcoming} />
+                            )}
+                            {accessible.upcoming && (
+                                <UpcomingPhaseBanner upcomingPhase={accessible.upcoming} />
+                            )}
+                        </>
+                    );
+                })()}
 
+                {/* BLOCK 3: Weight Chart */}
+                <WeightMiniChart
+                    data={recentWeightLogs}
+                    currentWeight={currentWeight}
+                    startWeight={dbUser.startWeight || 0}
+                    pisi={dbUser.pisi || 0}
+                />
+
+                {/* BLOCK 4: 4 Pillars */}
+                <section className="space-y-4">
+                    <h2 className="text-xl font-serif font-black text-slate-900 ml-1">Tes Piliers</h2>
+                    <PillarsGrid />
+                </section>
+
+                {/* BLOCK 5: Journal CTA */}
+                <div className="mt-8">
+                    <DailyJournalCard />
                 </div>
+
+                {/* BLOCK 6: Tracking Grid */}
+                <TrackingGrid />
+
+                {/* BLOCK 7: Coming Soon */}
+                <ComingSoonGrid />
+
             </div>
-        </DashboardClient>
+        </div>
     );
 }
