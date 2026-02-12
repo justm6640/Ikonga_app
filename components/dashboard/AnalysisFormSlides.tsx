@@ -48,9 +48,13 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
         objectif: existingData?.objectif || "",
         commentaire_libre: existingData?.commentaire_libre || "",
         autres_infos: existingData?.autres_infos || "",
+        startWeight: existingData?.startWeight || undefined,
+        targetWeight: existingData?.targetWeight || undefined,
+        heightCm: existingData?.heightCm || undefined,
+        countryOrigin: existingData?.countryOrigin || "",
     })
 
-    const totalSlides = 8
+    const totalSlides = 9
 
     const updateFormData = (field: keyof AnalysisFormData, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }))
@@ -119,6 +123,49 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
             <AnalysisSlideTips type="welcome" />
         </div>,
 
+        // Slide 1: Informations de base
+        <div key="basics" className="space-y-6">
+            <h2 className="text-2xl font-serif font-bold text-slate-900">
+                Informations de base 📊
+            </h2>
+            <div className="space-y-4">
+                <div>
+                    <Label htmlFor="startWeight">Poids de départ (kg) *</Label>
+                    <Input
+                        id="startWeight"
+                        type="number"
+                        value={formData.startWeight || ""}
+                        onChange={(e) => updateFormData("startWeight", parseFloat(e.target.value))}
+                        placeholder="Ex: 75"
+                        className="mt-2"
+                    />
+                </div>
+                <div>
+                    <Label htmlFor="heightCm">Taille (cm) *</Label>
+                    <Input
+                        id="heightCm"
+                        type="number"
+                        value={formData.heightCm || ""}
+                        onChange={(e) => updateFormData("heightCm", parseFloat(e.target.value))}
+                        placeholder="Ex: 165"
+                        className="mt-2"
+                    />
+                </div>
+                <div>
+                    <Label htmlFor="countryOrigin">Pays de résidence *</Label>
+                    <Input
+                        id="countryOrigin"
+                        type="text"
+                        value={formData.countryOrigin || ""}
+                        onChange={(e) => updateFormData("countryOrigin", e.target.value)}
+                        placeholder="Ex: France"
+                        className="mt-2"
+                    />
+                </div>
+            </div>
+            <AnalysisSlideTips type="basics" />
+        </div>,
+
         // Slide 1: Allergies & Intolérances
         <div key="allergies" className="space-y-6">
             <h2 className="text-2xl font-serif font-bold text-slate-900">
@@ -135,8 +182,8 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
                                 type="button"
                                 onClick={() => toggleArrayItem("allergies", allergy)}
                                 className={`p-3 rounded-xl border-2 transition-all text-sm ${formData.allergies?.includes(allergy)
-                                        ? "border-ikonga-coral bg-ikonga-coral/10 text-ikonga-coral font-bold"
-                                        : "border-slate-200 hover:border-slate-300"
+                                    ? "border-ikonga-coral bg-ikonga-coral/10 text-ikonga-coral font-bold"
+                                    : "border-slate-200 hover:border-slate-300"
                                     }`}
                             >
                                 {allergy}
@@ -154,8 +201,8 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
                                 type="button"
                                 onClick={() => toggleArrayItem("intolerances", intolerance)}
                                 className={`p-3 rounded-xl border-2 transition-all text-sm ${formData.intolerances?.includes(intolerance)
-                                        ? "border-ikonga-coral bg-ikonga-coral/10 text-ikonga-coral font-bold"
-                                        : "border-slate-200 hover:border-slate-300"
+                                    ? "border-ikonga-coral bg-ikonga-coral/10 text-ikonga-coral font-bold"
+                                    : "border-slate-200 hover:border-slate-300"
                                     }`}
                             >
                                 {intolerance}
@@ -214,8 +261,8 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
                                 type="button"
                                 onClick={() => toggleArrayItem("aliments_refuses", food)}
                                 className={`p-3 rounded-xl border-2 transition-all text-sm ${formData.aliments_refuses?.includes(food)
-                                        ? "border-ikonga-coral bg-ikonga-coral/10 text-ikonga-coral font-bold"
-                                        : "border-slate-200 hover:border-slate-300"
+                                    ? "border-ikonga-coral bg-ikonga-coral/10 text-ikonga-coral font-bold"
+                                    : "border-slate-200 hover:border-slate-300"
                                     }`}
                             >
                                 {food}
@@ -402,6 +449,18 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
                 </div>
 
                 <div>
+                    <Label htmlFor="targetWeight">Poids cible (kg)</Label>
+                    <Input
+                        id="targetWeight"
+                        type="number"
+                        value={formData.targetWeight || ""}
+                        onChange={(e) => updateFormData("targetWeight", parseFloat(e.target.value))}
+                        placeholder="Ex: 60"
+                        className="mt-2"
+                    />
+                </div>
+
+                <div>
                     <Label>Niveau de motivation</Label>
                     <Select value={formData.motivation} onValueChange={(val) => updateFormData("motivation", val)}>
                         <SelectTrigger className="mt-2">
@@ -469,10 +528,10 @@ export function AnalysisFormSlides({ existingData, onComplete, onCancel }: Analy
                             key={index}
                             onClick={() => handleSlideClick(index)}
                             className={`w-2 h-2 rounded-full transition-all ${index === currentSlide
-                                    ? "bg-ikonga-coral w-6"
-                                    : index < currentSlide
-                                        ? "bg-ikonga-coral/50 cursor-pointer hover:bg-ikonga-coral/70"
-                                        : "bg-slate-300"
+                                ? "bg-ikonga-coral w-6"
+                                : index < currentSlide
+                                    ? "bg-ikonga-coral/50 cursor-pointer hover:bg-ikonga-coral/70"
+                                    : "bg-slate-300"
                                 }`}
                         />
                     ))}

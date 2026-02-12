@@ -30,8 +30,11 @@ export const analysisFormSchema = z.object({
     commentaire_libre: z.string().optional(),
     autres_infos: z.string().optional(),
 
-    // Technical fields (hidden/inferred but good to have in schema if needed)
-    // age, weight, height come from User profile
+    // Profile updates (optional but collected in form)
+    startWeight: z.coerce.number().min(30).optional(),
+    targetWeight: z.coerce.number().min(30).optional(),
+    heightCm: z.coerce.number().min(100).optional(),
+    countryOrigin: z.string().optional(),
 })
 
 export type AnalysisFormData = z.infer<typeof analysisFormSchema>

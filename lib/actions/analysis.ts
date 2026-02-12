@@ -80,6 +80,20 @@ export async function generateAndSaveAnalysis(data: AnalysisFormData) {
             }
         })
 
+        // Update User Profile with new data
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                startWeight: validatedData.startWeight,
+                targetWeight: validatedData.targetWeight,
+                heightCm: validatedData.heightCm,
+                countryOrigin: validatedData.countryOrigin,
+                // Also update allergies/intolerances if provided
+                allergies: validatedData.allergies.length > 0 ? validatedData.allergies : undefined,
+                intolerances: validatedData.intolerances.length > 0 ? validatedData.intolerances : undefined,
+            }
+        })
+
         revalidatePath("/mon-analyse")
         return { success: true, data: analysisResult }
 
