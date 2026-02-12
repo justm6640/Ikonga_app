@@ -49,10 +49,14 @@ Tu dois produire un JSON valide avec exactement les 9 clés suivantes :
    - Terminer par "Objectifs beauté".
 
 8. "summary"
-   - Force principale, Point de vigilance, Potentiel réel, Pourquoi IKONGA est adapté, Ce qu’elle va transformer.
-   - Ton ultra inspirant.
+   - Titre suggéré (implicite) : RÉSUMÉ & CONCLUSION
+   - Synthèse inspirante : Force principale, Point de vigilance, Potentiel réel.
+   - Pourquoi IKONGA est adapté et ce qu’elle va transformer.
+   - Ton ultra motivant et visionary.
 
 9. "next_steps"
+   - Titre suggéré (implicite) : PROCHAINES ÉTAPES
+   - Actions concrètes immédiates (ex: "Valide ton menu", "Prends tes mesures").
    - Phrase de transition vers le programme.
    - Signature OBLIGATOIRE : "Fière de t’accompagner,\nRosy – IKONGA Lifestyle"
 

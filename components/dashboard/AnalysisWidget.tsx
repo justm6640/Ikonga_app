@@ -84,6 +84,20 @@ export function AnalysisWidget({ analysis }: AnalysisWidgetProps) {
             icon: User,
             gradient: 'from-pink-400 to-rose-500',
             bg: 'bg-pink-50'
+        },
+        {
+            key: 'summary',
+            title: 'RÉSUMÉ & CONCLUSION',
+            icon: Star,
+            gradient: 'from-amber-400 to-yellow-500',
+            bg: 'bg-amber-50'
+        },
+        {
+            key: 'next_steps',
+            title: 'PROCHAINES ÉTAPES',
+            icon: ArrowRight,
+            gradient: 'from-emerald-400 to-green-600',
+            bg: 'bg-emerald-50'
         }
     ]
 
