@@ -22,15 +22,19 @@ export function PartialLockDialog({ isBeforeCureStart, planStartDate }: PartialL
     const [isOpen, setIsOpen] = useState(false)
 
     useEffect(() => {
+        console.log("PartialLockDialog Debug:", { isBeforeCureStart, planStartDate })
+
         // Only show if:
         // 1. User is in the "Before Cure Start" period (J-48h to J-0)
         // 2. We haven't shown it in this session already (to avoid annoyance)
         if (isBeforeCureStart && planStartDate) {
-            const hasSeenPopup = sessionStorage.getItem("hasSeenPartialLockPopup")
-            if (!hasSeenPopup) {
-                setIsOpen(true)
-                sessionStorage.setItem("hasSeenPartialLockPopup", "true")
-            }
+            // const hasSeenPopup = sessionStorage.getItem("hasSeenPartialLockPopup")
+            // if (!hasSeenPopup) {
+            setIsOpen(true)
+            // sessionStorage.setItem("hasSeenPartialLockPopup", "true")
+            // }
+        } else {
+            console.log("PartialLockDialog: Conditions not met")
         }
     }, [isBeforeCureStart, planStartDate])
 

@@ -5,11 +5,19 @@ export default async function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
-    // ... (rest of the file until return)
+    // 🔒 NEW: Calculate if we are before cure start (for section locking)
+    // This is used to gray out sections that are not yet accessible
+    const { isBeforeCureStart: checkBeforeCureStart } = await import('@/lib/utils/access-control');
+
+    // Raw check based purely on dates (used for Popup, so Admins can see it too for testing)
+    const isBeforeCureStartRaw = checkBeforeCureStart(user.planStartDate);
+
+    // Flag for restriction (Admins are NEVER restricted)
+    const isBeforeCureStartFlag = role !== 'ADMIN' && isBeforeCureStartRaw;
 
     return (
         <SubscriptionProvider tier={tier} role={role} isBeforeCureStart={isBeforeCureStartFlag}>
-            <PartialLockDialog isBeforeCureStart={isBeforeCureStartFlag} planStartDate={user.planStartDate} />
+            <PartialLockDialog isBeforeCureStart={isBeforeCureStartRaw} planStartDate={user.planStartDate} />
             <div className="flex h-screen bg-background overflow-hidden font-sans">
                 {/* Sidebar - Desktop Only */}
                 <Sidebar />
