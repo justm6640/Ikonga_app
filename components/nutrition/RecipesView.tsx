@@ -207,9 +207,9 @@ export function RecipesView({ initialRecipes, currentPhase, onRecipeClick }: Rec
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
                 {/* Filtre par Jour - EN PREMIER */}
-                <div className="flex-1 min-w-[120px]">
+                <div className="w-full sm:flex-1 sm:min-w-[120px]">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className="w-full h-10 px-4 rounded-xl border border-orange-200 bg-orange-50 flex items-center justify-between hover:bg-orange-100 transition-colors">
@@ -235,7 +235,7 @@ export function RecipesView({ initialRecipes, currentPhase, onRecipeClick }: Rec
                     </DropdownMenu>
                 </div>
 
-                <div className="flex-1 min-w-[100px]">
+                <div className="flex-1 min-w-0 sm:min-w-[100px]">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className="w-full h-10 px-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between hover:bg-slate-50 transition-colors">
@@ -260,7 +260,7 @@ export function RecipesView({ initialRecipes, currentPhase, onRecipeClick }: Rec
                     </DropdownMenu>
                 </div>
 
-                <div className="flex-1 min-w-[100px]">
+                <div className="flex-1 min-w-0 sm:min-w-[100px]">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className="w-full h-10 px-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between hover:bg-slate-50 transition-colors">
@@ -314,7 +314,7 @@ export function RecipesView({ initialRecipes, currentPhase, onRecipeClick }: Rec
                     </button>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {recipes.map((recipe) => (
                         <div
                             key={recipe.id}
@@ -322,7 +322,8 @@ export function RecipesView({ initialRecipes, currentPhase, onRecipeClick }: Rec
                             className="bg-white rounded-2xl border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition-all group"
                         >
                             {recipe.imageUrl ? (
-                                <div className="w-full h-40 bg-slate-100 overflow-hidden">
+
+                                <div className="w-full h-28 sm:h-40 bg-slate-100 overflow-hidden">
                                     <img
                                         src={recipe.imageUrl}
                                         alt={recipe.name}
@@ -330,12 +331,12 @@ export function RecipesView({ initialRecipes, currentPhase, onRecipeClick }: Rec
                                     />
                                 </div>
                             ) : (
-                                <div className="w-full h-40 bg-gradient-to-br from-orange-100 to-pink-100 flex items-center justify-center">
-                                    <span className="text-5xl">🍽️</span>
+                                <div className="w-full h-28 sm:h-40 bg-gradient-to-br from-orange-100 to-pink-100 flex items-center justify-center">
+                                    <span className="text-3xl sm:text-5xl">🍽️</span>
                                 </div>
                             )}
-                            <div className="p-4">
-                                <h3 className="font-serif font-black text-lg text-slate-900 mb-2 line-clamp-2">
+                            <div className="p-3 sm:p-4">
+                                <h3 className="font-serif font-black text-sm sm:text-lg text-slate-900 mb-1 sm:mb-2 line-clamp-2">
                                     {recipe.name}
                                 </h3>
                                 {recipe.mealType && (
