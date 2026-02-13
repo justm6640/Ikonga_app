@@ -272,6 +272,7 @@ import { NutritionEngine } from "../engines/nutrition-engine"
 
 /**
  * Récupère les données de menu pour une semaine complète.
+ * Synchronisé avec getNutritionData : utilise les plans réels stockés en DB.
  */
 export async function getWeekData(weekNumber: number = 1) {
     const user = await getOrCreateUser()
@@ -281,46 +282,55 @@ export async function getWeekData(weekNumber: number = 1) {
     if (!activePhase) return null
 
     const phaseStartDate = startOfDay(activePhase.startDate)
-    const weekStartDate = addDays(phaseStartDate, (weekNumber - 1) * 7)
-    const weekEndDate = addDays(weekStartDate, 6)
 
-    // 1. Check if WeeklyPlan exists (with +/- 24h tolerance for timezones)
-    const { subDays } = await import("date-fns")
-    let weeklyPlan = await prisma.weeklyPlan.findFirst({
-        where: {
-            userId: user.id,
-            weekStart: {
-                gte: subDays(weekStartDate, 1),
-                lte: addDays(weekStartDate, 1)
-            }
-        },
-        orderBy: { weekStart: 'asc' } // Take the one closest to target if multiple (shouldn't happen usually)
+    // 1. Find ALL existing WeeklyPlans for this user, ordered by weekStart
+    const allPlans = await prisma.weeklyPlan.findMany({
+        where: { userId: user.id },
+        orderBy: { weekStart: 'asc' }
     })
 
-    // 2. If NO plan exists, GENERATE one
+    let weeklyPlan = allPlans[weekNumber - 1] || null
+
+    // 2. If no plan exists for this week index, try to generate one
     if (!weeklyPlan) {
-        console.log(`[getWeekData] Generating AI WeeklyPlan for User ${user.id} - Week ${weekNumber}`)
+        console.log(`[getWeekData] No plan found for week ${weekNumber}. Generating...`)
         const { generateUserWeeklyPlan } = await import("../ai/menu-generator")
-        const result = await generateUserWeeklyPlan(user.id, false, weekStartDate)
+        // Calculate approximate start date for generation
+        const approxStartDate = addDays(phaseStartDate, (weekNumber - 1) * 7)
+        const result = await generateUserWeeklyPlan(user.id, false, approxStartDate)
         if (result.success && result.plan) {
             weeklyPlan = result.plan
-        } else {
+        } else if (result.success && result.skipped) {
+            // Plan was skipped (already exists or custom menus cover it)
+            // Re-fetch all plans to find the one that was matched
+            const refreshedPlans = await prisma.weeklyPlan.findMany({
+                where: { userId: user.id },
+                orderBy: { weekStart: 'asc' }
+            })
+            weeklyPlan = refreshedPlans[weekNumber - 1] || null
+        }
+
+        if (!weeklyPlan) {
             return null
         }
     }
 
-    // 3. Batch fetch Custom Menus and Daily Logs for the week
+    // 3. Use the REAL weekStart from the stored plan
+    const realWeekStart = startOfDay(weeklyPlan.weekStart)
+    const realWeekEnd = addDays(realWeekStart, 6)
+
+    // 4. Batch fetch Custom Menus and Daily Logs for the week
     const [customMenus, dailyLogs] = await Promise.all([
         prisma.userCustomMenu.findMany({
             where: {
                 userId: user.id,
-                date: { gte: weekStartDate, lte: weekEndDate }
+                date: { gte: realWeekStart, lte: realWeekEnd }
             }
         }),
         prisma.dailyLog.findMany({
             where: {
                 userId: user.id,
-                date: { gte: weekStartDate, lte: weekEndDate }
+                date: { gte: realWeekStart, lte: realWeekEnd }
             }
         })
     ])
@@ -328,7 +338,7 @@ export async function getWeekData(weekNumber: number = 1) {
     const customMenusMap = new Map(customMenus.map(m => [startOfDay(m.date).getTime(), m.content]))
     const logsMap = new Set(dailyLogs.filter(l => l.nutritionDone).map(l => startOfDay(l.date).getTime()))
 
-    // 4. Batch fetch relevant Recipes for the week
+    // 5. Extract all recipe names from the plan content
     const content = weeklyPlan.content as any
     const allRecipeNames = new Set<string>()
     const extractNames = (d: any) => {
@@ -353,49 +363,52 @@ export async function getWeekData(weekNumber: number = 1) {
     })
     const recipesMap = new Map(recipes.map(r => [r.name, r]))
 
-    // 5. Build days data
+    // 6. Build days data using the REAL dates from the plan
     const daysData = []
+    const dayNames = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
     for (let i = 0; i < 7; i++) {
-        const currentDate = addDays(weekStartDate, i)
+        const currentDate = addDays(realWeekStart, i)
         const dateTime = currentDate.getTime()
 
-        // Resolve menu
+        // Resolve menu: priority to custom menus
         let rawMenu = customMenusMap.get(dateTime)
         if (!rawMenu) {
-            const dayIndex = i
-            const dayNames = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-            const targetDayName = dayNames[dayIndex]
+            // Try both content formats (array with dayIndex or object with day names)
             if (content.days && Array.isArray(content.days)) {
-                rawMenu = content.days.find((d: any) => d.dayIndex === dayIndex) || content.days[dayIndex]
+                rawMenu = content.days.find((d: any) => d.dayIndex === i) || content.days[i]
             } else {
-                rawMenu = content[targetDayName]
+                rawMenu = content[dayNames[i]]
             }
         }
 
-        // Enrich menu
+        // Enrich menu with recipe details
         const enrichedMenu: any = {}
         if (rawMenu) {
             const menuObj = rawMenu as any
-            ['breakfast', 'lunch', 'dinner', 'snack'].forEach(meal => {
-                const name = menuObj[meal]
-                if (name) {
-                    const recipe = recipesMap.get(name)
-                    enrichedMenu[meal] = recipe || { id: `custom-${Math.random()}`, name, isCustom: true }
-                }
-            })
+                ;['breakfast', 'lunch', 'dinner', 'snack'].forEach(meal => {
+                    const name = menuObj[meal]
+                    if (name) {
+                        const recipe = recipesMap.get(name)
+                        enrichedMenu[meal] = recipe || { id: `custom-${Math.random()}`, name, isCustom: true }
+                    }
+                })
         }
 
+        // Calculate the day number relative to the phase start
+        const daysSincePhaseStart = Math.max(0, Math.floor((dateTime - phaseStartDate.getTime()) / (1000 * 60 * 60 * 24)))
+
         daysData.push({
-            dayNumber: Math.floor((dateTime - phaseStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
+            dayNumber: daysSincePhaseStart + 1,
             date: currentDate,
-            menu: enrichedMenu,
+            menu: Object.keys(enrichedMenu).length > 0 ? enrichedMenu : null,
             isCompleted: logsMap.has(dateTime)
         })
     }
 
     return {
         weekNumber,
-        weekStartDate,
+        weekStartDate: realWeekStart,
         days: daysData,
         phase: activePhase.type
     }
@@ -403,6 +416,7 @@ export async function getWeekData(weekNumber: number = 1) {
 
 /**
  * Récupère les données complètes de la phase active.
+ * Synchronisé avec getWeekData : utilise les plans réels stockés en DB.
  */
 export async function getPhaseData() {
     const user = await getOrCreateUser()
@@ -419,28 +433,42 @@ export async function getPhaseData() {
     // Calculate total days and current day
     const totalDays = Math.floor((phaseEndDate.getTime() - phaseStartDate.getTime()) / (1000 * 60 * 60 * 24))
     const currentDay = Math.floor((new Date().getTime() - phaseStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
-    const totalWeeks = Math.ceil(totalDays / 7)
+
+    // Find ALL existing WeeklyPlans for this user, ordered by weekStart
+    const allPlans = await prisma.weeklyPlan.findMany({
+        where: { userId: user.id },
+        orderBy: { weekStart: 'asc' }
+    })
+
+    // Calculate total weeks: use real plans count if available, otherwise estimate from days
+    const totalWeeks = Math.max(allPlans.length, Math.ceil(totalDays / 7))
+
+    // Batch fetch ALL DailyLogs for the entire phase (instead of per-day queries)
+    const allLogs = await prisma.dailyLog.findMany({
+        where: {
+            userId: user.id,
+            date: { gte: phaseStartDate, lte: phaseEndDate },
+            nutritionDone: true
+        }
+    })
+    const completedDatesSet = new Set(allLogs.map(l => startOfDay(l.date).getTime()))
 
     // Build weeks data
     const weeksData = []
     for (let weekNum = 1; weekNum <= totalWeeks; weekNum++) {
-        const weekStart = addDays(phaseStartDate, (weekNum - 1) * 7)
+        // Use the real plan's weekStart if it exists, otherwise calculate
+        const plan = allPlans[weekNum - 1]
+        const weekStart = plan ? startOfDay(plan.weekStart) : addDays(phaseStartDate, (weekNum - 1) * 7)
         const weekEnd = addDays(weekStart, 6)
 
-        // Count completed days in this week
+        // Count completed days in this week using the batch-fetched logs
         let completedDays = 0
         for (let i = 0; i < 7; i++) {
             const dayDate = addDays(weekStart, i)
             if (isBefore(dayDate, phaseEndDate) || dayDate.getTime() === phaseEndDate.getTime()) {
-                const log = await prisma.dailyLog.findUnique({
-                    where: {
-                        userId_date: {
-                            userId: user.id,
-                            date: startOfDay(dayDate)
-                        }
-                    }
-                })
-                if (log?.nutritionDone) completedDays++
+                if (completedDatesSet.has(startOfDay(dayDate).getTime())) {
+                    completedDays++
+                }
             }
         }
 
