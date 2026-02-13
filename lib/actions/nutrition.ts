@@ -284,9 +284,17 @@ export async function getWeekData(weekNumber: number = 1) {
     const weekStartDate = addDays(phaseStartDate, (weekNumber - 1) * 7)
     const weekEndDate = addDays(weekStartDate, 6)
 
-    // 1. Check if WeeklyPlan exists
+    // 1. Check if WeeklyPlan exists (with +/- 24h tolerance for timezones)
+    const { subDays } = await import("date-fns")
     let weeklyPlan = await prisma.weeklyPlan.findFirst({
-        where: { userId: user.id, weekStart: weekStartDate }
+        where: {
+            userId: user.id,
+            weekStart: {
+                gte: subDays(weekStartDate, 1),
+                lte: addDays(weekStartDate, 1)
+            }
+        },
+        orderBy: { weekStart: 'asc' } // Take the one closest to target if multiple (shouldn't happen usually)
     })
 
     // 2. If NO plan exists, GENERATE one
