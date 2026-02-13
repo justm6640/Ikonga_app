@@ -1,12 +1,26 @@
 import { PartialLockDialog } from "@/components/dashboard/PartialLockDialog";
+import { SubscriptionProvider } from "@/components/providers/SubscriptionProvider";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { BottomNav } from "@/components/layout/BottomNav";
+import { AdminFAB } from "@/components/layout/AdminFAB";
+import { DashboardHeader } from "@/components/layout/DashboardHeader";
+import { getOrCreateUser } from "@/lib/actions/user";
+import { redirect } from "next/navigation";
+
+export const dynamic = 'force-dynamic';
 
 export default async function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    // 🔒 NEW: Calculate if we are before cure start (for section locking)
-    // This is used to gray out sections that are not yet accessible
+    const user = await getOrCreateUser();
+    if (!user) redirect("/login");
+
+    const tier = user.subscriptionTier || null;
+    const role = user.role || null;
+
+    // 🔒 Calculate if we are before cure start (for section locking)
     const { isBeforeCureStart: checkBeforeCureStart } = await import('@/lib/utils/access-control');
 
     // Raw check based purely on dates (used for Popup, so Admins can see it too for testing)

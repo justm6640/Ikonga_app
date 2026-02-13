@@ -3,6 +3,8 @@ import { getBeautyProfile } from "@/lib/actions/beauty"
 import { getOrCreateUser } from "@/lib/actions/user"
 import { redirect } from "next/navigation"
 
+export const dynamic = 'force-dynamic'
+
 export default async function BeautyPage() {
     const user = await getOrCreateUser()
     if (!user) redirect("/login")

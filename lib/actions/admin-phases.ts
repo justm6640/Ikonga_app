@@ -104,3 +104,25 @@ export async function overridePhase(userId: string, phaseType: PhaseType) {
         return { success: false }
     }
 }
+
+/**
+ * MET À JOUR LE TIER D'ABONNEMENT D'UN UTILISATEUR
+ */
+export async function updateSubscriptionTier(userId: string, tier: SubscriptionTier) {
+    try {
+        const admin = await getOrCreateUser()
+        if (admin?.role !== "ADMIN") throw new Error("Forbidden")
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: { subscriptionTier: tier }
+        })
+
+        revalidatePath("/admin/users")
+        revalidatePath(`/admin/users/${userId}`)
+        return { success: true }
+    } catch (error) {
+        console.error("Error updating subscription tier:", error)
+        return { success: false, error: "Échec de la mise à jour de l'abonnement" }
+    }
+}
