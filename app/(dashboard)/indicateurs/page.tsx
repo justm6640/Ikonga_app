@@ -22,7 +22,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
 
 export default async function IndicatorsHubPage() {
     const prismaUser = await getOrCreateUser();
@@ -128,10 +127,7 @@ export default async function IndicatorsHubPage() {
                 </div>
 
                 {/* Info Card - Glass Style */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
+                <div
                     className="mt-12 p-8 rounded-[2.5rem] bg-white/40 backdrop-blur-md border border-white/60 shadow-inner relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 p-4 opacity-10">
@@ -140,7 +136,7 @@ export default async function IndicatorsHubPage() {
                     <p className="text-sm text-indigo-900/60 leading-relaxed italic font-medium relative z-10 text-center">
                         "Ces indicateurs sont recalculés à chaque pesée pour transformer ton corps bien au-delà de la balance."
                     </p>
-                </motion.div>
+                </div>
             </div>
         </div>
     );
