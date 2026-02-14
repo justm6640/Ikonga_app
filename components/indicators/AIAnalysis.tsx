@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { generateBMIAnalysis } from "@/lib/actions/ai-indicators";
+import { generateMetricAnalysis, IndicatorType } from "@/lib/actions/ai-indicators";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, BrainCircuit, HeartPulse, Target, ThumbsUp } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface AIAnalysisProps {
+    indicatorType: IndicatorType;
     metrics: {
         firstName: string;
         weight: number;
@@ -16,10 +17,13 @@ interface AIAnalysisProps {
         bmi: number;
         pisi: number;
         targetWeight: number;
+        bodyFat?: number;
+        bmr?: number;
+        metabolicAge?: number;
     };
 }
 
-export function AIAnalysis({ metrics }: AIAnalysisProps) {
+export function AIAnalysis({ metrics, indicatorType }: AIAnalysisProps) {
     const [analysis, setAnalysis] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -27,8 +31,9 @@ export function AIAnalysis({ metrics }: AIAnalysisProps) {
         let mounted = true;
 
         async function fetchAnalysis() {
+            setLoading(true);
             try {
-                const result = await generateBMIAnalysis(metrics);
+                const result = await generateMetricAnalysis(metrics, indicatorType);
                 if (mounted) {
                     setAnalysis(result);
                     setLoading(false);
@@ -42,7 +47,7 @@ export function AIAnalysis({ metrics }: AIAnalysisProps) {
         fetchAnalysis();
 
         return () => { mounted = false; };
-    }, [metrics.weight]); // Re-run if weight changes
+    }, [metrics.weight, indicatorType]); // Re-run if weight or type changes
 
     if (loading) {
         return (

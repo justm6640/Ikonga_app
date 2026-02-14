@@ -164,7 +164,7 @@ export function WeightHistory({ logs, totalPages, currentPage, pageSize }: Weigh
                                         "w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-[1.5rem] flex items-center justify-center transition-transform group-hover:scale-110 duration-500 shrink-0",
                                         display.bgColor
                                     )}>
-                                        <Scale className={display.iconColor} size={24} className="sm:w-7 sm:h-7" />
+                                        <Scale className={cn(display.iconColor, "sm:w-7 sm:h-7")} size={24} />
                                     </div>
 
                                     {/* Weight & Date */}

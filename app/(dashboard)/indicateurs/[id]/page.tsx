@@ -42,7 +42,7 @@ export default async function IndicatorDetailPage({ params }: PageProps) {
     const lastWeight = lastWeightLog?.weight || dbUser.startWeight || 70;
     const height = dbUser.heightCm || 170;
     const age = dbUser.birthDate ? calculateAge(new Date(dbUser.birthDate)) : 30;
-    const gender = dbUser.gender || "FEMALE";
+    const gender = (dbUser.gender === "MALE" ? "MALE" : "FEMALE") as "MALE" | "FEMALE";
     const pisi = dbUser.pisi || 65;
     const targetWeight = dbUser.targetWeight || pisi;
 
@@ -62,7 +62,10 @@ export default async function IndicatorDetailPage({ params }: PageProps) {
         gender: gender,
         bmi: bmi,
         pisi: pisi,
-        targetWeight: targetWeight
+        targetWeight: targetWeight,
+        bodyFat: bodyFat,
+        bmr: bmr,
+        metabolicAge: metabolicAge
     };
 
     // Metadata for each indicator
@@ -199,33 +202,30 @@ export default async function IndicatorDetailPage({ params }: PageProps) {
                     </CardContent>
                 </Card>
 
-                {/* AI Analysis (IMC Only) */}
-                {id === 'imc' && (
-                    <div className="mb-8">
-                        <AIAnalysis metrics={aiMetrics} />
-                    </div>
-                )}
+                {/* AI Analysis (All Indicators) */}
+                <div className="mb-8">
+                    <AIAnalysis metrics={aiMetrics} indicatorType={id as any} />
+                </div>
 
-                {/* Pedagogy Section */}
-                {id !== 'imc' && (
-                    <div className="space-y-4">
-                        {data.pedagogy.map((item: any, idx: number) => (
-                            <Card key={idx} className="rounded-[2rem] border-none shadow-sm bg-white/60 backdrop-blur-sm">
-                                <CardContent className="p-6 flex gap-4">
-                                    <div className="mt-1">{item.icon}</div>
-                                    <div className="space-y-1">
-                                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                                            {idx + 1}. {item.title}
-                                        </h4>
-                                        <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                            {item.content}
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                )}
+                {/* Pedagogy Section (Secondary) */}
+                <div className="space-y-4">
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4 text-center">En savoir plus</h3>
+                    {data.pedagogy.map((item: any, idx: number) => (
+                        <Card key={idx} className="rounded-[2rem] border-none shadow-sm bg-white/60 backdrop-blur-sm">
+                            <CardContent className="p-6 flex gap-4">
+                                <div className="mt-1">{item.icon}</div>
+                                <div className="space-y-1">
+                                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                                        {idx + 1}. {item.title}
+                                    </h4>
+                                    <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                                        {item.content}
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
             </div>
         </div>
     );
