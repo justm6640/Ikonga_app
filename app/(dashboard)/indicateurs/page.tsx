@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 export default async function IndicatorsHubPage() {
     const prismaUser = await getOrCreateUser();
@@ -39,7 +40,7 @@ export default async function IndicatorsHubPage() {
     const lastWeight = dbUser.weighIns[0]?.weight || dbUser.startWeight || 70;
     const height = dbUser.heightCm || 170;
     const age = dbUser.birthDate ? calculateAge(new Date(dbUser.birthDate)) : 30;
-    const gender = dbUser.gender || "FEMALE";
+    const gender = (dbUser.gender === "MALE" ? "MALE" : "FEMALE") as "MALE" | "FEMALE";
 
     // Calculations
     const bmi = calculateBMI(lastWeight, height);
@@ -96,20 +97,21 @@ export default async function IndicatorsHubPage() {
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
             <div className="max-w-xl mx-auto pb-32 px-4 sm:px-6 pt-6">
                 {/* Header */}
-                <div className="mb-8 flex items-center gap-4">
-                    <Link href="/dashboard">
-                        <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-slate-100">
-                            <ArrowLeft size={20} />
-                        </Button>
-                    </Link>
-                    <div>
-                        <h1 className="text-3xl font-serif font-black text-slate-900">Indicateurs</h1>
-                        <p className="text-sm text-slate-500 mt-1">Ton bilan métabolique en temps réel</p>
+                <div className="mb-10 flex flex-col items-center text-center">
+                    <div className="w-full flex justify-start mb-6">
+                        <Link href="/dashboard">
+                            <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-slate-100/80 bg-white shadow-sm border border-slate-100">
+                                <ArrowLeft size={20} />
+                            </Button>
+                        </Link>
                     </div>
+                    <h1 className="text-4xl font-serif font-black text-slate-900 tracking-tight">Indicateurs</h1>
+                    <div className="h-1 w-12 bg-ikonga-coral rounded-full mt-4 mb-3" />
+                    <p className="text-sm text-slate-500 font-medium">Ton bilan métabolique en temps réel</p>
                 </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-5 px-1">
                     {metrics.map((metric, idx) => (
                         <Link key={metric.id} href={`/indicateurs/${metric.id}`}>
                             <MetricCard
@@ -119,18 +121,26 @@ export default async function IndicatorsHubPage() {
                                 interpretation={metric.interpretation}
                                 interpretationColor={metric.interpretationColor}
                                 iconName={metric.iconName}
-                                delay={idx * 0.1}
+                                delay={idx * 0.08}
                             />
                         </Link>
                     ))}
                 </div>
 
-                {/* Info Card */}
-                <div className="mt-8 p-6 rounded-[2rem] bg-indigo-50/50 border border-indigo-100/50">
-                    <p className="text-sm text-indigo-900/70 leading-relaxed italic">
-                        Ces indicateurs sont recalculés automatiquement à chaque nouvelle pesée. Ils te permettent de comprendre comment IKONGA transforme ton corps au-delà du simple chiffre sur la balance.
+                {/* Info Card - Glass Style */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="mt-12 p-8 rounded-[2.5rem] bg-white/40 backdrop-blur-md border border-white/60 shadow-inner relative overflow-hidden"
+                >
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <Scale size={80} className="text-indigo-900" />
+                    </div>
+                    <p className="text-sm text-indigo-900/60 leading-relaxed italic font-medium relative z-10 text-center">
+                        "Ces indicateurs sont recalculés à chaque pesée pour transformer ton corps bien au-delà de la balance."
                     </p>
-                </div>
+                </motion.div>
             </div>
         </div>
     );
