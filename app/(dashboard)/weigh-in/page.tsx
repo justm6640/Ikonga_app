@@ -70,19 +70,19 @@ export default async function WeighInPage(props: {
             </div>
 
             {/* Header */}
-            <div className="pt-8 pb-6 md:pb-8 animate-in fade-in slide-in-from-top-4 duration-700">
-                <div className="flex items-center gap-3 md:gap-4 mb-6">
+            <div className="pt-6 sm:pt-8 pb-4 md:pb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+                <div className="flex items-center gap-3 md:gap-4 mb-4 sm:mb-6">
                     <Link href="/dashboard">
-                        <button className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors">
-                            <ArrowLeft size={18} className="text-slate-600" />
+                        <button className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors shrink-0">
+                            <ArrowLeft size={16} className="text-slate-600 sm:w-[18px]" />
                         </button>
                     </Link>
                     <div className="flex flex-col">
-                        <h1 className="text-2xl font-serif font-black text-slate-900 tracking-tight leading-none uppercase">
+                        <h1 className="text-xl sm:text-2xl font-serif font-black text-slate-900 tracking-tight leading-none uppercase">
                             MA PESÉE
                         </h1>
-                        <p className="text-xs text-slate-500 font-medium">
-                            Suis ta progression en toute bienveillance et célèbre chaque étape 💛
+                        <p className="text-[10px] sm:text-xs text-slate-500 font-medium mt-0.5">
+                            Suis ta progression en toute bienveillance 💛
                         </p>
                     </div>
                 </div>
@@ -90,65 +90,65 @@ export default async function WeighInPage(props: {
 
             {/* Stats Cards */}
             {currentWeight && (
-                <div className="grid grid-cols-3 gap-3 md:gap-6 mb-8 animate-in fade-in slide-in-from-top-6 duration-700 delay-150">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-8 animate-in fade-in slide-in-from-top-6 duration-700 delay-150">
                     {/* Current Weight */}
-                    <div className="group relative bg-gradient-to-br from-white to-slate-50/50 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 border border-slate-100/50 shadow-lg shadow-slate-200/30 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                        <div className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-2xl bg-ikonga-coral/10 hidden md:block">
+                    <div className="group relative bg-gradient-to-br from-white to-slate-50/50 backdrop-blur-sm rounded-xl sm:rounded-3xl p-3 sm:p-6 border border-slate-100/50 shadow-lg shadow-slate-200/30 hover:shadow-xl transition-all duration-300">
+                        <div className="absolute top-4 right-4 p-2 rounded-2xl bg-ikonga-coral/10 hidden lg:block">
                             <Scale size={20} className="text-ikonga-coral" strokeWidth={2.5} />
                         </div>
-                        <div className="space-y-1">
-                            <p className="text-[10px] md:text-xs uppercase tracking-wider font-black text-slate-400">Poids</p>
-                            <div className="flex items-baseline gap-1 md:gap-2">
-                                <span className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">
+                        <div className="space-y-0.5 sm:space-y-1">
+                            <p className="text-[9px] sm:text-xs uppercase tracking-wider font-black text-slate-400">Poids</p>
+                            <div className="flex items-baseline gap-0.5 sm:gap-2">
+                                <span className="text-xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
                                     {currentWeight.toFixed(1)}
                                 </span>
-                                <span className="text-sm md:text-lg font-bold text-slate-400">kg</span>
+                                <span className="text-[10px] sm:text-lg font-bold text-slate-400">kg</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Progress */}
-                    <div className="group relative bg-gradient-to-br from-white to-emerald-50/30 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 border border-emerald-100/50 shadow-lg shadow-emerald-200/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                        <div className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-2xl bg-emerald-500/10 hidden md:block">
+                    <div className="group relative bg-gradient-to-br from-white to-emerald-50/30 backdrop-blur-sm rounded-xl sm:rounded-3xl p-3 sm:p-6 border border-emerald-100/50 shadow-lg shadow-emerald-200/20 hover:shadow-xl transition-all duration-300">
+                        <div className="absolute top-4 right-4 p-2 rounded-2xl bg-emerald-500/10 hidden lg:block">
                             <TrendingDown size={20} className="text-emerald-500" strokeWidth={2.5} />
                         </div>
-                        <div className="space-y-1">
-                            <p className="text-[10px] md:text-xs uppercase tracking-wider font-black text-slate-400">Progrès</p>
-                            <div className="flex items-baseline gap-1 md:gap-2">
-                                <span className={`text-2xl md:text-4xl font-black tracking-tight ${totalProgress > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
+                        <div className="space-y-0.5 sm:space-y-1">
+                            <p className="text-[9px] sm:text-xs uppercase tracking-wider font-black text-slate-400">Progrès</p>
+                            <div className="flex items-baseline gap-0.5 sm:gap-2">
+                                <span className={`text-xl sm:text-3xl md:text-4xl font-black tracking-tight ${totalProgress > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
                                     {totalProgress > 0 ? '-' : ''}{Math.abs(totalProgress).toFixed(1)}
                                 </span>
-                                <span className="text-sm md:text-lg font-bold text-slate-400">kg</span>
+                                <span className="text-[10px] sm:text-lg font-bold text-slate-400">kg</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Remaining */}
-                    <div className="group relative bg-gradient-to-br from-white to-purple-50/30 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 border border-purple-100/50 shadow-lg shadow-purple-200/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                        <div className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-2xl bg-purple-500/10 hidden md:block">
+                    <div className="group relative bg-gradient-to-br from-white to-purple-50/30 backdrop-blur-sm rounded-xl sm:rounded-3xl p-3 sm:p-6 border border-purple-100/50 shadow-lg shadow-purple-200/20 hover:shadow-xl transition-all duration-300">
+                        <div className="absolute top-4 right-4 p-2 rounded-2xl bg-purple-500/10 hidden lg:block">
                             <Target size={20} className="text-purple-500" strokeWidth={2.5} />
                         </div>
-                        <div className="space-y-1">
-                            <p className="text-[10px] md:text-xs uppercase tracking-wider font-black text-slate-400">Objectif</p>
-                            <div className="flex items-baseline gap-1 md:gap-2">
-                                <span className="text-2xl md:text-4xl font-black text-purple-500 tracking-tight">
+                        <div className="space-y-0.5 sm:space-y-1">
+                            <p className="text-[9px] sm:text-xs uppercase tracking-wider font-black text-slate-400">Objectif</p>
+                            <div className="flex items-baseline gap-0.5 sm:gap-2">
+                                <span className="text-xl sm:text-3xl md:text-4xl font-black text-purple-500 tracking-tight">
                                     {targetWeight ? (remainingWeight > 0 ? remainingWeight.toFixed(1) : 'OK') : '--'}
                                 </span>
-                                <span className="text-sm md:text-lg font-bold text-slate-400">kg</span>
+                                <span className="text-[10px] sm:text-lg font-bold text-slate-400">kg</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Achievement Badge (if goal reached) */}
                     {targetWeight && currentWeight <= targetWeight && (
-                        <div className="col-span-3 group relative bg-gradient-to-br from-amber-50 to-orange-50 backdrop-blur-sm rounded-3xl p-4 md:p-6 border border-amber-200/50 shadow-lg shadow-amber-200/30 hover:shadow-xl transition-all duration-300">
+                        <div className="col-span-3 group relative bg-gradient-to-br from-amber-50 to-orange-50 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-3 sm:p-6 border border-amber-200/50 shadow-lg shadow-amber-200/30 hover:shadow-xl transition-all duration-300">
                             <div className="flex items-center justify-center gap-2 md:gap-4">
-                                <div className="p-2 md:p-3 rounded-2xl bg-amber-400/20">
-                                    <Award size={24} className="text-amber-500" strokeWidth={2.5} />
+                                <div className="p-2 rounded-xl sm:rounded-2xl bg-amber-400/20">
+                                    <Award size={20} className="text-amber-500 sm:w-6 sm:h-6" strokeWidth={2.5} />
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-lg md:text-2xl font-black text-amber-700">Objectif Atteint ! 🎉</p>
-                                    <p className="text-[10px] md:text-sm text-amber-600 font-medium hidden sm:block">Félicitations pour cette magnifique réussite !</p>
+                                    <p className="text-base sm:text-2xl font-black text-amber-700">Objectif Atteint ! 🎉</p>
+                                    <p className="text-[9px] sm:text-sm text-amber-600 font-medium hidden xs:block">Félicitations pour cette réussite !</p>
                                 </div>
                             </div>
                         </div>

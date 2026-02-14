@@ -161,21 +161,21 @@ export function WeightHistory({ logs, totalPages, currentPage, pageSize }: Weigh
                                 <div className="flex items-center gap-6">
                                     {/* Variation Icon Box */}
                                     <div className={cn(
-                                        "w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-transform group-hover:scale-110 duration-500",
+                                        "w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-[1.5rem] flex items-center justify-center transition-transform group-hover:scale-110 duration-500 shrink-0",
                                         display.bgColor
                                     )}>
-                                        <Scale className={display.iconColor} size={28} />
+                                        <Scale className={display.iconColor} size={24} className="sm:w-7 sm:h-7" />
                                     </div>
 
                                     {/* Weight & Date */}
-                                    <div className="flex-1">
-                                        <div className="flex items-baseline gap-2">
-                                            <span className="text-5xl font-black text-slate-900 tracking-tighter">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-baseline gap-1 sm:gap-2">
+                                            <span className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tighter">
                                                 {log.weight.toFixed(1)}
                                             </span>
-                                            <span className="text-xl font-bold text-slate-300">kg</span>
+                                            <span className="text-base sm:text-xl font-bold text-slate-300">kg</span>
                                         </div>
-                                        <div className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-wider">
+                                        <div className="text-[10px] sm:text-sm font-bold text-slate-400 mt-0.5 sm:mt-1 uppercase tracking-wider truncate">
                                             {format(new Date(log.date), "EEE. d MMMM", { locale: fr })}
                                         </div>
                                     </div>

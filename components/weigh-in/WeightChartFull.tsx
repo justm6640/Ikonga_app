@@ -103,25 +103,25 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
 
     return (
         <Card className="rounded-[2.5rem] border-none shadow-xl bg-white/70 backdrop-blur-xl overflow-hidden">
-            <CardHeader className="p-8 pb-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-orange-400 flex items-center justify-center text-white shadow-lg shadow-pink-200">
-                            <TrendingDown size={24} />
+            <CardHeader className="p-4 sm:p-8 pb-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-pink-500 to-orange-400 flex items-center justify-center text-white shadow-lg shadow-pink-200 shrink-0">
+                            <TrendingDown size={20} className="sm:w-6 sm:h-6" />
                         </div>
                         <div>
-                            <CardTitle className="text-2xl font-black text-slate-900 tracking-tight">Courbe de Poids</CardTitle>
-                            <p className="text-sm font-bold text-emerald-500 mt-0.5">-{totalLoss} kg au total ✨</p>
+                            <CardTitle className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Courbe de Poids</CardTitle>
+                            <p className="text-[10px] sm:text-sm font-bold text-emerald-500 mt-0.5">-{totalLoss} kg au total ✨</p>
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200/50">
+                    <div className="flex items-center gap-1 p-1 bg-slate-100/80 rounded-xl sm:rounded-2xl border border-slate-200/50 self-start md:self-auto overflow-x-auto max-w-full scrollbar-none">
                         {(["3D", "7D", "30D", "ALL"] as const).map((r) => (
                             <button
                                 key={r}
                                 onClick={() => { setRange(r); setShowCustomDates(false); }}
                                 className={cn(
-                                    "px-4 py-2 rounded-xl text-xs font-black transition-all duration-300",
+                                    "px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black transition-all duration-300 shrink-0",
                                     range === r
                                         ? "bg-white text-slate-900 shadow-sm scale-105"
                                         : "text-slate-400 hover:text-slate-600"
@@ -133,13 +133,13 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
                         <button
                             onClick={() => { setRange("CUSTOM"); setShowCustomDates(!showCustomDates); }}
                             className={cn(
-                                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all duration-300",
+                                "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black transition-all duration-300 shrink-0",
                                 range === "CUSTOM"
                                     ? "bg-white text-slate-900 shadow-sm scale-105"
                                     : "text-slate-400 hover:text-slate-600"
                             )}
                         >
-                            <CalendarIcon size={14} />
+                            <CalendarIcon size={12} className="sm:w-3.5 sm:h-3.5" />
                             <span>PERSO</span>
                         </button>
                     </div>
@@ -174,9 +174,9 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
             </CardHeader>
 
             <CardContent className="p-0 sm:p-4">
-                <div className="h-[300px] md:h-[400px] w-full pt-8">
+                <div className="h-[280px] sm:h-[300px] md:h-[400px] w-full pt-8">
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={filteredData} margin={{ top: 10, right: 30, left: -20, bottom: 0 }}>
+                        <AreaChart data={filteredData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#E5488A" stopOpacity={0.2} />

@@ -19,10 +19,10 @@ export function WeighInModal() {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button
-                    className="w-full sm:w-auto h-14 px-8 text-lg rounded-2xl bg-ikonga-gradient shadow-lg shadow-pink-500/20 hover:opacity-90 transition-all active:scale-[0.98] font-bold text-white"
+                    className="w-14 h-14 sm:w-auto sm:h-14 rounded-full sm:rounded-2xl bg-ikonga-gradient shadow-lg shadow-pink-500/20 hover:opacity-90 transition-all active:scale-[0.98] font-bold text-white p-0 sm:px-8"
                 >
-                    <Plus className="mr-2 h-5 w-5" />
-                    Ajouter une pesée
+                    <Plus className="h-6 w-6 sm:mr-2 sm:h-5 sm:w-5" />
+                    <span className="hidden sm:inline text-lg">Ajouter une pesée</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md rounded-[2.5rem] p-0 overflow-hidden border-none bg-white/95 backdrop-blur-xl transition-all duration-300">
