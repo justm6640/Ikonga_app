@@ -92,49 +92,49 @@ export default async function WeighInPage(props: {
             {currentWeight && (
                 <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-8 animate-in fade-in slide-in-from-top-6 duration-700 delay-150">
                     {/* Current Weight */}
-                    <div className="group relative bg-gradient-to-br from-white to-slate-50/50 backdrop-blur-sm rounded-xl sm:rounded-3xl p-3 sm:p-6 border border-slate-100/50 shadow-lg shadow-slate-200/30 hover:shadow-xl transition-all duration-300">
+                    <div className="group relative bg-gradient-to-br from-white to-slate-50/50 backdrop-blur-sm rounded-xl sm:rounded-3xl p-2.5 sm:p-6 border border-slate-100/50 shadow-lg shadow-slate-200/30 hover:shadow-xl transition-all duration-300">
                         <div className="absolute top-4 right-4 p-2 rounded-2xl bg-ikonga-coral/10 hidden lg:block">
                             <Scale size={20} className="text-ikonga-coral" strokeWidth={2.5} />
                         </div>
                         <div className="space-y-0.5 sm:space-y-1">
-                            <p className="text-[9px] sm:text-xs uppercase tracking-wider font-black text-slate-400">Poids</p>
+                            <p className="text-[8px] sm:text-xs uppercase tracking-wider font-black text-slate-400">Poids</p>
                             <div className="flex items-baseline gap-0.5 sm:gap-2">
-                                <span className="text-xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+                                <span className="text-lg sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
                                     {currentWeight.toFixed(1)}
                                 </span>
-                                <span className="text-[10px] sm:text-lg font-bold text-slate-400">kg</span>
+                                <span className="text-[9px] sm:text-lg font-bold text-slate-400">kg</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Progress */}
-                    <div className="group relative bg-gradient-to-br from-white to-emerald-50/30 backdrop-blur-sm rounded-xl sm:rounded-3xl p-3 sm:p-6 border border-emerald-100/50 shadow-lg shadow-emerald-200/20 hover:shadow-xl transition-all duration-300">
+                    <div className="group relative bg-gradient-to-br from-white to-emerald-50/30 backdrop-blur-sm rounded-xl sm:rounded-3xl p-2.5 sm:p-6 border border-emerald-100/50 shadow-lg shadow-emerald-200/20 hover:shadow-xl transition-all duration-300">
                         <div className="absolute top-4 right-4 p-2 rounded-2xl bg-emerald-500/10 hidden lg:block">
                             <TrendingDown size={20} className="text-emerald-500" strokeWidth={2.5} />
                         </div>
                         <div className="space-y-0.5 sm:space-y-1">
-                            <p className="text-[9px] sm:text-xs uppercase tracking-wider font-black text-slate-400">Progrès</p>
+                            <p className="text-[8px] sm:text-xs uppercase tracking-wider font-black text-slate-400">Progrès</p>
                             <div className="flex items-baseline gap-0.5 sm:gap-2">
-                                <span className={`text-xl sm:text-3xl md:text-4xl font-black tracking-tight ${totalProgress > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
+                                <span className={`text-lg sm:text-3xl md:text-4xl font-black tracking-tight ${totalProgress > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
                                     {totalProgress > 0 ? '-' : ''}{Math.abs(totalProgress).toFixed(1)}
                                 </span>
-                                <span className="text-[10px] sm:text-lg font-bold text-slate-400">kg</span>
+                                <span className="text-[9px] sm:text-lg font-bold text-slate-400">kg</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Remaining */}
-                    <div className="group relative bg-gradient-to-br from-white to-purple-50/30 backdrop-blur-sm rounded-xl sm:rounded-3xl p-3 sm:p-6 border border-purple-100/50 shadow-lg shadow-purple-200/20 hover:shadow-xl transition-all duration-300">
+                    <div className="group relative bg-gradient-to-br from-white to-purple-50/30 backdrop-blur-sm rounded-xl sm:rounded-3xl p-2.5 sm:p-6 border border-purple-100/50 shadow-lg shadow-purple-200/20 hover:shadow-xl transition-all duration-300">
                         <div className="absolute top-4 right-4 p-2 rounded-2xl bg-purple-500/10 hidden lg:block">
                             <Target size={20} className="text-purple-500" strokeWidth={2.5} />
                         </div>
                         <div className="space-y-0.5 sm:space-y-1">
-                            <p className="text-[9px] sm:text-xs uppercase tracking-wider font-black text-slate-400">Objectif</p>
+                            <p className="text-[8px] sm:text-xs uppercase tracking-wider font-black text-slate-400">Objectif</p>
                             <div className="flex items-baseline gap-0.5 sm:gap-2">
-                                <span className="text-xl sm:text-3xl md:text-4xl font-black text-purple-500 tracking-tight">
+                                <span className="text-lg sm:text-3xl md:text-4xl font-black text-purple-500 tracking-tight">
                                     {targetWeight ? (remainingWeight > 0 ? remainingWeight.toFixed(1) : 'OK') : '--'}
                                 </span>
-                                <span className="text-[10px] sm:text-lg font-bold text-slate-400">kg</span>
+                                <span className="text-[9px] sm:text-lg font-bold text-slate-400">kg</span>
                             </div>
                         </div>
                     </div>

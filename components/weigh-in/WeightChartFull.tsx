@@ -65,15 +65,15 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
         if (active && payload && payload.length) {
             const data = payload[0].payload
             return (
-                <div className="bg-white/95 backdrop-blur-xl p-4 rounded-[1.5rem] shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-300">
-                    <p className="text-[10px] uppercase tracking-widest font-black text-slate-400 mb-1">
-                        {format(new Date(data.date), "EEE. d MMMM", { locale: fr })}
+                <div className="bg-white/95 backdrop-blur-xl p-3 sm:p-4 rounded-xl sm:rounded-[1.5rem] shadow-xl border border-slate-100 animate-in fade-in zoom-in duration-300">
+                    <p className="text-[9px] sm:text-[10px] uppercase tracking-widest font-black text-slate-400 mb-0.5 sm:mb-1">
+                        {format(new Date(data.date), "EEE. d MMM", { locale: fr })}
                     </p>
                     <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-black bg-gradient-to-br from-pink-500 to-orange-400 bg-clip-text text-transparent">
+                        <span className="text-lg sm:text-2xl font-black bg-gradient-to-br from-pink-500 to-orange-400 bg-clip-text text-transparent">
                             {data.weight.toFixed(1)}
                         </span>
-                        <span className="text-sm font-bold text-slate-400">kg</span>
+                        <span className="text-xs sm:text-sm font-bold text-slate-400">kg</span>
                     </div>
                 </div>
             )
@@ -83,34 +83,34 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
 
     if (!isMounted) {
         return (
-            <Card className="rounded-[2.5rem] border-none shadow-xl bg-white/70 backdrop-blur-xl overflow-hidden">
-                <CardHeader className="p-8 pb-4">
+            <Card className="rounded-[2rem] sm:rounded-[2.5rem] border-none shadow-xl bg-white/70 backdrop-blur-xl overflow-hidden">
+                <CardHeader className="p-6 sm:p-8 pb-4">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-orange-400 flex items-center justify-center text-white shadow-lg shadow-pink-200 animate-pulse">
-                            <TrendingDown size={24} />
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-orange-400 flex items-center justify-center text-white shadow-lg shadow-pink-200 animate-pulse">
+                            <TrendingDown size={20} className="sm:w-6 sm:h-6" />
                         </div>
                         <div>
-                            <CardTitle className="text-2xl font-black text-slate-900 tracking-tight">Courbe de Poids</CardTitle>
+                            <CardTitle className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Courbe de Poids</CardTitle>
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent className="p-8">
-                    <div className="h-[300px] md:h-[400px] w-full bg-slate-50/50 animate-pulse rounded-3xl" />
+                <CardContent className="p-6 sm:p-8 pt-0">
+                    <div className="h-[250px] sm:h-[300px] md:h-[400px] w-full bg-slate-50/50 animate-pulse rounded-3xl" />
                 </CardContent>
             </Card>
         )
     }
 
     return (
-        <Card className="rounded-[2.5rem] border-none shadow-xl bg-white/70 backdrop-blur-xl overflow-hidden">
-            <CardHeader className="p-4 sm:p-8 pb-4">
+        <Card className="rounded-[2rem] sm:rounded-[2.5rem] border-none shadow-xl bg-white/70 backdrop-blur-xl overflow-hidden">
+            <CardHeader className="p-5 sm:p-8 pb-2 sm:pb-4">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
                     <div className="flex items-center gap-3 sm:gap-4">
                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-pink-500 to-orange-400 flex items-center justify-center text-white shadow-lg shadow-pink-200 shrink-0">
                             <TrendingDown size={20} className="sm:w-6 sm:h-6" />
                         </div>
                         <div>
-                            <CardTitle className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Courbe de Poids</CardTitle>
+                            <CardTitle className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">Courbe de Poids</CardTitle>
                             <p className="text-[10px] sm:text-sm font-bold text-emerald-500 mt-0.5">-{totalLoss} kg au total ✨</p>
                         </div>
                     </div>
@@ -149,24 +149,24 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
                     <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
-                        className="mt-6 p-6 bg-slate-50/80 rounded-[2rem] border border-slate-200/50 flex flex-col sm:flex-row items-center gap-4"
+                        className="mt-4 sm:mt-6 p-4 sm:p-6 bg-slate-50/80 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200/50 flex flex-col sm:flex-row items-center gap-3 sm:gap-4"
                     >
-                        <div className="flex-1 w-full space-y-2">
-                            <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Du</label>
+                        <div className="flex-1 w-full space-y-1 sm:space-y-2">
+                            <label className="text-[9px] sm:text-[10px] font-black uppercase text-slate-400 ml-3 sm:ml-4 tracking-widest">Du</label>
                             <input
                                 type="date"
                                 value={customStart}
                                 onChange={(e) => setCustomStart(e.target.value)}
-                                className="w-full bg-white rounded-xl p-3 text-sm font-bold border-none shadow-sm focus:ring-2 focus:ring-pink-200"
+                                className="w-full bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 text-xs sm:text-sm font-bold border-none shadow-sm focus:ring-2 focus:ring-pink-200"
                             />
                         </div>
-                        <div className="flex-1 w-full space-y-2">
-                            <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Au</label>
+                        <div className="flex-1 w-full space-y-1 sm:space-y-2">
+                            <label className="text-[9px] sm:text-[10px] font-black uppercase text-slate-400 ml-3 sm:ml-4 tracking-widest">Au</label>
                             <input
                                 type="date"
                                 value={customEnd}
                                 onChange={(e) => setCustomEnd(e.target.value)}
-                                className="w-full bg-white rounded-xl p-3 text-sm font-bold border-none shadow-sm focus:ring-2 focus:ring-pink-200"
+                                className="w-full bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 text-xs sm:text-sm font-bold border-none shadow-sm focus:ring-2 focus:ring-pink-200"
                             />
                         </div>
                     </motion.div>
@@ -174,7 +174,7 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
             </CardHeader>
 
             <CardContent className="p-0 sm:p-4">
-                <div className="h-[280px] sm:h-[300px] md:h-[400px] w-full pt-8">
+                <div className="h-[250px] sm:h-[300px] md:h-[400px] w-full pt-4 sm:pt-8">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={filteredData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                             <defs>
@@ -188,17 +188,19 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
                                 dataKey="date"
                                 hide={range === "3D" || range === "7D"}
                                 tickFormatter={(str) => format(new Date(str), "d MMM", { locale: fr })}
-                                tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 800 }}
+                                tick={{ fill: "#94a3b8", fontSize: 9, fontWeight: 700 }}
                                 axisLine={false}
                                 tickLine={false}
                                 dy={10}
+                                minTickGap={30}
                             />
                             <YAxis
-                                domain={['dataMin - 2', 'dataMax + 2']}
-                                tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 800 }}
+                                domain={['dataMin - 1', 'dataMax + 1']}
+                                tick={{ fill: "#94a3b8", fontSize: 9, fontWeight: 700 }}
                                 axisLine={false}
                                 tickLine={false}
                                 dx={-10}
+                                width={35}
                             />
                             <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#f1f5f9', strokeWidth: 2 }} />
 
@@ -206,15 +208,15 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
                                 <ReferenceLine
                                     y={targetWeight}
                                     stroke="#10b981"
-                                    strokeDasharray="12 8"
-                                    strokeWidth={2}
+                                    strokeDasharray="8 4"
+                                    strokeWidth={1.5}
                                     label={{
                                         position: 'right',
                                         value: `Objectif ${targetWeight}kg`,
                                         fill: '#10b981',
-                                        fontSize: 10,
-                                        fontWeight: 900,
-                                        className: "tracking-widest uppercase"
+                                        fontSize: 9,
+                                        fontWeight: 800,
+                                        className: "tracking-widest uppercase hidden sm:block"
                                     }}
                                 />
                             )}
@@ -223,11 +225,11 @@ export function WeightChartFull({ data, startWeight, targetWeight }: WeightChart
                                 type="monotone"
                                 dataKey="weight"
                                 stroke="url(#colorWeight)"
-                                strokeWidth={5}
+                                strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorWeight)"
-                                animationDuration={2000}
-                                activeDot={{ r: 8, strokeWidth: 4, stroke: '#fff', fill: '#E5488A' }}
+                                animationDuration={1500}
+                                activeDot={{ r: 6, strokeWidth: 3, stroke: '#fff', fill: '#E5488A' }}
                             />
                         </AreaChart>
                     </ResponsiveContainer>
