@@ -82,7 +82,8 @@ export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: b
     }
 
     const currentPhase = user.phases[0]?.type || "DETOX";
-    const analysisData = user.analysis?.content ? (user.analysis.content as any) : {};
+    const analysisText = user.analysis?.content ? (user.analysis.content as any) : {};
+    const inputData = user.analysis?.inputData ? (user.analysis.inputData as any) : {};
 
     // 1.8 Gather Personalization Data
     const physicalData = {
@@ -95,10 +96,16 @@ export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: b
     };
 
     const preferences = {
-        allergies: user.allergies?.length ? user.allergies.join(", ") : (analysisData?.nutrition?.allergies || "Aucune"),
-        diet: user.dietaryUsage || analysisData?.nutrition?.dietaryUsage || "Standard",
+        allergies: user.allergies?.length ? user.allergies.join(", ") : (inputData.allergies?.join(", ") || "Aucune"),
+        diet: user.dietaryUsage || inputData.dietaryUsage || "Standard",
         country: user.countryOrigin || "Non spécifié",
-        tastes: analysisData?.nutrition?.tastes || "Afro-Fusion & Varié"
+        tastes: analysisText?.nutrition?.tastes || "Afro-Fusion & Varié",
+        // New lifestyle data
+        repasJour: inputData.nb_repas_jour || "3",
+        grignotage: inputData.grignotage || "Jamais",
+        tempsCuisine: inputData.disponibilite_jours || "30min",
+        stress: inputData.stress || 5,
+        activite: inputData.activite_physique || "Modéré"
     };
 
     // 1.9 Fetch Phase Guidelines
@@ -123,11 +130,18 @@ export async function generateUserWeeklyPlan(userId: string, forceCurrentWeek: b
     Taille : ${physicalData.height}cm
     IMC : ${physicalData.bmi}
     Objectif (PISI) : ${physicalData.pisi}kg
+    Niveau d'activité : ${preferences.activite}
     
     ⚠️ SANTÉ & RÉGIME :
     Régime : ${preferences.diet}
     Allergies : ${preferences.allergies}
     Préférences : ${preferences.tastes}
+
+    🔄 RYTHME & LOGISTIQUE :
+    Rythme souhaité : ${preferences.repasJour} repas/jour
+    Temps pour cuisiner : ${preferences.tempsCuisine} par repas
+    Niveau de stress : ${preferences.stress}/10
+    Tendance au grignotage : ${preferences.grignotage}
 
     📋 RÈGLES DE LA PHASE ${currentPhase} :
     ✅ À PRIVILÉGIER : ${allowed || "Légumes verts, protéines maigres, eau"}
