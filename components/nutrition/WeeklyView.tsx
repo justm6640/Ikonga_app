@@ -142,9 +142,9 @@ export function WeeklyView({ weekData, availableWeeks, onWeekChange, onDayClick 
 
                             {/* Menu Content */}
                             {day.menu ? (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                                     {/* Breakfast */}
-                                    <div className="flex items-center gap-2 sm:gap-3">
+                                    <div className="flex items-center gap-3">
                                         <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
                                             <span className="text-xs sm:text-sm">🌅</span>
                                         </div>

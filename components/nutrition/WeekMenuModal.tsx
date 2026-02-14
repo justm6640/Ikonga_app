@@ -28,7 +28,7 @@ export function WeekMenuModal({
 }: WeekMenuModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl p-0 border-none sm:rounded-[2rem] overflow-hidden bg-slate-50/50 h-[90vh] flex flex-col">
+            <DialogContent className="max-w-4xl p-0 border-none rounded-t-[2rem] sm:rounded-[2rem] overflow-hidden bg-slate-50 h-[100dvh] sm:h-[90vh] flex flex-col gap-0 [&>button]:hidden">
                 <div className="px-6 py-4 bg-white border-b border-slate-100 flex items-center justify-between shadow-sm relative z-20">
                     <DialogTitle className="text-xl font-serif font-black text-slate-900">
                         {weekData ? `Semaine ${weekData.weekNumber}` : 'Chargement...'}

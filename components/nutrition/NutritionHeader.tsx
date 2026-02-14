@@ -34,14 +34,16 @@ export function NutritionHeader({ subscriptionTier, phase, showTitle = true }: N
                 </div>
             )}
 
-            <div className="flex gap-2">
-                <Badge className="bg-orange-50 text-orange-600 border-none px-3 py-1 rounded-md font-bold text-[10px] uppercase tracking-wider">
-                    {subscriptionTier}
-                </Badge>
-                <Badge className="bg-orange-500 text-white border-none px-3 py-1 rounded-md font-bold text-[10px] uppercase tracking-wider">
-                    PHASE {phase}
-                </Badge>
-            </div>
+            {showTitle && (
+                <div className="flex gap-2">
+                    <Badge className="bg-orange-50 text-orange-600 border-none px-3 py-1 rounded-md font-bold text-[10px] uppercase tracking-wider">
+                        {subscriptionTier}
+                    </Badge>
+                    <Badge className="bg-orange-500 text-white border-none px-3 py-1 rounded-md font-bold text-[10px] uppercase tracking-wider">
+                        PHASE {phase}
+                    </Badge>
+                </div>
+            )}
         </div>
     )
 }

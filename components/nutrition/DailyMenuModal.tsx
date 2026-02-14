@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { ArrowRight, Utensils } from "lucide-react"
+import { ArrowRight, Utensils, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface DailyMenuModalProps {
@@ -75,10 +75,19 @@ export function DailyMenuModal({ isOpen, onClose, dayData }: DailyMenuModalProps
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-md p-0 border-none sm:rounded-[2rem] overflow-hidden bg-white shadow-2xl max-h-[95vh] flex flex-col">
+            <DialogContent className="max-w-md p-0 border-none rounded-t-[2rem] sm:rounded-[2rem] overflow-hidden bg-white shadow-2xl max-h-[100dvh] sm:max-h-[95vh] flex flex-col gap-0 [&>button]:hidden">
                 {/* Header */}
                 <div className="bg-slate-900 px-4 sm:px-6 py-6 sm:py-8 relative overflow-hidden shrink-0">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full -mr-8 -mt-8" />
+
+                    {/* Close button */}
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 backdrop-blur-md text-white flex items-center justify-center hover:bg-white/20 transition-colors z-20"
+                    >
+                        <X size={16} />
+                    </button>
+
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-2">
                             <Badge className="bg-orange-500 text-white border-none px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-widest">
